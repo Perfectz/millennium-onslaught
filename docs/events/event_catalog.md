@@ -1,8 +1,8 @@
 # Event Catalog
 
-> **Purpose:** Complete listing of all EventBus signals. Name, payload, who emits, who listens. Updated every MVP.
+> **Purpose:** Complete listing of EventBus signals, payloads, typical emitters, and typical listeners.
 
-**Last Updated:** 2026-03-01 (MVP 0 — Initial catalog)
+**Last Verified Against:** `autoloads/event_bus.gd` on 2026-03-01
 
 ---
 
@@ -21,8 +21,8 @@
 |--------|---------|---------|-----------|
 | `combat_hit_landed` | `attacker: Node, target: Node, damage: float, hit_position: Vector3` | Combat system | VFX, Audio, Camera, HUD |
 | `combat_kill` | `attacker: Node, target: Node, kill_position: Vector3` | Combat system | VFX, Audio, Score, Drops |
-| `combat_combo_step` | `player: Node, step: int` | Combo system | HUD, Audio |
-| `combat_combo_dropped` | `player: Node` | Combo system | HUD |
+| `combat_combo_step` | `player: Node, step: int` | PlayerController (bridged from ComboTracker) | HUD, Audio |
+| `combat_combo_dropped` | `player: Node` | PlayerController (bridged from ComboTracker) | HUD |
 | `combat_dodge` | `player: Node` | Player controller | Audio, VFX |
 | `combat_block` | `player: Node` | Player controller | Audio, VFX |
 | `combat_parry` | `player: Node, attacker: Node` | Combat system | Audio, VFX, Camera |
@@ -40,9 +40,9 @@
 
 | Signal | Payload | Emitter | Listeners |
 |--------|---------|---------|-----------|
-| `player_health_changed` | `player_index: int, new_hp: float, max_hp: float` | Health component | HUD |
+| `player_health_changed` | `player_index: int, new_hp: float, max_hp: float` | PlayerController (bridged from HealthComponent) | HUD |
 | `player_tp_changed` | `player_index: int, new_tp: float, max_tp: float` | TP component | HUD |
-| `player_died` | `player_index: int` | Health component | GameManager, Co-op |
+| `player_died` | `player_index: int` | PlayerController (bridged from HealthComponent) | GameManager, Co-op |
 | `player_revived` | `player_index: int` | Revive system | HUD, VFX |
 
 ## Enemy Events
@@ -132,3 +132,4 @@
 | `input_device_connected` | `device_id: int` | InputManager | UI |
 | `input_device_disconnected` | `device_id: int` | InputManager | UI |
 | `input_context_changed` | `new_context: StringName` | InputManager | All input consumers |
+

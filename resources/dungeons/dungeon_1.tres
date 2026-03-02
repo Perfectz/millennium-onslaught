@@ -1,0 +1,16 @@
+[gd_resource type="Resource" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://resources/dungeons/dungeon_def.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/encounters/encounter_room1.tres" id="2"]
+[ext_resource type="Resource" path="res://resources/encounters/encounter_room2.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/encounters/encounter_room3.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/encounters/encounter_boss.tres" id="5"]
+
+[resource]
+script = ExtResource("1")
+dungeon_id = &"dungeon_1"
+dungeon_name = "The Proving Grounds"
+room_scenes = ["res://scenes/dungeon/rooms/room_01.tscn", "res://scenes/dungeon/rooms/room_02.tscn", "res://scenes/dungeon/rooms/room_03.tscn", "res://scenes/dungeon/rooms/room_boss.tscn"]
+room_encounters = [ExtResource("2"), ExtResource("3"), ExtResource("4")]
+boss_encounter = ExtResource("5")
+requires_story_flag = &""

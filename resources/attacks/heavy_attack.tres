@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/attacks/attack_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+attack_name = &"heavy"
+base_damage = 25.0
+damage_multiplier = 1.0
+knockback_force = 14.0
+knockback_direction = Vector3(1, 0.4, 0)
+hitstop_duration = 0.14
+windup_time = 0.15
+active_time = 0.15
+recovery_time = 0.3
+cancel_window_start = 0.7
+cancel_window_end = 0.95
+cancel_into = [&"dodge"]

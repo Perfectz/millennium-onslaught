@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites id="2026-03-01" name="report_8" tests="106" failures="1" skipped="0" flaky="0" time="0.000">
+	<testsuite id="0" name="test_combo_cancel_checker" package="tests/unit/components" timestamp="2026-03-01T23:36:29" hostname="localhost" tests="10" failures="0" errors="0" skipped="0" flaky="0" time="2.195">
+		<testcase name="test_before_cancel_window_returns_false" classname="test_combo_cancel_checker" time="0.094">
+		</testcase>
+		<testcase name="test_inside_cancel_window_returns_true" classname="test_combo_cancel_checker" time="0.094">
+		</testcase>
+		<testcase name="test_after_cancel_window_returns_false" classname="test_combo_cancel_checker" time="0.093">
+		</testcase>
+		<testcase name="test_at_exact_window_start_returns_true" classname="test_combo_cancel_checker" time="0.095">
+		</testcase>
+		<testcase name="test_at_exact_window_end_returns_true" classname="test_combo_cancel_checker" time="0.094">
+		</testcase>
+		<testcase name="test_allowed_cancel_type_accepted" classname="test_combo_cancel_checker" time="0.092">
+		</testcase>
+		<testcase name="test_disallowed_cancel_type_rejected" classname="test_combo_cancel_checker" time="0.094">
+		</testcase>
+		<testcase name="test_empty_cancel_into_rejects_all" classname="test_combo_cancel_checker" time="0.097">
+		</testcase>
+		<testcase name="test_full_cancel_check_combines_timing_and_type" classname="test_combo_cancel_checker" time="0.094">
+		</testcase>
+		<testcase name="test_zero_duration_attack_always_in_window" classname="test_combo_cancel_checker" time="0.094">
+		</testcase>
+	</testsuite>
+	<testsuite id="1" name="test_combo_tracker" package="tests/unit/components" timestamp="2026-03-01T23:36:32" hostname="localhost" tests="11" failures="0" errors="0" skipped="0" flaky="0" time="2.289">
+		<testcase name="test_initial_step_is_zero" classname="test_combo_tracker" time="0.078">
+		</testcase>
+		<testcase name="test_advance_step_increments" classname="test_combo_tracker" time="0.095">
+		</testcase>
+		<testcase name="test_advance_past_max_resets_to_zero" classname="test_combo_tracker" time="0.078">
+		</testcase>
+		<testcase name="test_reset_sets_step_to_zero" classname="test_combo_tracker" time="0.079">
+		</testcase>
+		<testcase name="test_combo_window_active_after_advance" classname="test_combo_tracker" time="0.079">
+		</testcase>
+		<testcase name="test_combo_window_not_active_initially" classname="test_combo_tracker" time="0.093">
+		</testcase>
+		<testcase name="test_combo_window_expires_after_timeout" classname="test_combo_tracker" time="0.094">
+		</testcase>
+		<testcase name="test_combo_window_still_active_before_timeout" classname="test_combo_tracker" time="0.093">
+		</testcase>
+		<testcase name="test_step_resets_on_window_expiry" classname="test_combo_tracker" time="0.078">
+		</testcase>
+		<testcase name="test_full_combo_sequence" classname="test_combo_tracker" time="0.093">
+		</testcase>
+		<testcase name="test_window_not_active_after_combo_finish" classname="test_combo_tracker" time="0.095">
+		</testcase>
+	</testsuite>
+	<testsuite id="2" name="test_damage_calculator" package="tests/unit/components" timestamp="2026-03-01T23:36:34" hostname="localhost" tests="7" failures="0" errors="0" skipped="0" flaky="0" time="1.523">
+		<testcase name="test_basic_damage_calculation" classname="test_damage_calculator" time="0.094">
+		</testcase>
+		<testcase name="test_multiplier_increases_damage" classname="test_damage_calculator" time="0.094">
+		</testcase>
+		<testcase name="test_defense_reduces_damage" classname="test_damage_calculator" time="0.078">
+		</testcase>
+		<testcase name="test_defense_does_not_make_damage_below_one" classname="test_damage_calculator" time="0.094">
+		</testcase>
+		<testcase name="test_zero_base_damage_returns_zero" classname="test_damage_calculator" time="0.094">
+		</testcase>
+		<testcase name="test_light_attack_damage_from_constants" classname="test_damage_calculator" time="0.097">
+		</testcase>
+		<testcase name="test_heavy_attack_damage_from_constants" classname="test_damage_calculator" time="0.093">
+		</testcase>
+	</testsuite>
+	<testsuite id="3" name="test_health_component" package="tests/unit/components" timestamp="2026-03-01T23:36:36" hostname="localhost" tests="17" failures="0" errors="0" skipped="0" flaky="0" time="3.700">
+		<testcase name="test_initial_hp_equals_max_hp" classname="test_health_component" time="0.062">
+		</testcase>
+		<testcase name="test_take_damage_reduces_hp" classname="test_health_component" time="0.093">
+		</testcase>
+		<testcase name="test_take_damage_does_not_go_below_zero" classname="test_health_component" time="0.094">
+		</testcase>
+		<testcase name="test_take_zero_damage_does_nothing" classname="test_health_component" time="0.095">
+		</testcase>
+		<testcase name="test_take_negative_damage_is_ignored" classname="test_health_component" time="0.094">
+		</testcase>
+		<testcase name="test_is_dead_returns_false_when_alive" classname="test_health_component" time="0.094">
+		</testcase>
+		<testcase name="test_is_dead_returns_true_at_zero_hp" classname="test_health_component" time="0.094">
+		</testcase>
+		<testcase name="test_heal_increases_hp" classname="test_health_component" time="0.094">
+		</testcase>
+		<testcase name="test_heal_does_not_exceed_max_hp" classname="test_health_component" time="0.094">
+		</testcase>
+		<testcase name="test_multiple_damage_instances_accumulate" classname="test_health_component" time="0.095">
+		</testcase>
+		<testcase name="test_take_damage_after_death_does_not_change_hp" classname="test_health_component" time="0.089">
+		</testcase>
+		<testcase name="test_set_max_hp_updates_ceiling" classname="test_health_component" time="0.093">
+		</testcase>
+		<testcase name="test_reset_restores_full_health" classname="test_health_component" time="0.078">
+		</testcase>
+		<testcase name="test_heal_after_death_is_ignored" classname="test_health_component" time="0.093">
+		</testcase>
+		<testcase name="test_reset_emits_health_changed" classname="test_health_component" time="0.108">
+		</testcase>
+		<testcase name="test_set_max_hp_clamps_current_hp" classname="test_health_component" time="0.095">
+		</testcase>
+		<testcase name="test_set_max_hp_rejects_non_positive" classname="test_health_component" time="0.157">
+		</testcase>
+	</testsuite>
+	<testsuite id="4" name="test_juggle_tracker" package="tests/unit/components" timestamp="2026-03-01T23:36:39" hostname="localhost" tests="15" failures="0" errors="0" skipped="0" flaky="0" time="5.100">
+		<testcase name="test_initial_state_is_grounded" classname="test_juggle_tracker" time="0.092">
+		</testcase>
+		<testcase name="test_launch_makes_target_airborne" classname="test_juggle_tracker" time="0.093">
+		</testcase>
+		<testcase name="test_launch_emits_launched_signal" classname="test_juggle_tracker" time="0.112">
+		</testcase>
+		<testcase name="test_double_launch_stays_airborne" classname="test_juggle_tracker" time="0.064">
+		</testcase>
+		<testcase name="test_register_air_hit_increments_count" classname="test_juggle_tracker" time="0.092">
+		</testcase>
+		<testcase name="test_register_air_hit_emits_air_hit_signal" classname="test_juggle_tracker" time="0.109">
+		</testcase>
+		<testcase name="test_multiple_air_hits_increment" classname="test_juggle_tracker" time="0.096">
+		</testcase>
+		<testcase name="test_air_hit_while_grounded_does_nothing" classname="test_juggle_tracker" time="0.077">
+		</testcase>
+		<testcase name="test_limit_reached_at_max_count" classname="test_juggle_tracker" time="0.095">
+		</testcase>
+		<testcase name="test_limit_reached_emits_signal" classname="test_juggle_tracker" time="0.108">
+		</testcase>
+		<testcase name="test_hits_beyond_limit_are_rejected" classname="test_juggle_tracker" time="0.093">
+		</testcase>
+		<testcase name="test_land_resets_to_grounded" classname="test_juggle_tracker" time="0.094">
+		</testcase>
+		<testcase name="test_land_emits_landed_signal" classname="test_juggle_tracker" time="0.109">
+		</testcase>
+		<testcase name="test_land_while_grounded_does_nothing" classname="test_juggle_tracker" time="1.951">
+		</testcase>
+		<testcase name="test_custom_juggle_limit" classname="test_juggle_tracker" time="0.093">
+		</testcase>
+	</testsuite>
+	<testsuite id="5" name="test_score_tracker" package="tests/unit/components" timestamp="2026-03-01T23:36:45" hostname="localhost" tests="14" failures="0" errors="0" skipped="0" flaky="0" time="3.070">
+		<testcase name="test_initial_state" classname="test_score_tracker" time="0.095">
+		</testcase>
+		<testcase name="test_record_kill_increments_count" classname="test_score_tracker" time="0.077">
+		</testcase>
+		<testcase name="test_multiple_kill_types_tracked" classname="test_score_tracker" time="0.094">
+		</testcase>
+		<testcase name="test_unknown_type_returns_zero" classname="test_score_tracker" time="0.094">
+		</testcase>
+		<testcase name="test_tick_accumulates_time" classname="test_score_tracker" time="0.095">
+		</testcase>
+		<testcase name="test_update_max_combo" classname="test_score_tracker" time="0.092">
+		</testcase>
+		<testcase name="test_max_combo_only_increases" classname="test_score_tracker" time="0.093">
+		</testcase>
+		<testcase name="test_combo_of_ten_tracked" classname="test_score_tracker" time="0.096">
+		</testcase>
+		<testcase name="test_record_damage" classname="test_score_tracker" time="0.094">
+		</testcase>
+		<testcase name="test_score_increases_with_kills" classname="test_score_tracker" time="0.093">
+		</testcase>
+		<testcase name="test_score_penalized_by_time" classname="test_score_tracker" time="0.094">
+		</testcase>
+		<testcase name="test_score_boosted_by_combo" classname="test_score_tracker" time="0.094">
+		</testcase>
+		<testcase name="test_score_never_negative" classname="test_score_tracker" time="0.093">
+		</testcase>
+		<testcase name="test_reset_clears_all" classname="test_score_tracker" time="0.097">
+		</testcase>
+	</testsuite>
+	<testsuite id="6" name="test_tp_tracker" package="tests/unit/components" timestamp="2026-03-01T23:36:48" hostname="localhost" tests="14" failures="0" errors="0" skipped="0" flaky="0" time="3.069">
+		<testcase name="test_initial_tp_is_zero" classname="test_tp_tracker" time="0.094">
+		</testcase>
+		<testcase name="test_max_tp_equals_constant" classname="test_tp_tracker" time="0.093">
+		</testcase>
+		<testcase name="test_add_tp_increases_current" classname="test_tp_tracker" time="0.093">
+		</testcase>
+		<testcase name="test_add_tp_clamps_to_max" classname="test_tp_tracker" time="0.095">
+		</testcase>
+		<testcase name="test_add_tp_zero_does_nothing" classname="test_tp_tracker" time="0.093">
+		</testcase>
+		<testcase name="test_add_tp_negative_is_ignored" classname="test_tp_tracker" time="0.092">
+		</testcase>
+		<testcase name="test_spend_tp_reduces_current" classname="test_tp_tracker" time="0.095">
+		</testcase>
+		<testcase name="test_spend_tp_fails_when_insufficient" classname="test_tp_tracker" time="0.094">
+		</testcase>
+		<testcase name="test_spend_tp_exact_amount_succeeds" classname="test_tp_tracker" time="0.095">
+		</testcase>
+		<testcase name="test_tick_regen_increases_tp" classname="test_tp_tracker" time="0.079">
+		</testcase>
+		<testcase name="test_tick_regen_clamps_to_max" classname="test_tp_tracker" time="0.092">
+		</testcase>
+		<testcase name="test_reset_clears_tp" classname="test_tp_tracker" time="0.095">
+		</testcase>
+		<testcase name="test_tp_changed_signal_on_add" classname="test_tp_tracker" time="0.109">
+		</testcase>
+		<testcase name="test_tp_spent_signal_on_spend" classname="test_tp_tracker" time="0.106">
+		</testcase>
+	</testsuite>
+	<testsuite id="7" name="test_encounter_roller" package="tests/unit/systems" timestamp="2026-03-01T23:36:51" hostname="localhost" tests="7" failures="1" errors="1" skipped="0" flaky="0" time="1.270">
+		<testcase name="test_roll_from_single_entry_pool" classname="test_encounter_roller" time="0.096">
+		</testcase>
+		<testcase name="test_roll_from_multi_entry_pool" classname="test_encounter_roller" time="0.094">
+		</testcase>
+		<testcase name="test_roll_respects_enemy_count" classname="test_encounter_roller" time="0.094">
+		</testcase>
+		<testcase name="test_roll_multi_wave_returns_sequence" classname="test_encounter_roller" time="0.110">
+			<error message="ERROR: res://tests/unit/systems/test_encounter_roller.gd:51" type="ABORT">
+<![CDATA[
+Godot Runtime Error !
+Error: 'Invalid type in function 'roll_wave' in base 'RefCounted (EncounterRoller)'. The array of argument 1 (Array) does not have the same element type as the expected typed array argument.'
+	at res://scripts/systems/encounter_roller.gd:23
+	at res://tests/unit/systems/test_encounter_roller.gd:51
+]]>
+			</error>
+			<failure message="FAILED: res://tests/unit/systems/test_encounter_roller.gd:52" type="FAILURE">
+<![CDATA[
+Expecting:
+ '2'
+ but was
+ '0'
+]]>
+			</failure>
+		</testcase>
+	</testsuite>
+	<testsuite id="8" name="test_state_machine" package="tests/unit/systems" timestamp="2026-03-01T23:36:53" hostname="localhost" tests="11" failures="0" errors="0" skipped="0" flaky="0" time="2.348">
+		<testcase name="test_initial_state_is_set_correctly" classname="test_state_machine" time="0.093">
+		</testcase>
+		<testcase name="test_initial_state_enter_is_called" classname="test_state_machine" time="0.095">
+		</testcase>
+		<testcase name="test_transition_changes_current_state" classname="test_state_machine" time="0.078">
+		</testcase>
+		<testcase name="test_transition_calls_exit_on_old_state" classname="test_state_machine" time="0.093">
+		</testcase>
+		<testcase name="test_transition_calls_enter_on_new_state" classname="test_state_machine" time="0.093">
+		</testcase>
+		<testcase name="test_transition_to_same_state_does_nothing" classname="test_state_machine" time="0.032">
+		</testcase>
+		<testcase name="test_previous_state_name_tracks_history" classname="test_state_machine" time="0.093">
+		</testcase>
+		<testcase name="test_multiple_states_can_be_registered" classname="test_state_machine" time="0.094">
+		</testcase>
+		<testcase name="test_get_current_state_returns_state_object" classname="test_state_machine" time="0.079">
+		</testcase>
+		<testcase name="test_state_receives_machine_reference" classname="test_state_machine" time="0.092">
+		</testcase>
+		<testcase name="test_transition_chain" classname="test_state_machine" time="0.094">
+		</testcase>
+	</testsuite>
+</testsuites>

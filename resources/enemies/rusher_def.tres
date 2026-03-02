@@ -1,0 +1,20 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/enemies/enemy_def.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/attacks/enemy_rusher_attack.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+enemy_name = &"Rusher"
+enemy_type = &"rusher"
+base_hp = 50.0
+move_speed = 4.0
+attack_range = 1.5
+perception_delay = 0.3
+attack_cooldown = 1.5
+attack = ExtResource("2")
+behavior = &"rusher"
+can_block = false
+block_damage_reduction = 0.0
+mesh_color = Color(0.9, 0.2, 0.15, 1)
+xp_reward = 10

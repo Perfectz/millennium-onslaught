@@ -96,3 +96,15 @@ func restart_dungeon() -> void:
 	GameState.reset_dungeon()
 	EventBus.game_restarted.emit()
 	EventBus.log_event(&"game_restarted")
+
+
+## Request a scene transition with event bus notification.
+func transition_to_scene(scene_path: String) -> void:
+	EventBus.scene_transition_started.emit(scene_path)
+	EventBus.log_event(&"scene_transition_started", {"target": scene_path})
+	var error := get_tree().change_scene_to_file(scene_path)
+	if error != OK:
+		push_error("GameManager: Failed to transition to scene: " + scene_path)
+		return
+	EventBus.scene_transition_completed.emit(scene_path)
+	EventBus.log_event(&"scene_transition_completed", {"target": scene_path})

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/attacks/attack_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+attack_name = &"boss_slam_enraged"
+base_damage = 26.0
+damage_multiplier = 1.0
+knockback_force = 8.0
+knockback_direction = Vector3(1, 0.3, 0)
+hitstop_duration = 0.12
+windup_time = 0.25
+active_time = 0.1
+recovery_time = 0.35

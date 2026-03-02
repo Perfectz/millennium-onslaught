@@ -1,0 +1,20 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/attacks/attack_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+attack_name = &"ranged_shot"
+base_damage = 8.0
+damage_multiplier = 1.0
+knockback_force = 2.0
+knockback_direction = Vector3(1, 0.1, 0)
+hitstop_duration = 0.05
+windup_time = 0.3
+active_time = 0.1
+recovery_time = 0.5
+cancel_window_start = 0.5
+cancel_window_end = 0.9
+cancel_into = []
+is_launcher = false
+launch_velocity = 0.0

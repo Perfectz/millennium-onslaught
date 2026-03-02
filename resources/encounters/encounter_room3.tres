@@ -1,0 +1,67 @@
+[gd_resource type="Resource" load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://resources/encounters/encounter_def.gd" id="1"]
+[ext_resource type="Script" path="res://resources/encounters/wave_def.gd" id="2"]
+[ext_resource type="Script" path="res://resources/encounters/spawn_entry.gd" id="3"]
+[ext_resource type="Resource" path="res://resources/enemies/rusher_def.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/enemies/ranged_def.tres" id="5"]
+[ext_resource type="Resource" path="res://resources/enemies/shield_def.tres" id="6"]
+
+[sub_resource type="Resource" id="spawn_w1"]
+script = ExtResource("3")
+enemy_def = ExtResource("4")
+count = 3
+spawn_side = &"both"
+
+[sub_resource type="Resource" id="wave1"]
+script = ExtResource("2")
+spawn_entries = [SubResource("spawn_w1")]
+delay_before_spawn = 1.0
+
+[sub_resource type="Resource" id="spawn_w2_ranged"]
+script = ExtResource("3")
+enemy_def = ExtResource("5")
+count = 2
+spawn_side = &"right"
+
+[sub_resource type="Resource" id="spawn_w2_shield"]
+script = ExtResource("3")
+enemy_def = ExtResource("6")
+count = 1
+spawn_side = &"left"
+
+[sub_resource type="Resource" id="wave2"]
+script = ExtResource("2")
+spawn_entries = [SubResource("spawn_w2_ranged"), SubResource("spawn_w2_shield")]
+delay_before_spawn = 1.5
+
+[sub_resource type="Resource" id="spawn_w3_rusher"]
+script = ExtResource("3")
+enemy_def = ExtResource("4")
+count = 2
+spawn_side = &"left"
+
+[sub_resource type="Resource" id="spawn_w3_shield"]
+script = ExtResource("3")
+enemy_def = ExtResource("6")
+count = 2
+spawn_side = &"right"
+
+[sub_resource type="Resource" id="spawn_w3_ranged"]
+script = ExtResource("3")
+enemy_def = ExtResource("5")
+count = 1
+spawn_side = &"both"
+
+[sub_resource type="Resource" id="wave3"]
+script = ExtResource("2")
+spawn_entries = [SubResource("spawn_w3_rusher"), SubResource("spawn_w3_shield"), SubResource("spawn_w3_ranged")]
+delay_before_spawn = 2.0
+
+[resource]
+script = ExtResource("1")
+encounter_id = &"room3_encounter"
+waves = [SubResource("wave1"), SubResource("wave2"), SubResource("wave3")]
+arena_lock = true
+arena_min_x = -10.0
+arena_max_x = 10.0

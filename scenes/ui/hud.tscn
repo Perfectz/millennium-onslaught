@@ -1,0 +1,118 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1"]
+
+[node name="HUD" type="CanvasLayer"]
+layer = 10
+process_mode = 3
+script = ExtResource("1")
+
+[node name="Panel" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 232.0
+offset_bottom = 100.0
+
+[node name="HPBar" type="Control" parent="Panel/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(216, 28)
+
+[node name="HPLabel" type="Label" parent="Panel/VBox/HPBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "HP  100 / 100"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HPBarBG" type="ColorRect" parent="Panel/VBox/HPBar"]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 8.0
+offset_top = 4.0
+offset_right = 208.0
+offset_bottom = 24.0
+color = Color(0.15, 0.05, 0.05, 0.8)
+
+[node name="HPBarFill" type="ColorRect" parent="Panel/VBox/HPBar/HPBarBG"]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 198.0
+offset_bottom = 18.0
+color = Color(0.2, 0.8, 0.2, 1)
+
+[node name="TPBar" type="Control" parent="Panel/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(216, 28)
+
+[node name="TPLabel" type="Label" parent="Panel/VBox/TPBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "TP  0 / 100"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TPBarBG" type="ColorRect" parent="Panel/VBox/TPBar"]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 8.0
+offset_top = 4.0
+offset_right = 208.0
+offset_bottom = 24.0
+color = Color(0.05, 0.05, 0.2, 0.8)
+
+[node name="TPBarFill" type="ColorRect" parent="Panel/VBox/TPBar/TPBarBG"]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 198.0
+offset_bottom = 18.0
+color = Color(0.2, 0.4, 0.9, 1)
+
+[node name="ComboCounter" type="Label" parent="Panel"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -200.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 56.0
+grow_horizontal = 0
+text = "HIT 0"
+horizontal_alignment = 2
+
+[node name="StateLabel" type="Label" parent="Panel"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -80.0
+offset_right = 200.0
+grow_horizontal = 2
+grow_vertical = 0
+horizontal_alignment = 1

@@ -1,30 +1,23 @@
-# docs/schemas/ — Data Schema Documentation
+# docs/schemas/ - Data Schema Documentation
 
-Each resource type used in the project is documented here with all fields, valid ranges, and examples.
+Schema docs in this folder should describe fields, ranges, and examples for each resource type.
 
-## Contents
+## Current Status (2026-03-01)
 
-*No schemas documented yet — created starting MVP 1 when data resources are introduced.*
+Per-schema markdown files have not been written yet.
+Resource classes currently implemented in code:
 
-## Planned Schemas (MVP order)
+- `AttackDef` (`resources/attacks/attack_def.gd`)
+- `EnemyDef` (`resources/enemies/enemy_def.gd`)
+- `SpawnEntry` (`resources/encounters/spawn_entry.gd`)
+- `WaveDef` (`resources/encounters/wave_def.gd`)
+- `EncounterDef` (`resources/encounters/encounter_def.gd`)
+- `DungeonDef` (`resources/dungeons/dungeon_def.gd`)
 
-| Schema | MVP | Description |
-|--------|-----|-------------|
-| CharacterDef | 1 | Playable character definition |
-| AttackDef | 1 | Single attack or combo step definition |
-| EnemyDef | 2 | Enemy type definition |
-| EncounterDef | 2 | Wave of enemies configuration |
-| DungeonDef | 2 | Complete dungeon definition |
-| TownDef | 3 | Town with shop, inn, NPCs |
-| StoryDef | 3 | Dialogue and cutscene scripts |
-| EquipmentDef | 4 | Weapon, armor, accessory definitions |
-| SkillTreeDef | 4 | Per-character passive upgrade tree |
+## Recommended Schema Doc Format
 
-## Format Convention
-
-Each schema doc should include:
-1. Resource type name and class
-2. Purpose (one line)
-3. All fields with types and valid ranges
-4. At least one complete example
-5. Notes on how to create new instances
+1. Resource class and purpose
+2. Field table (name, type, default, constraints)
+3. Minimal valid example
+4. Authoring notes (how to create/edit in Godot)
+5. Validation and runtime usage notes

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/attacks/attack_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+attack_name = &"rusher_swing"
+base_damage = 15.0
+damage_multiplier = 1.0
+knockback_force = 5.0
+knockback_direction = Vector3(1, 0.2, 0)
+hitstop_duration = 0.05
+windup_time = 0.2
+active_time = 0.12
+recovery_time = 0.4

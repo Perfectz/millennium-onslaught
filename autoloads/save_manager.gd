@@ -84,7 +84,13 @@ func load_game(slot: int = 0) -> bool:
 		EventBus.log_event(&"load_failed", {"slot": slot, "error": error_msg})
 		return false
 
-	GameState.deserialize_persistent(json.data)
+	var success := GameState.deserialize_persistent(json.data)
+	if not success:
+		var error_msg := "Failed to deserialize save data for slot " + str(slot)
+		push_error(error_msg)
+		EventBus.load_failed.emit(slot, error_msg)
+		EventBus.log_event(&"load_failed", {"slot": slot, "error": error_msg})
+		return false
 	EventBus.load_completed.emit(slot)
 	EventBus.log_event(&"load_completed", {"slot": slot})
 	return true

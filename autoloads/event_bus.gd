@@ -36,6 +36,10 @@ signal enemy_spawned(enemy: Node, enemy_type: StringName)
 signal enemy_died(enemy: Node, enemy_type: StringName, position: Vector3)
 signal enemy_wave_cleared()
 
+# --- Encounter ---
+signal encounter_arena_locked(min_x: float, max_x: float)
+signal encounter_arena_unlocked()
+
 # --- Dungeon ---
 signal dungeon_entered(dungeon_id: StringName)
 signal dungeon_room_entered(room_index: int)

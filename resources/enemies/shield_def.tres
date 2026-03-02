@@ -1,0 +1,20 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/enemies/enemy_def.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/attacks/enemy_shield_attack.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+enemy_name = &"Guardian"
+enemy_type = &"shield"
+base_hp = 70.0
+move_speed = 3.0
+attack_range = 1.8
+perception_delay = 0.2
+attack_cooldown = 2.0
+attack = ExtResource("2")
+behavior = &"shield"
+can_block = true
+block_damage_reduction = 0.9
+mesh_color = Color(0.2, 0.3, 0.9, 1)
+xp_reward = 20

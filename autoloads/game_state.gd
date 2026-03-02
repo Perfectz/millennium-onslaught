@@ -43,6 +43,10 @@ var dungeon_drops: Array[Dictionary] = []
 var encounter_active: bool = false
 var encounter_enemies_alive: int = 0
 
+## Arena lock bounds (set when encounter with arena_lock starts).
+var arena_lock_min_x: float = -100.0
+var arena_lock_max_x: float = 100.0
+
 
 ## Current game phase.
 var current_phase: StringName = &"main_menu"
@@ -83,6 +87,8 @@ func reset_dungeon() -> void:
 	dungeon_drops.clear()
 	encounter_active = false
 	encounter_enemies_alive = 0
+	arena_lock_min_x = -100.0
+	arena_lock_max_x = 100.0
 
 
 ## Bank transient rewards into persistent state. Called on dungeon completion.
@@ -105,10 +111,22 @@ func serialize_persistent() -> Dictionary:
 
 
 ## Deserialize persistent state from a loaded dictionary.
-func deserialize_persistent(data: Dictionary) -> void:
+## Returns false if required fields are missing or have wrong types.
+func deserialize_persistent(data: Dictionary) -> bool:
+	if not data is Dictionary:
+		push_error("GameState: deserialize_persistent received non-Dictionary data.")
+		return false
+
+	# Validate required fields exist.
+	var required_fields: Array[String] = ["party_roster", "character_data", "inventory", "gold", "story_flags", "active_party"]
+	for field in required_fields:
+		if field not in data:
+			push_warning("GameState: Missing field '%s' in save data. Using default." % field)
+
 	party_roster = data.get("party_roster", [])
 	character_data = data.get("character_data", {})
 	inventory = data.get("inventory", [])
-	gold = data.get("gold", 0)
+	gold = int(data.get("gold", 0))
 	story_flags = data.get("story_flags", {})
 	active_party = data.get("active_party", [])
+	return true

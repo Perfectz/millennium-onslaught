@@ -44,6 +44,9 @@ func return_instance(instance: Node) -> void:
 		push_warning("ObjectPool: Returning instance without pool_key meta. Freeing instead.")
 		instance.queue_free()
 		return
+	if not instance.get_meta(&"pool_active", false):
+		push_warning("ObjectPool: Double-return detected for pool '%s'. Ignoring." % key)
+		return
 	_deactivate(instance)
 	_pools[key].append(instance)
 	_active_counts[key] = maxi(0, _active_counts.get(key, 1) - 1)

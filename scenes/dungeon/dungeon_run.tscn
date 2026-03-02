@@ -1,0 +1,42 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/characters/player.tscn" id="1"]
+[ext_resource type="Script" path="res://scripts/systems/camera_follow.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/dungeon/dungeon_run.gd" id="3"]
+
+[sub_resource type="Environment" id="env"]
+background_mode = 0
+ambient_light_source = 2
+ambient_light_color = Color(0.3, 0.3, 0.4, 1)
+ambient_light_energy = 0.5
+
+[node name="DungeonRun" type="Node3D"]
+script = ExtResource("3")
+
+[node name="Player" parent="." instance=ExtResource("1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.93969, 0.34202, 0, -0.34202, 0.93969, 0, 4, 8)
+fov = 50.0
+script = ExtResource("2")
+target_path = NodePath("../Player")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.25, 0.433013, 0, 0.866025, 0.5, -0.5, -0.433013, 0.75, 0, 10, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("env")
+
+[node name="FadeOverlay" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="FadeRect" type="ColorRect" parent="FadeOverlay"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0)
+mouse_filter = 2

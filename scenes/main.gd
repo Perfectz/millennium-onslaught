@@ -19,12 +19,35 @@ func _process(_delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	# F4 — Toggle debug info
-	if event is InputEventKey and event.pressed and event.keycode == KEY_F4:
-		_toggle_debug_info()
-	# M — Toggle mute
-	if event is InputEventKey and event.pressed and event.keycode == KEY_M:
-		AudioManager.toggle_mute()
+	if not event is InputEventKey or not event.pressed:
+		return
+	match event.keycode:
+		KEY_F1:
+			print("[Debug] F1 — Hitbox/Hurtbox overlay (not implemented until MVP 1)")
+		KEY_F2:
+			print("[Debug] F2 — Depth/Z display (not implemented until MVP 1)")
+		KEY_F3:
+			print("[Debug] F3 — AI state overlay (not implemented until MVP 2)")
+		KEY_F4:
+			_toggle_debug_info()
+		KEY_F5:
+			print("[Debug] F5 — Input display (not implemented until MVP 5)")
+		KEY_F6:
+			_dump_game_state()
+		KEY_M:
+			AudioManager.toggle_mute()
+
+
+## F6 — Dump full game state JSON to console.
+func _dump_game_state() -> void:
+	var state := GameState.serialize_persistent()
+	state["current_phase"] = GameManager.get_current_phase_name()
+	state["current_dungeon"] = GameState.current_dungeon_id
+	state["event_buffer_size"] = EventBus._event_ring_buffer.size()
+	print("=== Game State Dump ===")
+	print(JSON.stringify(state, "\t"))
+	print("=== Recent Events ===")
+	print(EventBus.dump_events_json())
 
 
 func _verify_autoloads() -> void:
