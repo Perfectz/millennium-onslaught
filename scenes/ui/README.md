@@ -4,9 +4,11 @@
 Gameplay UI scenes (HUD, victory/defeat, menus).
 
 ## Current Contents Snapshot
-Status: 3 files, 0 subfolders.
+Status: 5 files, 0 subfolders.
 - [file] `defeat_screen.tscn`
 - [file] `hud.tscn`
+- [file] `main_menu.tscn`
+- [file] `title_screen.tscn`
 - [file] `victory_screen.tscn`
 
 ## AI Coding Guidance

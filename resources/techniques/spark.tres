@@ -1,0 +1,22 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/techniques/technique_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+technique_id = &"spark"
+display_name = "Spark"
+description = "Discharges an arc of electricity."
+tp_cost = 20.0
+base_damage = 20.0
+element_type = &"lightning"
+status_effect_chance = 0.4
+status_effect_duration = 2.5
+knockback_force = 8.0
+is_projectile = true
+projectile_speed = 24.0
+aoe_radius = 0.0
+animation_name = &"attack_heavy"
+particle_color = Color(0.8, 1, 0.2, 1)
+unlock_level = 3
+scales_with_magic = false

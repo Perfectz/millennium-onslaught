@@ -8,6 +8,7 @@ func enter(_previous_state: StringName) -> void:
 	var player: PlayerController = entity as PlayerController
 	player.hitbox.disable()
 	player.hurtbox.is_invincible = true
+	player.intent_buffer.clear_all()
 	entity.set_deferred("collision_layer", 0)
 	entity.set_deferred("collision_mask", 0)
 

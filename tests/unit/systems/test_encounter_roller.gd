@@ -44,10 +44,9 @@ func test_roll_respects_enemy_count() -> void:
 
 
 func test_roll_multi_wave_returns_sequence() -> void:
-	var waves: Array[Array] = [
-		[{"enemy_type": &"rusher", "count": 2}],
-		[{"enemy_type": &"ranged", "count": 1}],
-	]
+	var wave_1: Array[Dictionary] = [{"enemy_type": &"rusher", "count": 2}]
+	var wave_2: Array[Dictionary] = [{"enemy_type": &"ranged", "count": 1}]
+	var waves: Array[Array] = [wave_1, wave_2]
 	var result := _roller.roll_encounter(waves)
 	assert_int(result.size()).is_equal(2)
 

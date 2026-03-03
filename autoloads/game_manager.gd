@@ -29,10 +29,29 @@ const PHASE_NAMES: Dictionary = {
 var _current_phase: Phase = Phase.MAIN_MENU
 var _previous_phase: Phase = Phase.MAIN_MENU
 var _is_paused: bool = false
+var _transitioner: SceneTransitioner
+
+
+var _touch_controls: CanvasLayer
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_transitioner = SceneTransitioner.new()
+	_transitioner.name = "SceneTransitioner"
+	add_child(_transitioner)
+	_init_touch_controls()
+
+
+## Spawn touch controls on mobile platforms.
+func _init_touch_controls() -> void:
+	if not InputManager.is_mobile():
+		return
+	var TouchControlsScene := load("res://scripts/ui/touch_controls.gd")
+	_touch_controls = CanvasLayer.new()
+	_touch_controls.set_script(TouchControlsScene)
+	_touch_controls.name = "TouchControls"
+	add_child(_touch_controls)
 
 
 ## Transition to a new game phase.
@@ -98,13 +117,41 @@ func restart_dungeon() -> void:
 	EventBus.log_event(&"game_restarted")
 
 
-## Request a scene transition with event bus notification.
+## Request a scene transition with fade effect.
 func transition_to_scene(scene_path: String) -> void:
-	EventBus.scene_transition_started.emit(scene_path)
-	EventBus.log_event(&"scene_transition_started", {"target": scene_path})
-	var error := get_tree().change_scene_to_file(scene_path)
-	if error != OK:
-		push_error("GameManager: Failed to transition to scene: " + scene_path)
-		return
-	EventBus.scene_transition_completed.emit(scene_path)
-	EventBus.log_event(&"scene_transition_completed", {"target": scene_path})
+	_transitioner.transition_to(scene_path)
+
+
+## Navigate to the overworld map.
+func go_to_overworld() -> void:
+	change_phase(Phase.OVERWORLD)
+	transition_to_scene(Constants.SCENE_OVERWORLD)
+
+
+## Navigate to a town by town_id.
+func go_to_town(town_id: StringName) -> void:
+	GameState.pending_town_id = town_id
+	change_phase(Phase.TOWN)
+	transition_to_scene(Constants.SCENE_TOWN)
+
+
+## Navigate to a dungeon by dungeon_id.
+func go_to_dungeon(dungeon_id: StringName) -> void:
+	GameState.pending_dungeon_id = dungeon_id
+	change_phase(Phase.DUNGEON)
+	transition_to_scene(Constants.SCENE_DUNGEON)
+
+
+## Navigate to a cutscene with scene data, next destination, and optional music track.
+func go_to_cutscene(scenes: Array, next_destination: StringName = &"overworld", music: StringName = &"") -> void:
+	GameState.pending_cutscene_data = scenes
+	GameState.pending_cutscene_next = next_destination
+	GameState.pending_cutscene_music = music
+	change_phase(Phase.CUTSCENE)
+	transition_to_scene(Constants.SCENE_CUTSCENE)
+
+
+## Navigate to the main menu.
+func go_to_main_menu() -> void:
+	change_phase(Phase.MAIN_MENU)
+	transition_to_scene(Constants.SCENE_MAIN_MENU)

@@ -231,7 +231,46 @@ The complete game has: 5–8 playable characters with distinct movesets, 4+ dung
 
 ---
 
-### MVP 5 — "Together"
+### MVP 5 — "The Stage"
+
+**Goal:** Replace discrete room-by-room dungeon transitions with continuous, flowing stages. Players walk seamlessly from entrance to boss through connected encounter zones and traversal segments — no loading screens, no fade-to-black. The dungeon feels like one continuous journey inspired by Castle Crashers' "beads on a string" model.
+
+**Acceptance Criteria:**
+- I enter a dungeon and experience a continuous stage — no fade-to-black room transitions. I walk forward from the entrance and the stage unfolds ahead of me.
+- The stage is composed of modular chunks that tile seamlessly along the X axis. I never see a seam or gap between chunks.
+- Encounter zones ("beads") trigger when I enter them. Enemies spawn and the camera frames the fight area. A soft barrier (enemy pressure + camera leading) discourages me from running past, but there are no invisible walls.
+- Between encounters, traversal segments ("string") provide walking space with light platforming, environmental props, and visual breathing room. I can see the next area approaching.
+- Environmental interactables exist: I can pick up barrels and crates and throw them at enemies for damage. Hazard zones (spike pits, fire columns) damage anyone who enters them — enemies included.
+- The pacing follows a clear rhythm: encounters escalate in intensity with breathers between peaks. The stage builds toward the boss.
+- The boss encounter is a purpose-built wider area at the end of the stage with no forward exit until the boss is defeated.
+- Camera movement is continuous: it follows me through traversal, widens during encounters, and never hard-cuts between areas.
+- Chunks load ahead of the player and unload behind, keeping memory use bounded.
+- The Piata Basement (dungeon_1) is rebuilt as a continuous stage with 8–10 chunks.
+- The existing room-based test arena still works unchanged.
+
+**Systems Needed:** Stage chunk system (modular Node3D chunks that tile along X with standardized connection points), StageDef resource (ordered chunk sequence with encounter triggers, interactable placements, hazard positions, and pacing metadata), encounter trigger zones (Area3D activation replacing room-enter triggers, multiple triggers per chunk), soft gating (camera leading + forward enemy spawn pressure during active encounters, no invisible walls), environmental interactables (pickup/throw system for barrels/crates, hazard damage zones with VFX), chunk streaming manager (sliding window around player X, load ahead, unload behind), stage-aware DungeonManager (detect StageDef vs legacy DungeonDef, delegate appropriately), continuous camera mode (smooth follow in traversal, soft framing in encounters).
+
+**Content:** Piata Basement rebuilt as continuous stage (8–10 chunks: 2 traversal intro, 3 escalating encounter zones, 2 traversal breathers, 1 boss arena, 1 post-boss). 3 throwable prop types (barrel, crate, rock). 2 hazard types (spike pit, fire column). StageDef resource for dungeon_1.
+
+**Risks & Mitigations:**
+| Risk | Mitigation |
+|------|------------|
+| Memory pressure from many simultaneous chunks | Stream chunks in a 3-chunk window (current ± 1). Profile on Android. Keep chunks lightweight. |
+| Visible seams between chunks | Standardize connection points (matching floor height + edge alignment). Use fog or particles to mask distant transitions. |
+| Soft gating feels too loose — players run past encounters | Camera leading + forward enemy spawns create natural pressure. If player runs too far ahead, spawn a pursuit wave. |
+| Environmental interactables break combat balance | Throwables deal moderate fixed damage. Hazards damage enemies too. Hazards are avoidable. |
+| Backwards compatibility with existing room-based dungeons | DungeonDef room-based flow remains unchanged. StageDef is a parallel path, not a replacement. DungeonRun checks which type. |
+| Chunk authoring is tedious | Create a chunk template scene with connection point markers and standard floor. Document authoring conventions in README. |
+
+**Demo Checklist:** Enter the Piata Basement. Walk forward — see the stage unfold continuously. Reach the first encounter zone — enemies spawn, camera frames the fight. Defeat them. Walk forward through a traversal segment — platforms, props. Enter a harder encounter. Pick up a barrel and throw it at an enemy. Walk through a hazard zone — dodge spikes. Reach the boss area. Fight the boss. Win. See victory screen. Also: open the test arena — verify old room-based system still works.
+
+**TDD Targets:** Chunk window calculation (which chunks to load given player X position), encounter trigger activation logic (enter zone → start, all dead → complete), StageDef validation (chunks connected, encounters reference valid defs), interactable damage calculation (throwable impact, hazard tick), soft gating offset calculation (camera lead amount based on encounter distance).
+
+**Documentation Deliverable:** Update INDEX.md with stage chunk system, encounter trigger system, interactable system. Document StageDef schema in docs/schemas/. Document chunk authoring conventions in scenes/dungeon/chunks/README.md. Add stage-related events to event catalog. Update DECISIONS.md with "Continuous Stage Design" rationale.
+
+---
+
+### MVP 6 — "Together"
 
 **Goal:** Four players can play on one screen. Android build works with touch controls. Settings and save system are production-ready.
 
@@ -265,7 +304,7 @@ The complete game has: 5–8 playable characters with distinct movesets, 4+ dung
 
 ---
 
-### MVP 6 — "Ship It"
+### MVP 7 — "Ship It"
 
 **Goal:** The game is complete and polished. Full content, full audio, full visual effects, accessibility, and a finished narrative arc.
 
@@ -429,7 +468,8 @@ All gameplay-tunable values live in Resource data files. The AI can add new char
 | AttackDef | A single attack or combo step | Damage multiplier, knockback direction and force, hitstop duration, active frame window, cancel window start/end, element, status effect |
 | EquipmentDef | A piece of equipment | Name, slot (weapon/armor/accessory), stat modifiers, passive effects list, rarity, shop price |
 | EncounterDef | A wave of enemies in a room | Enemy types and counts, spawn positions, trigger type (position/time/kill-count) |
-| DungeonDef | A complete dungeon | Room sequence, encounter pool (randomized per entry), boss reference, biome theme, music reference |
+| DungeonDef | A complete dungeon (legacy rooms) | Room sequence, encounter pool (randomized per entry), boss reference, biome theme, music reference |
+| StageDef | A continuous stage (MVP 5+) | Ordered chunk sequence, encounter triggers with positions, interactable placements, hazard positions, pacing density metadata, boss reference |
 | TownDef | A town on the overworld | Name, shop inventory references, inn cost, NPC list with dialogue references, services available |
 | StoryDef | A dialogue or cutscene script | Speaker, portrait, lines, trigger flag, next scene |
 | SkillTreeDef | A character's passive upgrade tree | Nodes with stat bonuses, prerequisite connections, point costs |
@@ -483,11 +523,19 @@ All gameplay-tunable values live in Resource data files. The AI can add new char
 
 ### Dungeon Rules
 
-**Room Layout:** Room geometry (platforms, walls, pits, terrain) is fixed and hand-authored per room scene. This means players can learn room layouts and develop platforming strategies. The level design IS authored content.
+**Stage Layout (MVP 5+):** Production dungeons use continuous stages — modular chunks tiled along X that the player walks through seamlessly. Chunks define geometry (floor, platforms, walls), connection points (matching edges), and content markers (spawn points, interactable positions). Chunk geometry is hand-authored. The level design IS authored content. Players experience one continuous journey from entrance to boss.
 
-**Encounter Randomization:** Each time a player enters a dungeon, the encounter roller selects enemy waves for each room from the dungeon's encounter pool. This means the rooms are familiar but the fights are different each time. Events (treasure chests, trap triggers, NPC encounters) also randomize from a pool.
+**Beads on a String:** Stages follow a "beads on a string" pacing model. Encounter zones ("beads") are connected by traversal segments ("string"). Encounter zones contain enemy spawns and soft gating. Traversal segments contain light platforming, environmental props, and breathing room. The pacing builds in intensity with a density curve: low → medium → high → release → escalation → boss.
 
-**Progression Within a Dungeon:** Rooms are traversed linearly. Each room must be cleared (all enemies defeated) before the exit to the next room opens. The final room is always the boss room. Temporary power-ups and dungeon-only drops may appear between rooms.
+**60-90 Second Rule:** Something meaningful must change every 60-90 seconds — a new encounter starts, the environment shifts, a hazard appears, a traversal challenge begins. Dead time kills momentum.
+
+**Soft Gating:** During encounters, players are encouraged to stay and fight through camera leading and enemy spawn pressure, not invisible walls. The camera moves ahead slightly, enemies spawn from the forward edge if the player pushes past. When the encounter is complete, soft gating releases naturally.
+
+**Environmental Interactables:** Stages contain throwable objects (barrels, crates, rocks) and hazards (spike pits, fire columns). Throwables can be picked up and thrown at enemies for damage. Hazards damage any entity — player and enemy alike. These add tactical variety to encounters.
+
+**Legacy Room System:** The room-based DungeonDef system (discrete rooms with fade-to-black transitions) remains functional for prototyping and testing but is not used for production dungeons.
+
+**Encounter Randomization:** The encounter roller selects enemy waves for each encounter zone from the dungeon's encounter pool. The stage geometry is familiar but the fights differ each run.
 
 **Death:** Dying in a dungeon means: transient state is wiped (dungeon-only buffs and drops lost), player returns to the overworld map, all persistent state is retained (levels, gold, equipment, story flags). The dungeon can be re-entered immediately with fresh randomized encounters.
 
@@ -637,7 +685,7 @@ These are constraints learned from real-world game development. The AI must trea
 **Symptom:** With multiple players, the camera jerks wildly, zooms in and out rapidly, or leaves players off-screen.
 **Root Cause:** Camera directly follows the average position without smoothing, deadzone, or zoom limits.
 **Prevention Rule:** Co-op camera must use smooth interpolation, a deadzone, defined zoom limits (min and max), and soft containment (push players at edges, do not hard-clip).
-**Guideline:** Camera system is designed for co-op from the start (MVP 2 camera architecture), even if co-op is not playable until MVP 5.
+**Guideline:** Camera system is designed for co-op from the start (MVP 2 camera architecture), even if co-op is not playable until MVP 6.
 
 ### Lesson 13 — The Samey Runs Problem
 
@@ -651,7 +699,7 @@ These are constraints learned from real-world game development. The AI must trea
 **Symptom:** Development stalls because RPG systems (leveling, equipment, skills, passives, shops) are all being built simultaneously.
 **Root Cause:** Trying to implement everything at once instead of layering.
 **Prevention Rule:** Combat feel comes first (MVP 1–2). RPG systems layer in after combat is fun (MVP 4). Do not build shop UI before enemies feel good to fight.
-**Guideline:** The MVP order is intentional: combat → dungeon → overworld → RPG → co-op → polish. Do not reorder.
+**Guideline:** The MVP order is intentional: combat → dungeon → overworld → RPG → stage design → co-op → polish. Do not reorder.
 
 ### Lesson 15 — The Invisible Progress Problem
 
@@ -666,6 +714,13 @@ These are constraints learned from real-world game development. The AI must trea
 **Root Cause:** Event bus signals are not documented, leading to drift and duplication.
 **Prevention Rule:** Every event bus signal is registered in the event catalog document. Adding a new signal without updating the catalog is a deliverable failure.
 **Guideline:** Documentation is a mandatory MVP deliverable, not optional polish.
+
+### Lesson 17 — The Stop-Start Room Problem
+
+**Symptom:** Dungeon runs feel repetitive and mechanical. Each room is a discrete box. Fade to black, load new room, fight, repeat. No sense of journey or continuous progression through a place.
+**Root Cause:** Room-based dungeon design with hard scene transitions creates a stop-start rhythm that breaks immersion and limits pacing control.
+**Prevention Rule:** Production dungeons must use continuous stage design — "beads on a string" model where encounter zones are connected by traversal segments. No loading screens or fade-to-black between combat areas.
+**Guideline:** MVP 5 introduces continuous stages. The pacing follows a density curve (low → medium → high → release) with the 60-90 second rule: something meaningful changes every minute. Room-based design remains as a legacy/prototyping tool but production dungeons use StageDef.
 
 ---
 
@@ -782,38 +837,53 @@ Every individual MVP is done when:
 | 52 | Drop tables | Enemies drop equipment based on rarity tier definitions | RPG |
 | 53 | Varied shop inventories | Each town sells different equipment appropriate to progression point | Town |
 
-### MVP 5 — "Together"
+### MVP 5 — "The Stage"
 
 | # | Item | Description | Category |
 |---|------|-------------|----------|
-| 54 | Multi-device input | Map keyboard + up to 3 controllers to player indices | Co-op |
-| 55 | Per-player HUD | Health/TP bars for all active players on screen | UI |
-| 56 | Co-op camera | Shared camera with dynamic zoom and player containment | Co-op |
-| 57 | Revive mechanic | Downed player revived by ally standing near and holding button | Co-op |
-| 58 | Combination attacks | Two specific characters trigger a special team attack when near each other | Co-op |
-| 59 | Android export | Working APK with touch controls, virtual joystick and action buttons | Android |
-| 60 | Settings menu | Audio volume, display options, control remapping | UI |
-| 61 | Control remapping | Rebind keyboard and controller inputs, persist to config | UI |
-| 62 | Save system hardening | Test save/load across all game states, handle edge cases | Core |
+| 54 | Stage chunk system | Modular Node3D chunks that tile along X with standardized connection points | Stage |
+| 55 | StageDef resource | Data definition for continuous stage: chunk sequence, triggers, interactables, pacing | Stage |
+| 56 | Chunk streaming manager | Load/unload chunks in sliding window around player X position | Stage |
+| 57 | Encounter trigger zones | Area3D-based encounter activation replacing room-enter triggers | Stage |
+| 58 | Soft gating system | Camera-leading + enemy pressure during encounters, no invisible walls | Stage |
+| 59 | Environmental throwables | Pick up and throw barrels/crates at enemies for damage | Stage |
+| 60 | Environmental hazards | Spike pits, fire columns that damage any entity in their zone | Stage |
+| 61 | Continuous camera mode | Smooth follow in traversal, soft framing in encounters, no hard cuts | Stage |
+| 62 | Stage-aware DungeonManager | Detect StageDef vs DungeonDef and delegate to appropriate system | Stage |
+| 63 | Piata Basement stage rebuild | Dungeon_1 rebuilt as 8–10 continuous chunks with encounters and interactables | Content |
 
-### MVP 6 — "Ship It"
+### MVP 6 — "Together"
 
 | # | Item | Description | Category |
 |---|------|-------------|----------|
-| 63 | Characters 5 through 8 | Remaining roster with unique movesets and techniques | Content |
-| 64 | Full enemy variety | 12+ enemy types across biome themes | Content |
-| 65 | Dungeon 2 | New dungeon with unique theme, rooms, encounters, and boss | Content |
-| 66 | Dungeon 3 | Another unique dungeon | Content |
-| 67 | Dungeon 4 | Another unique dungeon | Content |
-| 68 | Town 2 | New town with unique shop inventory and NPCs | Content |
-| 69 | Town 3 | Another unique town | Content |
-| 70 | Full story script | Complete narrative arc with dialogue for all story beats | Content |
-| 71 | Full audio SFX | Sound effects for every gameplay event | Audio |
-| 72 | Music per context | Unique tracks for overworld, each town, each biome, boss fights | Audio |
-| 73 | VFX polish | Attack trails, elemental particles, screen transitions, UI juice | Polish |
-| 74 | Daily challenge mode | Date-seeded dungeon run with fixed parameters and local leaderboard | Content |
-| 75 | Accessibility options | Colorblind mode, difficulty settings, input assist (auto-combo) | Polish |
-| 76 | Final balance pass | Automated stat simulations to flag outlier characters/equipment | Polish |
+| 64 | Multi-device input | Map keyboard + up to 3 controllers to player indices | Co-op |
+| 65 | Per-player HUD | Health/TP bars for all active players on screen | UI |
+| 66 | Co-op camera | Shared camera with dynamic zoom and player containment | Co-op |
+| 67 | Revive mechanic | Downed player revived by ally standing near and holding button | Co-op |
+| 68 | Combination attacks | Two specific characters trigger a special team attack when near each other | Co-op |
+| 69 | Android export | Working APK with touch controls, virtual joystick and action buttons | Android |
+| 70 | Settings menu | Audio volume, display options, control remapping | UI |
+| 71 | Control remapping | Rebind keyboard and controller inputs, persist to config | UI |
+| 72 | Save system hardening | Test save/load across all game states, handle edge cases | Core |
+
+### MVP 7 — "Ship It"
+
+| # | Item | Description | Category |
+|---|------|-------------|----------|
+| 73 | Characters 5 through 8 | Remaining roster with unique movesets and techniques | Content |
+| 74 | Full enemy variety | 12+ enemy types across biome themes | Content |
+| 75 | Dungeon 2 | New continuous stage with unique theme, encounters, and boss | Content |
+| 76 | Dungeon 3 | Another unique continuous stage | Content |
+| 77 | Dungeon 4 | Another unique continuous stage | Content |
+| 78 | Town 2 | New town with unique shop inventory and NPCs | Content |
+| 79 | Town 3 | Another unique town | Content |
+| 80 | Full story script | Complete narrative arc with dialogue for all story beats | Content |
+| 81 | Full audio SFX | Sound effects for every gameplay event | Audio |
+| 82 | Music per context | Unique tracks for overworld, each town, each biome, boss fights | Audio |
+| 83 | VFX polish | Attack trails, elemental particles, screen transitions, UI juice | Polish |
+| 84 | Daily challenge mode | Date-seeded dungeon run with fixed parameters and local leaderboard | Content |
+| 85 | Accessibility options | Colorblind mode, difficulty settings, input assist (auto-combo) | Polish |
+| 86 | Final balance pass | Automated stat simulations to flag outlier characters/equipment | Polish |
 
 ---
 
@@ -821,7 +891,7 @@ Every individual MVP is done when:
 
 ### Git Strategy
 
-- **main** branch: Stable, buildable, playable. Tagged at each MVP completion (v0.1 through v0.6).
+- **main** branch: Stable, buildable, playable. Tagged at each MVP completion (v0.1 through v0.7).
 - **develop** branch: Integration branch. Features merge here first. Must build and pass tests.
 - **feature/** branches: One branch per backlog item or small group of related items. Named descriptively: `feature/juggle-system`, `feature/town-shop-ui`. Merged to develop via pull request or merge commit.
 
@@ -832,7 +902,7 @@ Every individual MVP is done when:
 - **Variables and functions:** snake_case. player_speed, calculate_damage().
 - **Constants:** UPPER_SNAKE_CASE. MAX_JUGGLE_COUNT, BASE_GRAVITY.
 - **Event bus signals:** snake_case with domain prefix. combat_hit_landed, dungeon_room_cleared, rpg_level_up.
-- **Resource files (.tres):** snake_case matching the thing they define. chaz_character.tres, sand_worm_enemy.tres, fire_slash_attack.tres.
+- **Resource files (.tres):** snake_case matching the thing they define. alys_character.tres, sand_worm_enemy.tres, fire_slash_attack.tres.
 
 ### Debug Overlays
 

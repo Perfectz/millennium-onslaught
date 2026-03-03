@@ -26,6 +26,9 @@ func physics_process(delta: float) -> StringName:
 	entity.move_and_slide()
 	player.clamp_belt_depth()
 
+	if player.intent_buffer.consume(&"attack_light"):
+		return &"attack_air"
+
 	if entity.is_on_floor():
 		return &"land"
 

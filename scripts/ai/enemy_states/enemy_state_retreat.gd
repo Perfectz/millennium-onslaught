@@ -3,6 +3,10 @@ class_name EnemyStateRetreat
 extends State
 
 
+func enter(_previous_state: StringName) -> void:
+	(entity as EnemyController).play_animation(&"run")
+
+
 func physics_process(delta: float) -> StringName:
 	var enemy := entity as EnemyController
 

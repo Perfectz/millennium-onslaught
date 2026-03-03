@@ -1,0 +1,104 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/ui/hub_screen_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+screen_background_title = "MOTAVIA OVERWORLD"
+screen_background_subtitle = "PLANETARY SURVEY MAP / NO IMAGE ATTACHED"
+left_header = "Destinations"
+info_header = "Location Intel"
+hint_text = "UP/DOWN OR D-PAD: NAVIGATE   ENTER/A: TRAVEL   START/ESC: PAUSE"
+default_accent = Color(0.31, 0.78, 0.95, 1)
+dialogue_header = "HUNTER COMMS"
+entries = [{
+"action": "go_town",
+"action_target": "piata",
+"accent": Color(0.42, 0.68, 1, 1),
+"context_subtitle": "SETTLEMENT OVERVIEW PLACEHOLDER",
+"context_title": "MOTAVIA MAP: PIATA REGION",
+"description": "A distinguished seat of learning on Motavia. Scholars study the ancient past while hunters gather in the town square.",
+"dialogue": "Alys\u2014this is the Academy! We could learn a ton if we just take a quick look around\u2026",
+"dialogue_thread": [{
+"speaker": "Chaz Ashley",
+"dialogue": "Alys\u2014this is the Academy! We could learn a ton if we just take a quick look around\u2026",
+"portrait_code": "CHAZ / HUNTER",
+"portrait_image": "res://assets/textures/portraits/chaz_portrait.png"
+}, {
+"speaker": "Alys Brangwin",
+"dialogue": "And we can do the grand tour right after we collect our paycheck. Principal\u2019s office, rookie\u2014try not to get distracted by the education.",
+"portrait_code": "ALYS / HUNTER",
+"portrait_image": "res://assets/textures/portraits/alys_portrait.png"
+}, {
+"speaker": "Chaz Ashley",
+"dialogue": "H-hey! Okay\u2014principal\u2019s office. No touring. Mostly.",
+"portrait_code": "CHAZ / HUNTER",
+"portrait_image": "res://assets/textures/portraits/chaz_portrait.png"
+}],
+"id": "piata_academy",
+"level": "Town Hub",
+"map_video": "res://assets/textures/locations/piata_academy_map.ogv",
+"menu_label": "Piata Academy",
+"node_id": "piata",
+"portrait_code": "CHAZ / HUNTER",
+"portrait_image": "res://assets/textures/portraits/chaz_portrait.png",
+"speaker": "Chaz Ashley",
+"story_subtitle": "ACADEMY GROUNDS / 16:9 PLACEHOLDER",
+"story_title": "STORY CUE",
+"story_video": "res://assets/textures/locations/piata_academy_story.ogv",
+"title": "Piata Academy"
+}, {
+"action": "go_dungeon",
+"action_target": "dungeon_1",
+"accent": Color(0.26, 0.95, 1, 1),
+"context_subtitle": "SUB-LEVEL SCAN PLACEHOLDER",
+"context_title": "MOTAVIA MAP: PIATA BASEMENT",
+"description": "The sealed basement beneath Piata Academy. The principal has ordered an investigation into Bio-monster sightings in the lower levels.",
+"dialogue": "The principal wants us to check the basement. Something's been stirring down there — don't let your guard down.",
+"id": "piata_basement",
+"level": "Lv 1 - 5",
+"menu_label": "Piata Basement",
+"node_id": "dungeon_1",
+"portrait_code": "ALYS / HUNTER",
+"portrait_image": "res://assets/textures/portraits/alys_portrait.png",
+"speaker": "Alys Brangwin",
+"story_subtitle": "ACADEMY SUB-LEVEL / 16:9 PLACEHOLDER",
+"story_title": "STORY CUE",
+"title": "Piata Basement"
+}, {
+"action": "go_dungeon",
+"action_target": "birth_valley",
+"accent": Color(0.85, 0.42, 0.42, 1),
+"context_subtitle": "UNCHARTED ZONE PLACEHOLDER",
+"context_title": "MOTAVIA MAP: BIRTH VALLEY",
+"description": "A desolate canyon where Bio-monsters breed unchecked. Something unnatural stirs in its depths, connected to the petrification of Zema.",
+"dialogue": "This valley is the source. Whatever is behind the Bio-monster surge, we'll find our answers here.",
+"id": "birth_valley",
+"level": "Lv 5 - 10",
+"menu_label": "Birth Valley",
+"node_id": "birth_valley",
+"portrait_code": "ALYS / HUNTER",
+"portrait_image": "res://assets/textures/portraits/alys_portrait.png",
+"speaker": "Alys Brangwin",
+"story_subtitle": "CANYON DEPTHS / 16:9 PLACEHOLDER",
+"story_title": "STORY CUE",
+"title": "Birth Valley"
+}, {
+"action": "go_town",
+"action_target": "zema",
+"accent": Color(0.6, 0.55, 0.7, 1),
+"context_subtitle": "PETRIFIED SETTLEMENT PLACEHOLDER",
+"context_title": "MOTAVIA MAP: ZEMA",
+"description": "A small settlement where every inhabitant has been turned to stone. The cause remains unknown, but scholars believe it is connected to the Bio-monster outbreak.",
+"dialogue": "The people of Zema... all turned to stone. There must be a way to reverse this. We need to find Alshline.",
+"id": "zema_town",
+"level": "Petrified Town",
+"menu_label": "Zema",
+"node_id": "zema",
+"portrait_code": "HAHN / SCHOLAR",
+"portrait_image": "res://assets/textures/portraits/hahn_portrait.png",
+"speaker": "Hahn Mahlay",
+"story_subtitle": "STONE VILLAGE / 16:9 PLACEHOLDER",
+"story_title": "STORY CUE",
+"title": "Zema"
+}]

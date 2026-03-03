@@ -37,6 +37,9 @@ extends Resource
 ## Block damage reduction (0.0 = full block, 1.0 = no block).
 @export var block_damage_reduction: float = 0.0
 
+## Resistance to incoming knockback (0.0 = normal, 1.0 = immovable).
+@export var knockback_resistance: float = 0.0
+
 ## Projectile scene for ranged enemies.
 @export var projectile_scene: PackedScene = null
 
@@ -45,3 +48,15 @@ extends Resource
 
 ## XP reward on death.
 @export var xp_reward: int = 10
+
+## Gold dropped on death.
+@export var gold_reward: int = 5
+
+## Equipment drop table. Each entry: {item_id: StringName, chance: float (0.0-1.0)}
+@export var drop_table: Array[Dictionary] = []
+
+## Elemental weakness (takes bonus damage from this element).
+@export var weakness: StringName = &""
+
+## Elemental resistance (takes reduced damage from this element).
+@export var resistance: StringName = &""

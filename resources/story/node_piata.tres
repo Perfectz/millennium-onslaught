@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/story/overworld_node_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+node_id = &"piata"
+display_name = "Piata Academy"
+node_type = &"town"
+scene_path = "res://scenes/town/town.tscn"
+connections = [&"dungeon_1"]
+requires_flag = &""
+map_position = Vector2(0.25, 0.4)
+description = "A distinguished town built around the renowned Piata Academy, center of learning on Motavia."

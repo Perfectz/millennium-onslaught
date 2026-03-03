@@ -1,0 +1,12 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/equipment/equipment_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+equipment_id = &"power_ring"
+display_name = "Power Ring"
+description = "An ancient ring that amplifies the wearer's strength."
+cost = 500
+slot = &"accessory"
+stat_bonuses = {"strength": 4, "agility": 2}

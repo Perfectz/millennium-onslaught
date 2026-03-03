@@ -6,6 +6,7 @@ extends CharacterBody3D
 
 @onready var state_machine: StateMachine = $StateMachine
 @onready var model_pivot: Node3D = $ModelPivot
+@onready var enemy_model: Node3D = $ModelPivot/EnemyModel
 @onready var hitbox: Hitbox = $Hitbox
 @onready var hurtbox: Hurtbox = $Hurtbox
 
@@ -14,13 +15,14 @@ extends CharacterBody3D
 
 var health: HealthComponent
 var juggle: JuggleTracker
+var status_effects: StatusEffectTracker
 var target: Node3D = null
 var facing_right: bool = true
 
 ## Shield enemy: hits absorbed before stagger.
 var _block_hits_remaining: int = 0
 var _is_blocking: bool = false
-var _stagger_timer: float = 0.0
+var _stagger_override_duration: float = 0.0
 var _original_material: Material = null
 var _health_bar_fill: MeshInstance3D = null
 
@@ -29,6 +31,10 @@ var enemy_type: StringName = &"rusher"
 
 ## Attack cooldown for token system.
 var attack_cooldown_timer: float = 0.0
+
+## Hit lag freeze timer — brief pause on the enemy model for impact feel.
+var _hit_lag_timer: float = 0.0
+var _hit_lag_frozen: bool = false
 
 ## Boss phase tracking.
 var boss_phase: int = 1
@@ -50,6 +56,7 @@ func _ready() -> void:
 
 	health = HealthComponent.new(hp)
 	juggle = JuggleTracker.new(Constants.MAX_JUGGLE_COUNT)
+	status_effects = StatusEffectTracker.new()
 
 	state_machine.entity = self
 	state_machine.add_state(&"idle", EnemyStateIdle.new())
@@ -68,15 +75,27 @@ func _ready() -> void:
 	state_machine.set_initial_state(&"idle")
 	hurtbox.hit_received.connect(_on_hit_received)
 	_create_health_bar()
+	add_to_group("enemies")
 	EventBus.enemy_spawned.emit(self, enemy_type)
 
 
 func _physics_process(delta: float) -> void:
+	# Hit lag: brief freeze on this enemy for impact feel.
+	if _hit_lag_frozen:
+		_hit_lag_timer -= delta
+		if _hit_lag_timer <= 0.0:
+			_hit_lag_frozen = false
+		return
+
 	var capped := minf(delta, Constants.DELTA_CAP)
 	if attack_cooldown_timer > 0.0:
 		attack_cooldown_timer -= capped
-	if _stagger_timer > 0.0:
-		_stagger_timer -= capped
+	# Tick status effects (burn DOT).
+	var burn_damage := status_effects.tick(capped)
+	if burn_damage > 0.0 and not health.is_dead():
+		health.take_damage(burn_damage)
+		if health.is_dead():
+			state_machine.transition_to(&"dead")
 	_update_health_bar()
 
 
@@ -85,7 +104,7 @@ func set_target(new_target: Node3D) -> void:
 
 
 func update_facing_toward_target() -> void:
-	if target == null or not is_inside_tree():
+	if target == null or not is_instance_valid(target) or not is_inside_tree():
 		return
 	if target.global_position.x > global_position.x:
 		facing_right = true
@@ -96,16 +115,19 @@ func update_facing_toward_target() -> void:
 
 
 func get_horizontal_distance_to_target() -> float:
-	if target == null or not is_inside_tree():
+	if target == null or not is_instance_valid(target) or not is_inside_tree():
 		return INF
 	return absf(global_position.x - target.global_position.x)
 
 
 ## Get the move speed from enemy def or fall back to rusher speed.
 func get_move_speed() -> float:
+	var base_speed: float
 	if enemy_def:
-		return enemy_def.move_speed * speed_multiplier
-	return Constants.ENEMY_RUSHER_SPEED * speed_multiplier
+		base_speed = enemy_def.move_speed * speed_multiplier
+	else:
+		base_speed = Constants.ENEMY_RUSHER_SPEED * speed_multiplier
+	return base_speed * status_effects.get_speed_multiplier()
 
 
 ## Get the attack range from enemy def or fall back to rusher range.
@@ -149,7 +171,7 @@ func absorb_block_hit() -> bool:
 	_block_hits_remaining -= 1
 	if _block_hits_remaining <= 0:
 		_is_blocking = false
-		_stagger_timer = Constants.ENEMY_SHIELD_STAGGER_DURATION
+		_stagger_override_duration = Constants.ENEMY_SHIELD_STAGGER_DURATION
 		_block_hits_remaining = Constants.ENEMY_SHIELD_STAGGER_HITS
 		return false
 	return true
@@ -165,6 +187,8 @@ func apply_gravity(delta: float) -> void:
 
 
 func _on_hit_received(attack_data: AttackDef, attacker: Node3D) -> void:
+	if not is_instance_valid(attacker):
+		return
 	# Shield enemies can block frontal attacks.
 	if is_blocking():
 		var attacker_in_front := (attacker.global_position.x > global_position.x) == facing_right
@@ -175,7 +199,27 @@ func _on_hit_received(attack_data: AttackDef, attacker: Node3D) -> void:
 				state_machine.transition_to(&"stagger")
 			return
 
-	CombatSystem.process_hit(health, attack_data, attacker, self)
+	# Calculate elemental multiplier from enemy weakness/resistance.
+	var elem_mult := 1.0
+	if enemy_def and attack_data.element_type != &"":
+		elem_mult = ElementCalculator.get_multiplier(
+			attack_data.element_type, enemy_def.weakness, enemy_def.resistance
+		)
+	var dmg_taken_mult := status_effects.get_damage_taken_multiplier()
+	var attacker_str: int = 0
+	if attacker.has_method("get_derived_stats"):
+		attacker_str = StatCalculator.get_stat(attacker.get_derived_stats(), &"strength")
+	CombatSystem.process_hit(
+		health, attack_data, attacker, self,
+		0.0, attacker_str, Constants.STRENGTH_DAMAGE_SCALE, elem_mult, dmg_taken_mult
+	)
+	# Apply elemental status effects from the incoming attack.
+	CombatSystem.apply_status_if_applicable(attack_data, self, status_effects)
+
+	# Hit lag: brief freeze on impact for weight/crunch feel.
+	var lag_dur := Constants.HIT_LAG_HEAVY_DURATION if attack_data.knockback_force >= Constants.KNOCKBACK_HEAVY else Constants.HIT_LAG_DURATION
+	_hit_lag_timer = lag_dur
+	_hit_lag_frozen = true
 
 	# Apply knockback — horizontal only so characters slide back, not up/down.
 	var kb_dir := attack_data.knockback_direction
@@ -184,11 +228,15 @@ func _on_hit_received(attack_data: AttackDef, attacker: Node3D) -> void:
 		kb_dir.x = -absf(kb_dir.x)
 	else:
 		kb_dir.x = absf(kb_dir.x)
-	velocity.x = kb_dir.normalized().x * attack_data.knockback_force
+	var resistance := 0.0
+	if enemy_def:
+		resistance = clampf(enemy_def.knockback_resistance, 0.0, 0.95)
+	velocity.x = kb_dir.normalized().x * attack_data.knockback_force * (1.0 - resistance)
 
 	# Launcher check.
 	if attack_data.is_launcher and not juggle.is_airborne():
-		velocity.y = attack_data.launch_velocity if attack_data.launch_velocity > 0.0 else Constants.JUGGLE_LAUNCH_VELOCITY
+		var base_launch := attack_data.launch_velocity if attack_data.launch_velocity > 0.0 else Constants.JUGGLE_LAUNCH_VELOCITY
+		velocity.y = base_launch * (1.0 - resistance * 0.5)
 		juggle.launch()
 		EventBus.combat_juggle_launched.emit(self, attacker)
 	elif juggle.is_airborne():
@@ -211,7 +259,22 @@ func _on_hit_received(attack_data: AttackDef, attacker: Node3D) -> void:
 		state_machine.transition_to(&"hurt")
 
 
+func play_animation(anim_name: StringName, speed_scale: float = 1.0) -> void:
+	if enemy_model and enemy_model.has_method("play_animation"):
+		enemy_model.play_animation(anim_name, speed_scale)
+
+
+func get_animation_duration(anim_name: StringName) -> float:
+	if enemy_model and enemy_model.has_method("get_animation_duration"):
+		return enemy_model.get_animation_duration(anim_name)
+	return 0.0
+
+
 func flash_mesh(color: Color) -> void:
+	if enemy_model and enemy_model.has_method("flash"):
+		enemy_model.flash(color)
+		return
+
 	var mesh := model_pivot.get_node_or_null("Mesh") as MeshInstance3D
 	if mesh == null:
 		return
@@ -226,6 +289,10 @@ func flash_mesh(color: Color) -> void:
 
 
 func restore_mesh() -> void:
+	if enemy_model and enemy_model.has_method("restore"):
+		enemy_model.restore()
+		return
+
 	var mesh := model_pivot.get_node_or_null("Mesh") as MeshInstance3D
 	if mesh == null:
 		return
@@ -290,6 +357,9 @@ func _update_health_bar() -> void:
 
 
 func _apply_mesh_color(color: Color) -> void:
+	if enemy_model:
+		return
+
 	var mesh_instance := model_pivot.get_node_or_null("Mesh")
 	if mesh_instance and mesh_instance is MeshInstance3D:
 		var mat := StandardMaterial3D.new()
@@ -306,12 +376,35 @@ func configure(def: EnemyDef, player_target: Node3D) -> void:
 	target = player_target
 	_block_hits_remaining = Constants.ENEMY_SHIELD_STAGGER_HITS if def.can_block else 0
 	_is_blocking = false
-	_stagger_timer = 0.0
+	_stagger_override_duration = 0.0
 	attack_cooldown_timer = 0.0
 	boss_phase = 1
 	speed_multiplier = 1.0
 	boss_attack_override = null
+	status_effects.clear_all()
 	_apply_mesh_color(def.mesh_color)
 	collision_layer = Constants.LAYER_ENEMY
-	collision_mask = Constants.LAYER_ENVIRONMENT | Constants.LAYER_PLAYER | Constants.LAYER_PLATFORM
+	collision_mask = Constants.LAYER_ENVIRONMENT | Constants.LAYER_PLATFORM
 	state_machine.set_initial_state(&"idle")
+
+
+## Apply a stagger override used by parries/guard breaks.
+func apply_parry_stun(duration: float, parry_player: Node3D = null) -> void:
+	if health == null or health.is_dead():
+		return
+	_stagger_override_duration = maxf(_stagger_override_duration, duration)
+	stop_blocking()
+	hitbox.disable()
+	if is_instance_valid(parry_player):
+		var push_dir := signf(global_position.x - parry_player.global_position.x)
+		if is_zero_approx(push_dir):
+			push_dir = -1.0 if facing_right else 1.0
+		velocity.x = push_dir * maxf(Constants.KNOCKBACK_LIGHT * 0.8, 2.5)
+	state_machine.transition_to(&"stagger")
+
+
+## Consume and clear stagger override duration.
+func consume_stagger_duration(default_duration: float) -> float:
+	var duration := _stagger_override_duration if _stagger_override_duration > 0.0 else default_duration
+	_stagger_override_duration = 0.0
+	return duration

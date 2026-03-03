@@ -62,18 +62,20 @@ func _destroy() -> void:
 	if _destroyed:
 		return
 	_destroyed = true
-	_spawn_impact_particles()
+	var pos := global_position if is_inside_tree() else Vector3.ZERO
+	_spawn_impact_particles(pos)
 	queue_free()
 
 
 ## Spawn a one-shot burst of cyan particles at the impact point.
-func _spawn_impact_particles() -> void:
+func _spawn_impact_particles(pos: Vector3) -> void:
+	if not is_inside_tree():
+		return
 	var burst := GPUParticles3D.new()
 	burst.amount = 16
 	burst.lifetime = 0.4
 	burst.one_shot = true
 	burst.explosiveness = 1.0
-	burst.emitting = true
 
 	var mat := ParticleProcessMaterial.new()
 	mat.spread = 180.0
@@ -100,6 +102,7 @@ func _spawn_impact_particles() -> void:
 	mesh.material = draw_mat
 	burst.draw_pass_1 = mesh
 
-	burst.global_position = global_position
 	get_tree().root.add_child(burst)
+	burst.global_position = pos
+	burst.emitting = true
 	burst.finished.connect(burst.queue_free)

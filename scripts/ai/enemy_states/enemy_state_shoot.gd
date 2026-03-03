@@ -14,6 +14,7 @@ func enter(_previous_state: StringName) -> void:
 	entity.velocity.z = 0.0
 	var enemy := entity as EnemyController
 	enemy.update_facing_toward_target()
+	enemy.play_animation(&"attack")
 	_phase = 0
 	_timer = WINDUP_TIME
 

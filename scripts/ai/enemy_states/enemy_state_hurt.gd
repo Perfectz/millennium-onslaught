@@ -11,6 +11,7 @@ func enter(_previous_state: StringName) -> void:
 	var enemy := entity as EnemyController
 	enemy.hitbox.disable()
 	enemy.stop_blocking()
+	enemy.play_animation(&"hurt")
 
 
 func physics_process(delta: float) -> StringName:

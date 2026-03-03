@@ -11,6 +11,7 @@ var _enemies_alive: int = 0
 var _is_active: bool = false
 var _spawn_delay_timer: float = 0.0
 var _waiting_for_spawn: bool = false
+var _between_wave_breather_timer: float = 0.0
 
 ## Reference to the player for targeting enemies.
 var player: Node3D = null
@@ -41,6 +42,10 @@ func _process(delta: float) -> void:
 		if _spawn_delay_timer <= 0.0:
 			_waiting_for_spawn = false
 			_spawn_current_wave()
+	if _between_wave_breather_timer > 0.0:
+		_between_wave_breather_timer -= delta
+		if _between_wave_breather_timer <= 0.0:
+			_begin_wave()
 
 
 ## Start an encounter from an EncounterDef.
@@ -49,12 +54,15 @@ func start_encounter(encounter: EncounterDef, enemy_packed_scene: PackedScene) -
 	enemy_scene = enemy_packed_scene
 	_current_wave_index = 0
 	_is_active = true
+	_between_wave_breather_timer = 0.0
 	GameState.encounter_active = true
 
 	if _encounter.arena_lock:
 		GameState.arena_lock_min_x = _encounter.arena_min_x
 		GameState.arena_lock_max_x = _encounter.arena_max_x
-		EventBus.encounter_arena_locked.emit(_encounter.arena_min_x, _encounter.arena_max_x)
+		GameState.arena_lock_min_z = _encounter.arena_min_z
+		GameState.arena_lock_max_z = _encounter.arena_max_z
+		EventBus.encounter_arena_locked.emit(_encounter.arena_min_x, _encounter.arena_max_x, _encounter.arena_min_z, _encounter.arena_max_z)
 
 	if _encounter.waves.is_empty():
 		_finish_encounter()
@@ -114,7 +122,7 @@ func _spawn_entry(entry: SpawnEntry) -> void:
 
 
 func _on_enemy_died(_enemy: Node, _enemy_type: StringName, _position: Vector3) -> void:
-	if not _is_active:
+	if not _is_active or _encounter == null:
 		return
 	_enemies_alive -= 1
 	GameState.encounter_enemies_alive = _enemies_alive
@@ -128,7 +136,8 @@ func _advance_wave() -> void:
 	if _current_wave_index >= _encounter.waves.size():
 		_finish_encounter()
 	else:
-		_begin_wave()
+		_between_wave_breather_timer = Constants.WAVE_BREATHER_DURATION
+		ToastSystem.show_toast("WAVE CLEAR", Color(0.8, 0.95, 1.0))
 
 
 ## Encounter complete — release arena lock.
@@ -136,10 +145,13 @@ func _finish_encounter() -> void:
 	_is_active = false
 	GameState.encounter_active = false
 	GameState.encounter_enemies_alive = 0
+	_between_wave_breather_timer = 0.0
 
 	if _encounter and _encounter.arena_lock:
 		GameState.arena_lock_min_x = -100.0
 		GameState.arena_lock_max_x = 100.0
+		GameState.arena_lock_min_z = -100.0
+		GameState.arena_lock_max_z = 100.0
 		EventBus.encounter_arena_unlocked.emit()
 
 	EventBus.enemy_wave_cleared.emit()
@@ -153,6 +165,7 @@ func clear_all_enemies() -> void:
 	_spawned_enemies.clear()
 	_enemies_alive = 0
 	_is_active = false
+	_between_wave_breather_timer = 0.0
 	GameState.encounter_active = false
 	GameState.encounter_enemies_alive = 0
 

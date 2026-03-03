@@ -16,5 +16,7 @@ attack = ExtResource("2")
 behavior = &"boss"
 can_block = false
 block_damage_reduction = 0.0
+knockback_resistance = 0.82
 mesh_color = Color(0.5, 0.15, 0.6, 1)
 xp_reward = 100
+gold_reward = 50

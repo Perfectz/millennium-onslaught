@@ -16,5 +16,7 @@ attack = ExtResource("2")
 behavior = &"shield"
 can_block = true
 block_damage_reduction = 0.9
+knockback_resistance = 0.65
 mesh_color = Color(0.2, 0.3, 0.9, 1)
 xp_reward = 20
+gold_reward = 10

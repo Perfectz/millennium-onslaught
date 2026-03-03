@@ -9,6 +9,9 @@ const SAVE_FILE_PREFIX: String = "save_slot_"
 const SAVE_FILE_EXT: String = ".json"
 const BACKUP_EXT: String = ".backup"
 
+## Holds parsed JSON data from the last successful _try_load_file call.
+var _last_parsed_data: Dictionary = {}
+
 
 func _ready() -> void:
 	_ensure_save_dir()
@@ -18,7 +21,7 @@ func _ready() -> void:
 func save_game(slot: int = 0) -> bool:
 	var data := GameState.serialize_persistent()
 	var json_string := JSON.stringify(data, "\t")
-	var final_path := _get_save_path(slot)
+	var final_path := get_save_path(slot)
 	var temp_path := final_path + ".tmp"
 	var backup_path := final_path + BACKUP_EXT
 
@@ -54,56 +57,64 @@ func save_game(slot: int = 0) -> bool:
 	return true
 
 
-## Load persistent game state from a slot.
+## Load persistent game state from a slot. Falls back to backup if primary is corrupt.
 func load_game(slot: int = 0) -> bool:
-	var path := _get_save_path(slot)
-	if not FileAccess.file_exists(path):
-		var error_msg := "Save file does not exist: " + path
-		push_error(error_msg)
-		EventBus.load_failed.emit(slot, error_msg)
-		EventBus.log_event(&"load_failed", {"slot": slot, "error": error_msg})
-		return false
+	var path := get_save_path(slot)
+	var backup_path := path + BACKUP_EXT
 
+	# Try primary file first.
+	var result := _try_load_file(path)
+	if result == OK:
+		var success := GameState.deserialize_persistent(_last_parsed_data)
+		if success:
+			EventBus.load_completed.emit(slot)
+			EventBus.log_event(&"load_completed", {"slot": slot})
+			return true
+
+	# Primary failed — try backup.
+	if FileAccess.file_exists(backup_path):
+		push_warning("SaveManager: Primary save corrupt for slot %d, trying backup." % slot)
+		result = _try_load_file(backup_path)
+		if result == OK:
+			var success := GameState.deserialize_persistent(_last_parsed_data)
+			if success:
+				EventBus.load_completed.emit(slot)
+				EventBus.log_event(&"load_completed", {"slot": slot, "from_backup": true})
+				return true
+
+	var error_msg := "Failed to load save data for slot " + str(slot)
+	push_error(error_msg)
+	EventBus.load_failed.emit(slot, error_msg)
+	EventBus.log_event(&"load_failed", {"slot": slot, "error": error_msg})
+	return false
+
+
+## Load save metadata for slot preview without applying to GameState.
+func load_save_metadata(slot: int) -> Dictionary:
+	var path := get_save_path(slot)
+	if not FileAccess.file_exists(path):
+		return {"exists": false}
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
-		var error_msg := "Failed to open save file: " + str(FileAccess.get_open_error())
-		push_error(error_msg)
-		EventBus.load_failed.emit(slot, error_msg)
-		EventBus.log_event(&"load_failed", {"slot": slot, "error": error_msg})
-		return false
-
+		return {"exists": false}
 	var json_string := file.get_as_text()
 	file.close()
-
 	var json := JSON.new()
-	var parse_err := json.parse(json_string)
-	if parse_err != OK:
-		var error_msg := "Failed to parse save JSON: " + json.get_error_message()
-		push_error(error_msg)
-		EventBus.load_failed.emit(slot, error_msg)
-		EventBus.log_event(&"load_failed", {"slot": slot, "error": error_msg})
-		return false
-
-	var success := GameState.deserialize_persistent(json.data)
-	if not success:
-		var error_msg := "Failed to deserialize save data for slot " + str(slot)
-		push_error(error_msg)
-		EventBus.load_failed.emit(slot, error_msg)
-		EventBus.log_event(&"load_failed", {"slot": slot, "error": error_msg})
-		return false
-	EventBus.load_completed.emit(slot)
-	EventBus.log_event(&"load_completed", {"slot": slot})
-	return true
+	if json.parse(json_string) != OK:
+		return {"exists": false}
+	if not json.data is Dictionary:
+		return {"exists": false}
+	return GameState.get_save_metadata(json.data)
 
 
 ## Check if a save file exists for a slot.
 func has_save(slot: int = 0) -> bool:
-	return FileAccess.file_exists(_get_save_path(slot))
+	return FileAccess.file_exists(get_save_path(slot))
 
 
 ## Delete a save file for a slot.
 func delete_save(slot: int = 0) -> void:
-	var path := _get_save_path(slot)
+	var path := get_save_path(slot)
 	if FileAccess.file_exists(path):
 		DirAccess.remove_absolute(path)
 	var backup := path + BACKUP_EXT
@@ -111,10 +122,30 @@ func delete_save(slot: int = 0) -> void:
 		DirAccess.remove_absolute(backup)
 
 
-func _get_save_path(slot: int) -> String:
+## Get the file path for a save slot.
+func get_save_path(slot: int) -> String:
 	return SAVE_DIR + SAVE_FILE_PREFIX + str(slot) + SAVE_FILE_EXT
 
 
 func _ensure_save_dir() -> void:
 	if not DirAccess.dir_exists_absolute(SAVE_DIR):
 		DirAccess.make_dir_recursive_absolute(SAVE_DIR)
+
+
+## Try to read and parse a JSON save file. Returns OK on success.
+## Stores parsed data in _last_parsed_data.
+func _try_load_file(path: String) -> int:
+	if not FileAccess.file_exists(path):
+		return ERR_FILE_NOT_FOUND
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return ERR_FILE_CANT_OPEN
+	var json_string := file.get_as_text()
+	file.close()
+	var json := JSON.new()
+	if json.parse(json_string) != OK:
+		return ERR_PARSE_ERROR
+	if not json.data is Dictionary:
+		return ERR_INVALID_DATA
+	_last_parsed_data = json.data
+	return OK

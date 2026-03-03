@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/equipment/equipment_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+equipment_id = &"silver_sword"
+display_name = "Silver Sword"
+description = "A finely crafted blade from the Zema smiths."
+cost = 250
+slot = &"weapon"
+stat_bonuses = {"strength": 5}
+passive_effects = {}
+required_level = 3

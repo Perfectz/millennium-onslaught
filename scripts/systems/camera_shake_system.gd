@@ -43,7 +43,7 @@ func shake(intensity: float, duration: float) -> void:
 	_timer = duration
 
 
-func _on_hit_landed(_attacker: Node, _target: Node, damage: float, _pos: Vector3) -> void:
+func _on_hit_landed(_attacker: Node, _target: Node, damage: float, _pos: Vector3, _attack_data: AttackDef) -> void:
 	if damage >= Constants.HEAVY_ATTACK_DAMAGE:
 		shake(Constants.CAMERA_SHAKE_HEAVY, Constants.CAMERA_SHAKE_DURATION)
 	else:

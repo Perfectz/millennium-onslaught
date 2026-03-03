@@ -11,6 +11,8 @@ func enter(_previous_state: StringName) -> void:
 	entity.velocity.x = 0.0
 	entity.velocity.y = 0.0
 	(entity as PlayerController).play_animation(&"idle")
+	(entity as PlayerController).spawn_dust(Constants.DUST_LAND_AMOUNT)
+	AudioManager.play_sfx_variant(&"land", Constants.SFX_VOL_LAND)
 
 
 func physics_process(delta: float) -> StringName:
@@ -28,6 +30,18 @@ func physics_process(delta: float) -> StringName:
 		return &"jump"
 
 	if _timer <= 0.0:
+		# Consume buffered actions so presses during landing aren't lost.
+		if player.intent_buffer.consume(&"attack_light"):
+			if Input.is_action_pressed("move_up"):
+				return &"attack_launcher"
+			return &"attack_light"
+		if player.intent_buffer.consume(&"attack_heavy"):
+			return &"attack_heavy"
+		if player.intent_buffer.consume(&"dodge") and player.can_dodge():
+			return &"dodge"
+		if player.intent_buffer.consume(&"technique"):
+			return &"technique"
+
 		var x_input := player.get_movement_input()
 		if absf(x_input) > Constants.INPUT_DEADZONE:
 			return &"run"

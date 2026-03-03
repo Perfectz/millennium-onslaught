@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://resources/towns/town_def.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/equipment/iron_sword.tres" id="2"]
+[ext_resource type="Resource" path="res://resources/equipment/steel_sword.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/equipment/leather_armor.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/equipment/chain_mail.tres" id="5"]
+[ext_resource type="Resource" path="res://resources/equipment/power_ring.tres" id="6"]
+[ext_resource type="Resource" path="res://resources/equipment/healing_herb.tres" id="7"]
+
+[resource]
+script = ExtResource("1")
+town_id = &"piata"
+town_name = "Piata Academy"
+shop_items = [ExtResource("2"), ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7")]
+has_inn = true
+inn_cost_multiplier = 1.0
+npcs = [{"name": "Scholar Hahn", "lines": ["Welcome to Piata Academy! I'm researching the connection between the Bio-monster surge and the ancient records.", "The Academy basement has become more dangerous lately. The creatures down there are getting bolder.", "If you venture past Birth Valley, you might reach Zema... but I've heard troubling rumors about that town."], "requires_flag": ""}, {"name": "Innkeeper", "lines": ["Rest well, hunter. The road ahead demands your full strength.", "The weapons shop has fresh stock. I'd recommend outfitting before any expedition."], "requires_flag": ""}, {"name": "Old Scholar", "lines": ["In the time of the Great Collapse, a thousand years ago, Bio-monsters nearly overran Motavia...", "The ancient texts speak of heroes who sealed away a great darkness. But seals weaken over time.", "If the pattern holds, what happened to Zema may only be the beginning."], "requires_flag": ""}]

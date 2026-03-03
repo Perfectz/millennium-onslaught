@@ -1,0 +1,72 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/ui/hub_screen_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+screen_background_title = "%TOWN% DISTRICT"
+screen_background_subtitle = "SETTLEMENT VIEW / NO IMAGE ATTACHED"
+left_header = "Facilities"
+info_header = "Facility Details"
+hint_text = "UP/DOWN OR D-PAD: NAVIGATE   ENTER/A: ENTER   B/ESC: LEAVE TOWN"
+default_accent = Color(0.35, 0.82, 0.95, 1)
+dialogue_header = "TOWN TALK"
+entries = [{
+"accent": Color(0.35, 0.95, 1, 1),
+"context_subtitle": "CONTRACT BOARD PLACEHOLDER",
+"context_title": "INTERIOR: GUILD OFFICE",
+"description": "The regional hunter's guild post. Review available contracts, receive mission briefings, and check your party status.",
+"dialogue": "Hunters live by their reputation. Take on jobs, stay sharp, and the Guild takes care of its own.",
+"id": "hunters_guild",
+"level": "Guild Rank: Apprentice",
+"menu_label": "Hunter's Guild Office",
+"portrait_code": "ALYS / HUNTER",
+"portrait_image": "res://assets/textures/portraits/alys_portrait.png",
+"speaker": "Alys Brangwin",
+"story_subtitle": "GUILD NOTICE BOARD / 16:9 PLACEHOLDER",
+"story_title": "LOCAL INTEL",
+"title": "Hunter's Guild Office"
+}, {
+"accent": Color(0.92, 0.78, 0.32, 1),
+"context_subtitle": "EQUIPMENT DISPLAY PLACEHOLDER",
+"context_title": "INTERIOR: WEAPONS SHOP",
+"description": "Piata Academy's weapons and armor provisioner. Students and hunters alike purchase supplies here before expeditions.",
+"dialogue": "We have a fine selection today. Swords, armor, accessories -- everything a hunter needs for the field.",
+"id": "academy_shop",
+"level": "Stock: Available",
+"menu_label": "Academy Weapons Shop",
+"portrait_code": "SHOPKEEPER / MERCHANT",
+"speaker": "Shopkeeper",
+"story_subtitle": "SHOP INVENTORY / 16:9 PLACEHOLDER",
+"story_title": "LOCAL INTEL",
+"title": "Academy Weapons Shop"
+}, {
+"accent": Color(0.45, 0.85, 0.55, 1),
+"context_subtitle": "REST AREA PLACEHOLDER",
+"context_title": "INTERIOR: PIATA INN",
+"description": "A cozy inn near the Academy. A full rest restores your party to peak condition before the next expedition.",
+"dialogue": "You look exhausted, hunter. A good night's rest will do you wonders. Shall I prepare a room?",
+"id": "piata_inn",
+"level": "Rest Cost: 50 Meseta",
+"menu_label": "Piata Inn",
+"portrait_code": "INNKEEPER / HOST",
+"speaker": "Innkeeper",
+"story_subtitle": "INN EXTERIOR / 16:9 PLACEHOLDER",
+"story_title": "LOCAL INTEL",
+"title": "Piata Inn"
+}, {
+"accent": Color(0.65, 0.55, 0.9, 1),
+"context_subtitle": "ARCHIVE TERMINAL PLACEHOLDER",
+"context_title": "INTERIOR: ACADEMY LIBRARY",
+"description": "The Academy's renowned library houses records spanning centuries. Scholars research the Algo star system's mysteries here.",
+"dialogue": "I've been cross-referencing the ancient records. The pattern of Bio-monster outbreaks... it's happened before, a thousand years ago.",
+"id": "academy_library",
+"level": "Archives: Open",
+"menu_label": "Academy Library",
+"portrait_code": "HAHN / SCHOLAR",
+"portrait_image": "res://assets/textures/portraits/hahn_portrait.png",
+"speaker": "Hahn Mahlay",
+"story_subtitle": "ANCIENT RECORDS / 16:9 PLACEHOLDER",
+"story_title": "LOCAL INTEL",
+"title": "Academy Library"
+}]

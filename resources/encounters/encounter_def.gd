@@ -17,3 +17,7 @@ extends Resource
 ## Arena bounds (left, right X limits) used during lock. Set in world coords.
 @export var arena_min_x: float = -10.0
 @export var arena_max_x: float = 10.0
+
+## Arena Z bounds (near, far depth limits) for belt-depth clamping.
+@export var arena_min_z: float = -3.0
+@export var arena_max_z: float = 3.0

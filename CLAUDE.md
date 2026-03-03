@@ -77,7 +77,7 @@ res://
 | Variables/functions | snake_case | `player_speed`, `calculate_damage()` |
 | Constants | UPPER_SNAKE_CASE | `MAX_JUGGLE_COUNT`, `BASE_GRAVITY` |
 | Signals | snake_case with domain prefix | `combat_hit_landed`, `rpg_level_up` |
-| Resource files | snake_case | `chaz_character.tres` |
+| Resource files | snake_case | `alys_character.tres` |
 
 ### Hard Rules
 - **Zero hardcoded values** in gameplay logic — all numbers go in Constants
@@ -99,7 +99,7 @@ res://
 
 ## Git Workflow
 
-- **main:** Stable, tagged at MVP completion (v0.0 through v0.6)
+- **main:** Stable, tagged at MVP completion (v0.0 through v0.7)
 - **develop:** Integration branch. Must build and pass tests.
 - **feature/\*:** One per backlog item. Named descriptively: `feature/juggle-system`
 - Commit messages: imperative mood, concise. Reference backlog item number when applicable.
@@ -113,8 +113,9 @@ res://
 | 2 | The Dungeon | Multi-room dungeon, 3+ enemy types, boss, HUD, juggle system |
 | 3 | The World | Overworld map, towns, shops, save/load, gold |
 | 4 | RPG Depth | Leveling, stats, equipment, 4 characters, techniques, skill tree |
-| 5 | Together | 4-player co-op, Android build, settings, control remapping |
-| 6 | Ship It | Full content, audio, VFX polish, daily challenge, accessibility |
+| 5 | The Stage | Continuous stages, beads-on-string pacing, env interactables, chunk streaming |
+| 6 | Together | 4-player co-op, Android build, settings, control remapping |
+| 7 | Ship It | Full content, audio, VFX polish, daily challenge, accessibility |
 
 ## Definition of Done (Per MVP)
 

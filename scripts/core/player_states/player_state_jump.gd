@@ -10,6 +10,7 @@ func enter(_previous_state: StringName) -> void:
 	entity.velocity.y = Constants.PLAYER_JUMP_VELOCITY
 	_variable_jump_applied = false
 	(entity as PlayerController).play_animation(&"jump")
+	AudioManager.play_sfx_variant(&"jump", Constants.SFX_VOL_JUMP)
 
 
 func physics_process(delta: float) -> StringName:
@@ -27,6 +28,9 @@ func physics_process(delta: float) -> StringName:
 	player.apply_belt_depth(delta)
 	entity.move_and_slide()
 	player.clamp_belt_depth()
+
+	if player.intent_buffer.consume(&"attack_light"):
+		return &"attack_air"
 
 	if entity.velocity.y <= 0.0:
 		return &"fall"

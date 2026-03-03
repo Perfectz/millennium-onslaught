@@ -1,0 +1,197 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/title_screen.gd" id="1"]
+
+[node name="TitleScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.03, 0.03, 0.07, 1)
+
+[node name="BackgroundGlow" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.06, 0.1, 0.18, 0.5)
+
+[node name="Content" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 80
+theme_override_constants/margin_top = 60
+theme_override_constants/margin_right = 60
+theme_override_constants/margin_bottom = 50
+
+[node name="HBox" type="HBoxContainer" parent="Content"]
+layout_mode = 2
+theme_override_constants/separation = 60
+
+[node name="LeftColumn" type="VBoxContainer" parent="Content/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.1
+theme_override_constants/separation = 0
+
+[node name="BrandBlock" type="VBoxContainer" parent="Content/HBox/LeftColumn"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TitleLabel" type="Label" parent="Content/HBox/LeftColumn/BrandBlock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 62
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0.15, 0.4, 0.35)
+theme_override_constants/shadow_offset_x = 3
+theme_override_constants/shadow_offset_y = 3
+text = "MILLENNIUM
+ONSLAUGHT"
+
+[node name="Divider" type="ColorRect" parent="Content/HBox/LeftColumn/BrandBlock"]
+layout_mode = 2
+custom_minimum_size = Vector2(140, 2)
+color = Color(0.25, 0.65, 1, 0.6)
+
+[node name="SubTitleLabel" type="Label" parent="Content/HBox/LeftColumn/BrandBlock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.5, 0.78, 0.95, 0.85)
+text = "A Belt-Scroller RPG  ·  Tactical Combat  ·  Relentless Momentum"
+
+[node name="NebulaFrame" type="AspectRatioContainer" parent="Content/HBox/LeftColumn"]
+layout_mode = 2
+size_flags_vertical = 3
+ratio = 1.777
+
+[node name="NebulaVideo" type="VideoStreamPlayer" parent="Content/HBox/LeftColumn/NebulaFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand = true
+loop = true
+
+[node name="ButtonRows" type="VBoxContainer" parent="Content/HBox/LeftColumn"]
+layout_mode = 2
+custom_minimum_size = Vector2(360, 0)
+theme_override_constants/separation = 4
+
+[node name="NewGameButton" type="Button" parent="Content/HBox/LeftColumn/ButtonRows"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+text = "NEW GAME"
+alignment = 0
+
+[node name="ContinueButton" type="Button" parent="Content/HBox/LeftColumn/ButtonRows"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+text = "CONTINUE"
+alignment = 0
+
+[node name="OptionsButton" type="Button" parent="Content/HBox/LeftColumn/ButtonRows"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+text = "OPTIONS"
+alignment = 0
+
+[node name="QuitButton" type="Button" parent="Content/HBox/LeftColumn/ButtonRows"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+text = "QUIT"
+alignment = 0
+
+[node name="OptionsPanel" type="PanelContainer" parent="Content/HBox/LeftColumn"]
+layout_mode = 2
+
+[node name="OptionsMargin" type="MarginContainer" parent="Content/HBox/LeftColumn/OptionsPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 12
+
+[node name="OptionsVBox" type="VBoxContainer" parent="Content/HBox/LeftColumn/OptionsPanel/OptionsMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="OptionsTitle" type="Label" parent="Content/HBox/LeftColumn/OptionsPanel/OptionsMargin/OptionsVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.5, 0.78, 0.95, 0.9)
+text = "DISPLAY"
+
+[node name="ScanlineCheck" type="CheckBox" parent="Content/HBox/LeftColumn/OptionsPanel/OptionsMargin/OptionsVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.6, 0.8, 0.95, 0.85)
+text = "Scanlines"
+button_pressed = true
+
+[node name="StatusLabel" type="Label" parent="Content/HBox/LeftColumn"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.5, 0.7, 0.85, 0.65)
+text = "No save data found."
+
+[node name="BottomSpacer" type="Control" parent="Content/HBox/LeftColumn"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 10)
+
+[node name="RightColumn" type="VBoxContainer" parent="Content/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+alignment = 1
+
+[node name="VideoFrame" type="AspectRatioContainer" parent="Content/HBox/RightColumn"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_horizontal = 3
+ratio = 0.5625
+alignment_horizontal = 1
+alignment_vertical = 1
+
+[node name="KeyArt" type="VideoStreamPlayer" parent="Content/HBox/RightColumn/VideoFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand = true
+
+[node name="VersionLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -30.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.4, 0.6, 0.8, 0.45)
+text = "v0.0 — Prototype Build"
+horizontal_alignment = 2

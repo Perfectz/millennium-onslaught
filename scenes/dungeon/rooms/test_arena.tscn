@@ -1,17 +1,21 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=22 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/characters/player.tscn" id="1"]
 [ext_resource type="Script" path="res://scripts/systems/camera_follow.gd" id="2"]
 [ext_resource type="Script" path="res://scenes/dungeon/rooms/test_arena.gd" id="3"]
+[ext_resource type="Texture2D" path="res://assets/textures/piata_floor.jpeg" id="4"]
+[ext_resource type="VideoStream" path="res://assets/textures/dreamy_background.ogv" id="5"]
 
 [sub_resource type="BoxShape3D" id="1"]
-size = Vector3(30, 1, 10)
+size = Vector3(52, 1, 6)
 
 [sub_resource type="BoxMesh" id="2"]
-size = Vector3(30, 1, 10)
+size = Vector3(52, 1, 6)
 
 [sub_resource type="StandardMaterial3D" id="3"]
-albedo_color = Color(0.25, 0.25, 0.3, 1)
+albedo_texture = ExtResource("4")
+uv1_scale = Vector3(17, 2, 1)
+texture_filter = 3
 
 [sub_resource type="BoxShape3D" id="4"]
 size = Vector3(3, 0.3, 3)
@@ -32,16 +36,34 @@ size = Vector3(2.5, 0.3, 3)
 size = Vector3(2.5, 0.3, 3)
 
 [sub_resource type="StandardMaterial3D" id="10"]
-albedo_color = Color(0.4, 0.4, 0.45, 1)
+albedo_texture = ExtResource("4")
+uv1_scale = Vector3(1, 1, 1)
+texture_filter = 3
 
 [sub_resource type="BoxShape3D" id="11"]
-size = Vector3(1, 10, 10)
+size = Vector3(1, 10, 6)
+
+[sub_resource type="BoxMesh" id="13"]
+size = Vector3(1, 20, 6)
+
+[sub_resource type="StandardMaterial3D" id="14"]
+albedo_color = Color(0.12, 0.1, 0.14, 1)
+roughness = 0.9
+
+[sub_resource type="BoxShape3D" id="15"]
+size = Vector3(52, 0.5, 6)
+
+[sub_resource type="BoxMesh" id="16"]
+size = Vector3(52, 0.5, 6)
 
 [sub_resource type="Environment" id="12"]
-background_mode = 0
+background_mode = 3
 ambient_light_source = 2
 ambient_light_color = Color(0.3, 0.3, 0.4, 1)
 ambient_light_energy = 0.5
+
+[sub_resource type="BoxMesh" id="17"]
+size = Vector3(54, 10, 6)
 
 [node name="TestArena" type="Node3D"]
 script = ExtResource("3")
@@ -59,7 +81,7 @@ mesh = SubResource("2")
 surface_material_override/0 = SubResource("3")
 
 [node name="PlatformLow" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 2.5, 0)
 collision_layer = 128
 collision_mask = 0
 
@@ -83,7 +105,7 @@ mesh = SubResource("7")
 surface_material_override/0 = SubResource("10")
 
 [node name="PlatformHigh" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 5.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 5.5, 0)
 collision_layer = 128
 collision_mask = 0
 
@@ -95,27 +117,54 @@ mesh = SubResource("9")
 surface_material_override/0 = SubResource("10")
 
 [node name="WallLeft" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 4, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26.5, 4, 0)
 collision_layer = 1
 collision_mask = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="WallLeft"]
 shape = SubResource("11")
 
+[node name="MeshInstance3D" type="MeshInstance3D" parent="WallLeft"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -5, 0)
+mesh = SubResource("13")
+surface_material_override/0 = SubResource("14")
+
 [node name="WallRight" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.5, 4, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.5, 4, 0)
 collision_layer = 1
 collision_mask = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="WallRight"]
 shape = SubResource("11")
 
+[node name="MeshInstance3D" type="MeshInstance3D" parent="WallRight"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -5, 0)
+mesh = SubResource("13")
+surface_material_override/0 = SubResource("14")
+
+[node name="Ceiling" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.25, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ceiling"]
+shape = SubResource("15")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ceiling"]
+mesh = SubResource("16")
+surface_material_override/0 = SubResource("14")
+
+[node name="Foundation" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6, 0)
+mesh = SubResource("17")
+surface_material_override/0 = SubResource("14")
+
 [node name="Player" parent="." instance=ExtResource("1")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.93969, 0.34202, 0, -0.34202, 0.93969, 0, 4, 8)
-fov = 50.0
+transform = Transform3D(1, 0, 0, 0, 0.99027, 0.13917, 0, -0.13917, 0.99027, 0, 2.5, 14)
+fov = 40.0
 script = ExtResource("2")
 target_path = NodePath("../Player")
 
@@ -126,16 +175,31 @@ shadow_enabled = true
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("12")
 
+[node name="BackgroundLayer" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="VideoBackground" type="VideoStreamPlayer" parent="BackgroundLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stream = ExtResource("5")
+autoplay = true
+loop = true
+expand = true
+volume_db = -80.0
+
 [node name="SpawnPoints" type="Node3D" parent="."]
 
 [node name="PlayerSpawn" type="Marker3D" parent="SpawnPoints"]
 
 [node name="EnemySpawn1" type="Marker3D" parent="SpawnPoints"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, 0)
 
 [node name="EnemySpawn2" type="Marker3D" parent="SpawnPoints"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 1)
 
 [node name="EnemySpawn3" type="Marker3D" parent="SpawnPoints"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, -1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, -1)
 

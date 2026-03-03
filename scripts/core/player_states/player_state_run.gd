@@ -5,6 +5,7 @@ extends State
 
 func enter(_previous_state: StringName) -> void:
 	(entity as PlayerController).play_animation(&"run")
+	(entity as PlayerController)._dust_run_timer = 0.0
 
 
 func physics_process(delta: float) -> StringName:
@@ -17,6 +18,7 @@ func physics_process(delta: float) -> StringName:
 	player.apply_belt_depth(delta)
 	entity.move_and_slide()
 	player.clamp_belt_depth()
+	player.tick_run_dust(delta)
 
 	if not entity.is_on_floor():
 		return &"fall"
@@ -25,16 +27,19 @@ func physics_process(delta: float) -> StringName:
 		player.consume_jump()
 		return &"jump"
 
-	if Input.is_action_just_pressed("attack_light"):
+	# Buffered action intents — survives hitstop and cross-state transitions.
+	if player.intent_buffer.consume(&"attack_light"):
 		if Input.is_action_pressed("move_up"):
 			return &"attack_launcher"
 		return &"attack_light"
-	if Input.is_action_just_pressed("attack_heavy"):
+	if player.intent_buffer.consume(&"attack_heavy"):
 		return &"attack_heavy"
-	if Input.is_action_just_pressed("dodge") and player.can_dodge():
+	if player.intent_buffer.consume(&"dodge") and player.can_dodge():
 		return &"dodge"
-	if Input.is_action_just_pressed("technique"):
+	if player.intent_buffer.consume(&"technique") or Input.is_action_just_pressed(&"technique"):
 		return &"technique"
+	if player.intent_buffer.consume(&"spell"):
+		return &"spell"
 
 	if absf(x_input) < Constants.INPUT_DEADZONE:
 		return &"idle"

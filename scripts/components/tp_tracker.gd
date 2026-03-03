@@ -7,7 +7,7 @@ signal tp_changed(current_tp: float, max_tp: float)
 signal tp_spent(amount: float)
 
 var _max_tp: float = Constants.TP_MAX
-var _current_tp: float = 0.0
+var _current_tp: float = Constants.TP_MAX
 
 
 ## Get current TP.
@@ -18,6 +18,12 @@ func get_current_tp() -> float:
 ## Get max TP.
 func get_max_tp() -> float:
 	return _max_tp
+
+
+## Set current TP directly (for save/load restore).
+func set_current_tp(value: float) -> void:
+	_current_tp = clampf(value, 0.0, _max_tp)
+	tp_changed.emit(_current_tp, _max_tp)
 
 
 ## Add TP (clamped to max). Ignores non-positive values.

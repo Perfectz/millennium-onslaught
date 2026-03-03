@@ -11,9 +11,13 @@ var _phase: int = 0  # 0=windup, 1=active, 2=recovery
 
 
 func enter(_previous_state: StringName) -> void:
-	_attack_data = preload("res://resources/attacks/heavy_attack.tres")
-	entity.velocity.x = 0.0
 	var player: PlayerController = entity as PlayerController
+	# Read heavy attack from CharacterDef if available, fall back to preloaded default.
+	if player.character_def and player.character_def.heavy_attack:
+		_attack_data = player.character_def.heavy_attack.duplicate()
+	else:
+		_attack_data = preload("res://resources/attacks/heavy_attack.tres").duplicate()
+	entity.velocity.x = 0.0
 	player.combo_tracker.reset()
 	_phase = 0
 	_elapsed = 0.0
@@ -40,6 +44,7 @@ func _start_active() -> void:
 	player.hitbox.enable(_attack_data, player.facing_right)
 	entity.velocity.x = 0.0
 	player.flash_mesh(Color(1.0, 1.0, 1.0))
+	EventBus.combat_attack_started.emit(player, &"heavy")
 
 
 func _start_recovery() -> void:
@@ -65,10 +70,12 @@ func physics_process(delta: float) -> StringName:
 	player.apply_gravity(delta)
 	entity.move_and_slide()
 
-	# Cancel window: dodge during late recovery.
-	if Input.is_action_just_pressed("dodge") and player.can_dodge():
+	# Cancel window: dodge or technique during recovery.
+	if player.intent_buffer.consume(&"dodge") and player.can_dodge():
 		if ComboCancelChecker.check(_attack_data, _elapsed, &"dodge"):
 			return &"dodge"
+	if _phase == 2 and (player.intent_buffer.consume(&"technique") or Input.is_action_just_pressed(&"technique")):
+		return &"technique"
 
 	match _phase:
 		0:

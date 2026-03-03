@@ -7,11 +7,12 @@ var _timer: float = 0.0
 
 
 func enter(_previous_state: StringName) -> void:
-	_timer = Constants.ENEMY_SHIELD_STAGGER_DURATION
 	var enemy := entity as EnemyController
+	_timer = enemy.consume_stagger_duration(Constants.ENEMY_SHIELD_STAGGER_DURATION)
 	enemy.stop_blocking()
 	enemy.hitbox.disable()
 	entity.velocity.x = 0.0
+	enemy.play_animation(&"hurt")
 
 
 func physics_process(delta: float) -> StringName:

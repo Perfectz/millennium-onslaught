@@ -15,10 +15,20 @@ func enter(_previous_state: StringName) -> void:
 	var player: PlayerController = entity as PlayerController
 	_combo_step = player.combo_tracker.advance_step()
 
-	match _combo_step:
-		1: _attack_data = preload("res://resources/attacks/light_attack_1.tres")
-		2: _attack_data = preload("res://resources/attacks/light_attack_2.tres")
-		_: _attack_data = preload("res://resources/attacks/light_attack_3.tres")
+	# Read combo chain from CharacterDef if available, fall back to preloaded defaults.
+	var chain: Array[AttackDef] = []
+	if player.character_def and player.character_def.combo_chain.size() >= 3:
+		chain = player.character_def.combo_chain
+	if chain.size() >= 3:
+		match _combo_step:
+			1: _attack_data = chain[0].duplicate()
+			2: _attack_data = chain[1].duplicate()
+			_: _attack_data = chain[2].duplicate()
+	else:
+		match _combo_step:
+			1: _attack_data = preload("res://resources/attacks/light_attack_1.tres").duplicate()
+			2: _attack_data = preload("res://resources/attacks/light_attack_2.tres").duplicate()
+			_: _attack_data = preload("res://resources/attacks/light_attack_3.tres").duplicate()
 
 	entity.velocity.x = 0.0
 	_phase = 0
@@ -52,6 +62,7 @@ func _start_active() -> void:
 	player.hitbox.enable(_attack_data, player.facing_right)
 	entity.velocity.x = 0.0
 	player.flash_mesh(Color(1.0, 1.0, 1.0))
+	EventBus.combat_attack_started.emit(player, &"light")
 
 
 func _start_recovery() -> void:
@@ -95,7 +106,7 @@ func physics_process(delta: float) -> StringName:
 					return &"idle"
 				return &"fall"
 			# Combo chaining: allow light→light during recovery (not after finisher).
-			if _combo_step > 0 and _combo_step < Constants.PLAYER_COMBO_MAX_STEPS and Input.is_action_just_pressed("attack_light"):
+			if _combo_step > 0 and _combo_step < Constants.PLAYER_COMBO_MAX_STEPS and player.intent_buffer.consume(&"attack_light"):
 				return &"attack_light"
 
 	return &""
@@ -103,13 +114,16 @@ func physics_process(delta: float) -> StringName:
 
 ## Check if any cancel-able action is being input during the cancel window.
 func _check_cancel_inputs(player: PlayerController) -> StringName:
-	if Input.is_action_just_pressed("attack_heavy"):
+	if player.intent_buffer.consume(&"attack_heavy"):
 		if ComboCancelChecker.check(_attack_data, _elapsed, &"heavy"):
 			return &"attack_heavy"
-	if Input.is_action_just_pressed("attack_light") and Input.is_action_pressed("move_up"):
+	if player.intent_buffer.has_buffered(&"attack_light") and Input.is_action_pressed("move_up"):
 		if ComboCancelChecker.check(_attack_data, _elapsed, &"launcher"):
+			player.intent_buffer.consume(&"attack_light")
 			return &"attack_launcher"
-	if Input.is_action_just_pressed("dodge") and player.can_dodge():
+	if player.intent_buffer.consume(&"dodge") and player.can_dodge():
 		if ComboCancelChecker.check(_attack_data, _elapsed, &"dodge"):
 			return &"dodge"
+	if _phase == 2 and (player.intent_buffer.consume(&"technique") or Input.is_action_just_pressed(&"technique")):
+		return &"technique"
 	return &""

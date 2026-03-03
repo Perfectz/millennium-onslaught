@@ -1,0 +1,22 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/techniques/technique_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+technique_id = &"astral"
+display_name = "Astral"
+description = "Conjures a shard of cosmic ice."
+tp_cost = 30.0
+base_damage = 26.0
+element_type = &"ice"
+status_effect_chance = 0.3
+status_effect_duration = 3.0
+knockback_force = 7.0
+is_projectile = true
+projectile_speed = 16.0
+aoe_radius = 0.0
+animation_name = &"attack_heavy"
+particle_color = Color(0.3, 0.7, 1, 1)
+unlock_level = 3
+scales_with_magic = false

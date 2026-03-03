@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/equipment/equipment_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+equipment_id = &"frost_blade"
+display_name = "Frost Blade"
+description = "A sword encased in eternal ice."
+cost = 400
+slot = &"weapon"
+stat_bonuses = {"strength": 4, "magic": 2}
+passive_effects = {}
+required_level = 4

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/equipment/equipment_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+equipment_id = &"speed_boots"
+display_name = "Speed Boots"
+description = "Enchanted footwear that quickens the step."
+cost = 350
+slot = &"accessory"
+stat_bonuses = {"agility": 3}
+passive_effects = {"speed_bonus": 0.1}
+required_level = 2

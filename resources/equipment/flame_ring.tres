@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/equipment/equipment_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+equipment_id = &"flame_ring"
+display_name = "Flame Ring"
+description = "A ring that burns with inner fire. Grants critical strikes."
+cost = 400
+slot = &"accessory"
+stat_bonuses = {"magic": 2}
+passive_effects = {"crit_chance": 0.05}
+required_level = 3

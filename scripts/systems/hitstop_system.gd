@@ -32,7 +32,10 @@ func start_hitstop(duration: float) -> void:
 	Engine.time_scale = 0.0
 
 
-func _on_hit_landed(_attacker: Node, _target: Node, damage: float, _pos: Vector3) -> void:
+func _on_hit_landed(_attacker: Node, _target: Node, damage: float, _pos: Vector3, attack_data: AttackDef) -> void:
+	if attack_data != null and attack_data.hitstop_duration > 0.0:
+		start_hitstop(attack_data.hitstop_duration)
+		return
 	if damage >= Constants.HEAVY_ATTACK_DAMAGE:
 		start_hitstop(Constants.HITSTOP_HEAVY_DURATION)
 	else:

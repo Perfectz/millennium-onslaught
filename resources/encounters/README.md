@@ -1,24 +1,30 @@
 # resources/encounters/
 
 ## Purpose
-Encounter/wave/spawn data resources.
+Encounter data files defining enemy wave compositions for dungeon rooms. Three resource types compose the encounter pipeline: `SpawnEntry` → `WaveDef` → `EncounterDef`.
 
-## Current Contents Snapshot
-Status: 10 files, 0 subfolders.
-- [file] `encounter_boss.tres`
-- [file] `encounter_def.gd`
-- [file] `encounter_def.gd.uid`
-- [file] `encounter_room1.tres`
-- [file] `encounter_room2.tres`
-- [file] `encounter_room3.tres`
-- [file] `spawn_entry.gd`
-- [file] `spawn_entry.gd.uid`
-- [file] `wave_def.gd`
-- [file] `wave_def.gd.uid`
+## Schema
+See [docs/schemas/encounter_def.md](../../docs/schemas/encounter_def.md) for full field definitions of all three types.
 
-## AI Coding Guidance
-- Keep files data-centric; runtime behavior belongs in scripts/.
-- Use stable IDs/paths because systems load these resources by reference.
+## Resource Definitions
 
-## Maintenance
-- Update this README when folder role or conventions change.
+| File | Class | Purpose |
+|------|-------|---------|
+| `spawn_entry.gd` | SpawnEntry | Single spawn instruction (which enemy, how many, from where) |
+| `wave_def.gd` | WaveDef | Group of spawn entries arriving together |
+| `encounter_def.gd` | EncounterDef | Complete fight — ordered waves + arena bounds |
+
+## Data Files
+
+| File | Waves | Enemy Composition |
+|------|-------|-------------------|
+| `encounter_room1.tres` | 2 | W1: 2 rushers → W2: 1 rusher + 1 ranged |
+| `encounter_room2.tres` | 2 | W1: 2 ranged + 1 shield → W2: 3 rushers |
+| `encounter_room3.tres` | 3 | W1: 3 rushers → W2: 2 ranged + 1 shield → W3: 2 rushers + 2 shields + 1 ranged |
+| `encounter_boss.tres` | 1 | W1: 1 boss (Warden) |
+
+## Adding a New Encounter
+1. Create `SpawnEntry` sub-resources inline or as separate `.tres`
+2. Create `WaveDef` resources referencing the spawn entries
+3. Create an `EncounterDef` with ordered waves and arena bounds
+4. Reference from a `DungeonDef.room_encounters` or `boss_encounter`

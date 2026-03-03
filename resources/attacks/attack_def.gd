@@ -25,3 +25,12 @@ extends Resource
 ## Whether this attack can launch enemies airborne.
 @export var is_launcher: bool = false
 @export var launch_velocity: float = 0.0
+
+## Elemental type: "", "fire", "ice", "lightning", "dark"
+@export var element_type: StringName = &""
+
+## Chance (0.0-1.0) to apply the element's status effect on hit.
+@export var status_effect_chance: float = 0.0
+
+## Duration of the applied status effect in seconds.
+@export var status_effect_duration: float = 3.0

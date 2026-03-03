@@ -10,9 +10,13 @@ var _phase: int = 0  # 0=windup, 1=active, 2=recovery
 
 
 func enter(_previous_state: StringName) -> void:
-	_attack_data = preload("res://resources/attacks/launcher_attack.tres")
-	entity.velocity.x = 0.0
 	var player: PlayerController = entity as PlayerController
+	# Read launcher attack from CharacterDef if available, fall back to preloaded default.
+	if player.character_def and player.character_def.launcher_attack:
+		_attack_data = player.character_def.launcher_attack.duplicate()
+	else:
+		_attack_data = preload("res://resources/attacks/launcher_attack.tres").duplicate()
+	entity.velocity.x = 0.0
 	player.combo_tracker.reset()
 	_phase = 0
 	var spd := Constants.PLAYER_ATTACK_SPEED_SCALE
@@ -38,6 +42,7 @@ func _start_active() -> void:
 	player.hitbox.enable(_attack_data, player.facing_right)
 	entity.velocity.x = 0.0
 	player.flash_mesh(Color(1.0, 1.0, 1.0))
+	EventBus.combat_attack_started.emit(player, &"launcher")
 
 
 func _start_recovery() -> void:
@@ -70,6 +75,11 @@ func physics_process(delta: float) -> StringName:
 			if _timer <= 0.0:
 				_start_recovery()
 		2:
+			# Dodge or technique cancel during recovery.
+			if player.intent_buffer.consume(&"dodge") and player.can_dodge():
+				return &"dodge"
+			if player.intent_buffer.consume(&"technique") or Input.is_action_just_pressed(&"technique"):
+				return &"technique"
 			if _timer <= 0.0:
 				if entity.is_on_floor():
 					return &"idle"

@@ -61,7 +61,7 @@ func get_current_state() -> State:
 
 
 func _process(delta: float) -> void:
-	if _current_state == null:
+	if _current_state == null or not is_instance_valid(entity):
 		return
 	var next := _current_state.process(delta)
 	if next != &"":
@@ -69,7 +69,7 @@ func _process(delta: float) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if _current_state == null:
+	if _current_state == null or not is_instance_valid(entity):
 		return
 	var capped := minf(delta, Constants.DELTA_CAP)
 	var next := _current_state.physics_process(capped)
@@ -78,7 +78,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _current_state == null:
+	if _current_state == null or not is_instance_valid(entity):
 		return
 	var next := _current_state.handle_input(event)
 	if next != &"":

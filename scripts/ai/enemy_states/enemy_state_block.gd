@@ -6,6 +6,7 @@ extends State
 func enter(_previous_state: StringName) -> void:
 	var enemy := entity as EnemyController
 	enemy.start_blocking()
+	enemy.play_animation(&"walk")
 
 
 func exit() -> void:

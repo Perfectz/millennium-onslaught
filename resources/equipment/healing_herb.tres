@@ -1,0 +1,12 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/equipment/equipment_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+equipment_id = &"healing_herb"
+display_name = "Healing Herb"
+description = "A medicinal herb that soothes wounds."
+cost = 30
+slot = &"accessory"
+stat_bonuses = {}

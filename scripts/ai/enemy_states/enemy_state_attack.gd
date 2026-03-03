@@ -20,6 +20,7 @@ func enter(_previous_state: StringName) -> void:
 	enemy.update_facing_toward_target()
 	_phase = 0
 	_timer = _attack_data.windup_time
+	enemy.play_animation(&"attack")
 	enemy.flash_mesh(Color(1.0, 0.6, 0.2))
 	if _timer <= 0.0:
 		_start_active()

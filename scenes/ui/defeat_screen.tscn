@@ -1,6 +1,64 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/defeat_screen.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="1"]
+bg_color = Color(0.12, 0.05, 0.08, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.95, 0.46, 0.48, 0.95)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0, 0, 0, 0.42)
+shadow_size = 12
+anti_aliasing = true
+anti_aliasing_size = 1.0
+
+[sub_resource type="StyleBoxFlat" id="2"]
+bg_color = Color(0.55, 0.2, 0.2, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.74, 0.72, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+anti_aliasing = true
+anti_aliasing_size = 1.0
+
+[sub_resource type="StyleBoxFlat" id="3"]
+bg_color = Color(0.71, 0.27, 0.27, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.83, 0.8, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+anti_aliasing = true
+anti_aliasing_size = 1.0
+
+[sub_resource type="StyleBoxFlat" id="4"]
+bg_color = Color(0.45, 0.15, 0.15, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.92, 0.59, 0.57, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+anti_aliasing = true
+anti_aliasing_size = 1.0
 
 [node name="DefeatScreen" type="CanvasLayer"]
 layer = 30
@@ -13,7 +71,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.15, 0, 0, 0.8)
+color = Color(0.08, 0.01, 0.02, 0.84)
 mouse_filter = 2
 
 [node name="Panel" type="Control" parent="."]
@@ -25,33 +83,88 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="VBox" type="VBoxContainer" parent="Panel"]
+[node name="Glow" type="ColorRect" parent="Panel"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -100.0
-offset_right = 200.0
-offset_bottom = 100.0
+offset_left = -300.0
+offset_top = -160.0
+offset_right = 300.0
+offset_bottom = 160.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 16
+color = Color(0.84, 0.17, 0.18, 0.14)
+mouse_filter = 2
 
-[node name="TitleLabel" type="Label" parent="Panel/VBox"]
+[node name="Card" type="PanelContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -230.0
+offset_top = -146.0
+offset_right = 230.0
+offset_bottom = 146.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("1")
+
+[node name="Margin" type="MarginContainer" parent="Panel/Card"]
 layout_mode = 2
-text = "DUNGEON FAILED"
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Card/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="TitleLabel" type="Label" parent="Panel/Card/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 42
+theme_override_colors/font_color = Color(1, 0.92, 0.92, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+text = "MISSION FAILED"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Spacer" type="Control" parent="Panel/VBox"]
+[node name="SubLabel" type="Label" parent="Panel/Card/Margin/VBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 32)
+theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(1, 0.78, 0.78, 1)
+text = "RETRY FROM THE LAST DEPLOYMENT POINT"
+horizontal_alignment = 1
 
-[node name="RetryButton" type="Button" parent="Panel/VBox"]
+[node name="Spacer" type="Control" parent="Panel/Card/Margin/VBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(200, 40)
+custom_minimum_size = Vector2(0, 10)
+
+[node name="TipLabel" type="Label" parent="Panel/Card/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(1, 0.72, 0.74, 1)
+text = "Tip: Build TP with light strings, then break groups with heavy finishers."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="RetryButton" type="Button" parent="Panel/Card/Margin/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 54)
 size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 23
+theme_override_colors/font_color = Color(1, 0.96, 0.96, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("2")
+theme_override_styles/hover = SubResource("3")
+theme_override_styles/focus = SubResource("3")
+theme_override_styles/pressed = SubResource("4")
 text = "Retry"

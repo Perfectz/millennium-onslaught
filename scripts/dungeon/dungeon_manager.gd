@@ -9,6 +9,8 @@ var _current_room_index: int = 0
 var _is_active: bool = false
 var _score_tracker: ScoreTracker = ScoreTracker.new()
 var _wave_system: WaveSystem = null
+var _dungeon_gold: int = 0
+var _dungeon_xp: int = 0
 
 
 func _ready() -> void:
@@ -25,11 +27,15 @@ func start_dungeon(dungeon_def: DungeonDef, wave_system: WaveSystem) -> void:
 	_current_room_index = 0
 	_is_active = true
 	_score_tracker.reset()
+	_dungeon_gold = 0
+	_dungeon_xp = 0
 	GameState.current_dungeon_id = dungeon_def.dungeon_id
 	GameState.current_room_index = 0
 	EventBus.dungeon_entered.emit(dungeon_def.dungeon_id)
 	EventBus.log_event(&"dungeon_entered", {"dungeon_id": dungeon_def.dungeon_id})
-	_enter_room()
+	# In stage mode, StageRunner handles encounters. Skip room entry.
+	if not GameState.stage_mode:
+		_enter_room()
 
 
 ## Enter the current room and start its encounter.
@@ -57,13 +63,22 @@ func _enter_room() -> void:
 func _on_wave_cleared() -> void:
 	if not _is_active:
 		return
-	EventBus.dungeon_room_cleared.emit(_current_room_index)
-	EventBus.log_event(&"dungeon_room_cleared", {"room_index": _current_room_index})
 
-	# Check if this was the last room.
-	if _current_room_index >= _dungeon_def.room_scenes.size() - 1:
-		_complete_dungeon()
-	# Otherwise wait for advance_to_next_room() to be called by the room loader.
+	if GameState.stage_mode:
+		# Stage mode: StageRunner handles forward bounds. DungeonManager tracks completion.
+		GameState.stage_encounters_completed += 1
+		EventBus.stage_encounter_cleared.emit(GameState.stage_encounters_completed - 1)
+		EventBus.log_event(&"stage_encounter_cleared", {
+			"encounter_index": GameState.stage_encounters_completed - 1})
+		if GameState.stage_encounters_completed >= GameState.stage_total_encounters:
+			_complete_dungeon()
+	else:
+		# Room mode: existing logic.
+		EventBus.dungeon_room_cleared.emit(_current_room_index)
+		EventBus.log_event(&"dungeon_room_cleared", {"room_index": _current_room_index})
+		if _current_room_index >= _dungeon_def.room_scenes.size() - 1:
+			_complete_dungeon()
+		# Otherwise wait for advance_to_next_room() to be called by the room loader.
 
 
 ## Advance to the next room. Called by dungeon_run after transition animation.
@@ -76,9 +91,22 @@ func _on_enemy_died(_enemy: Node, enemy_type: StringName, _position: Vector3) ->
 	if not _is_active:
 		return
 	_score_tracker.record_kill(enemy_type)
+	if _enemy is EnemyController:
+		var ec := _enemy as EnemyController
+		if ec.enemy_def:
+			# Accumulate gold from enemy drops.
+			_dungeon_gold += ec.enemy_def.gold_reward
+			# Award XP to active party members.
+			_dungeon_xp += ec.enemy_def.xp_reward
+			# Roll equipment drops from enemy's drop table.
+			if not ec.enemy_def.drop_table.is_empty():
+				var drops := DropRoller.roll_drops(ec.enemy_def.drop_table)
+				for item_id: StringName in drops:
+					GameState.dungeon_drops.append({"item_id": item_id})
+					EventBus.rpg_item_dropped.emit(_position, item_id)
 
 
-func _on_hit_landed(_attacker: Node, _target: Node, damage: float, _pos: Vector3) -> void:
+func _on_hit_landed(_attacker: Node, _target: Node, damage: float, _pos: Vector3, _attack_data: AttackDef) -> void:
 	if not _is_active:
 		return
 	_score_tracker.record_damage(damage)
@@ -99,12 +127,23 @@ func _process(delta: float) -> void:
 func _complete_dungeon() -> void:
 	_is_active = false
 	GameState.bank_dungeon_rewards()
+	# Bank accumulated gold.
+	GameState.gold += _dungeon_gold
+	EventBus.rpg_gold_changed.emit(GameState.gold)
+	# Award XP to all active party members via GameState.
+	for char_id: StringName in GameState.active_party:
+		if char_id in GameState.character_data:
+			GameState.character_data[char_id]["xp"] = GameState.character_data[char_id].get("xp", 0) + _dungeon_xp
+	# Set story flag for this dungeon.
+	GameState.story_flags[_dungeon_def.dungeon_id + "_complete"] = true
 	EventBus.dungeon_completed.emit(_dungeon_def.dungeon_id)
 	EventBus.log_event(&"dungeon_completed", {
 		"dungeon_id": _dungeon_def.dungeon_id,
 		"kills": _score_tracker.get_kill_count(),
 		"time": _score_tracker.get_elapsed_time(),
 		"score": _score_tracker.calculate_score(),
+		"gold_earned": _dungeon_gold,
+		"xp_earned": _dungeon_xp,
 	})
 
 
@@ -134,3 +173,13 @@ func is_active() -> bool:
 ## Get current room index.
 func get_current_room_index() -> int:
 	return _current_room_index
+
+
+## Get gold earned this run.
+func get_gold_earned() -> int:
+	return _dungeon_gold
+
+
+## Get XP earned this run.
+func get_xp_earned() -> int:
+	return _dungeon_xp

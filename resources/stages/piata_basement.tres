@@ -1,0 +1,44 @@
+[gd_resource type="Resource" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://resources/stages/stage_def.gd" id="1"]
+[ext_resource type="Script" path="res://resources/stages/stage_encounter_entry.gd" id="2"]
+[ext_resource type="Resource" path="res://resources/encounters/encounter_stage1_a.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/encounters/encounter_stage1_b.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/encounters/encounter_boss.tres" id="5"]
+
+[sub_resource type="Resource" id="enc_entry_1"]
+script = ExtResource("2")
+encounter_def = ExtResource("3")
+trigger_x = 60.0
+arena_half_width = 10.0
+arena_min_z = -3.0
+arena_max_z = 3.0
+is_boss = false
+
+[sub_resource type="Resource" id="enc_entry_2"]
+script = ExtResource("2")
+encounter_def = ExtResource("4")
+trigger_x = 108.0
+arena_half_width = 10.0
+arena_min_z = -3.0
+arena_max_z = 3.0
+is_boss = false
+
+[sub_resource type="Resource" id="enc_entry_boss"]
+script = ExtResource("2")
+encounter_def = ExtResource("5")
+trigger_x = 132.0
+arena_half_width = 10.0
+arena_min_z = -3.0
+arena_max_z = 3.0
+is_boss = true
+
+[resource]
+script = ExtResource("1")
+stage_id = &"piata_basement"
+stage_name = "Piata Basement"
+chunk_scenes = Array[String](["res://scenes/dungeon/chunks/chunk_start.tscn", "res://scenes/dungeon/chunks/chunk_street_a.tscn", "res://scenes/dungeon/chunks/chunk_plaza_a.tscn", "res://scenes/dungeon/chunks/chunk_street_b.tscn", "res://scenes/dungeon/chunks/chunk_plaza_b.tscn", "res://scenes/dungeon/chunks/chunk_boss.tscn"])
+chunk_width = 24.0
+encounters = [SubResource("enc_entry_1"), SubResource("enc_entry_2"), SubResource("enc_entry_boss")]
+music_track = &"stage_1"
+belt_depth = 3.0

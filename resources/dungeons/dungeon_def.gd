@@ -20,3 +20,6 @@ extends Resource
 
 ## Whether the dungeon is currently unlocked (managed by story flags at runtime).
 @export var requires_story_flag: StringName = &""
+
+## Optional: when set, this dungeon uses continuous stage mode instead of rooms.
+@export var stage_def: StageDef = null

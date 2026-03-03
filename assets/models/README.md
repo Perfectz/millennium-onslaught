@@ -4,8 +4,9 @@
 3D source models and related files.
 
 ## Current Contents Snapshot
-Status: 0 files, 1 subfolders.
+Status: 0 files, 2 subfolders.
 - [dir] `characters/`
+- [dir] `enemies/`
 
 ## AI Coding Guidance
 - Store source assets only; gameplay behavior belongs in scripts/.

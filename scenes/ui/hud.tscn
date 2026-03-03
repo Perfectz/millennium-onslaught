@@ -1,6 +1,95 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="1"]
+bg_color = Color(0.03, 0.08, 0.14, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.33, 0.72, 1, 0.95)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 10
+anti_aliasing = true
+anti_aliasing_size = 1.0
+
+[sub_resource type="StyleBoxFlat" id="2"]
+bg_color = Color(0.05, 0.1, 0.16, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.39, 0.82, 1, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.28)
+shadow_size = 6
+anti_aliasing = true
+anti_aliasing_size = 1.0
+
+[sub_resource type="StyleBoxFlat" id="3"]
+bg_color = Color(0.01, 0.05, 0.09, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.65, 0.9, 0.92)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 4
+anti_aliasing = true
+anti_aliasing_size = 1.0
+
+[sub_resource type="StyleBoxFlat" id="4"]
+bg_color = Color(0.01, 0.06, 0.11, 0.8)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.7, 0.9, 0.9)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 4
+anti_aliasing = true
+anti_aliasing_size = 1.0
+
+[sub_resource type="StyleBoxFlat" id="5"]
+bg_color = Color(0.03, 0.09, 0.15, 0.92)
+border_width_bottom = 2
+border_color = Color(0.29, 0.74, 0.98, 0.95)
+shadow_color = Color(0, 0, 0, 0.28)
+shadow_size = 5
+anti_aliasing = true
+anti_aliasing_size = 1.0
+
+[sub_resource type="StyleBoxFlat" id="6"]
+bg_color = Color(0.04, 0.11, 0.18, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.37, 0.81, 1, 0.96)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 6
+anti_aliasing = true
+anti_aliasing_size = 1.0
 
 [node name="HUD" type="CanvasLayer"]
 layer = 10
@@ -16,103 +105,394 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="VBox" type="VBoxContainer" parent="Panel"]
+[node name="TopFrame" type="PanelContainer" parent="Panel"]
 layout_mode = 1
-anchors_preset = 0
-offset_left = 16.0
-offset_top = 16.0
-offset_right = 232.0
-offset_bottom = 100.0
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 62.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("5")
+mouse_filter = 2
 
-[node name="HPBar" type="Control" parent="Panel/VBox"]
+[node name="Margin" type="MarginContainer" parent="Panel/TopFrame"]
 layout_mode = 2
-custom_minimum_size = Vector2(216, 28)
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 8
 
-[node name="HPLabel" type="Label" parent="Panel/VBox/HPBar"]
+[node name="HBox" type="HBoxContainer" parent="Panel/TopFrame/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="PlayerBlock" type="VBoxContainer" parent="Panel/TopFrame/Margin/HBox"]
+layout_mode = 2
+
+[node name="PilotLabel" type="Label" parent="Panel/TopFrame/Margin/HBox/PlayerBlock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.91, 0.97, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+text = "ALYS LANDALE // FRONTLINE"
+
+[node name="RoleLabel" type="Label" parent="Panel/TopFrame/Margin/HBox/PlayerBlock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.6, 0.84, 1, 1)
+text = "LEVEL 18 VANGUARD"
+
+[node name="Spacer" type="Control" parent="Panel/TopFrame/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ObjectivePanel" type="PanelContainer" parent="Panel/TopFrame/Margin/HBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("4")
+
+[node name="HBox" type="HBoxContainer" parent="Panel/TopFrame/Margin/HBox/ObjectivePanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ObjectiveIcon" type="ColorRect" parent="Panel/TopFrame/Margin/HBox/ObjectivePanel/HBox"]
+custom_minimum_size = Vector2(14, 14)
+layout_mode = 2
+color = Color(0.42, 0.87, 1, 1)
+
+[node name="ObjectiveLabel" type="Label" parent="Panel/TopFrame/Margin/HBox/ObjectivePanel/HBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.86, 0.95, 1, 1)
+text = "OBJECTIVE  |  CLEAR THE ROOM"
+vertical_alignment = 1
+
+[node name="NowPlayingStrip" type="PanelContainer" parent="Panel"]
+modulate = Color(1, 1, 1, 0)
+visible = false
+layout_mode = 1
+anchors_preset = 10
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -230.0
+offset_top = 72.0
+offset_right = 230.0
+offset_bottom = 116.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("6")
+mouse_filter = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel/NowPlayingStrip"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="HBox" type="HBoxContainer" parent="Panel/NowPlayingStrip/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="ColorRect" parent="Panel/NowPlayingStrip/Margin/HBox"]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+color = Color(0.97, 0.84, 0.45, 1)
+
+[node name="NowPlayingLabel" type="Label" parent="Panel/NowPlayingStrip/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.92, 0.98, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+text = "Now Playing  |  Title"
+horizontal_alignment = 1
+
+[node name="StatsCard" type="PanelContainer" parent="Panel"]
+layout_mode = 1
+offset_left = 20.0
+offset_top = 74.0
+offset_right = 420.0
+offset_bottom = 260.0
+theme_override_styles/panel = SubResource("1")
+mouse_filter = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel/StatsCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
+
+[node name="VBox" type="VBoxContainer" parent="Panel/StatsCard/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="VitalsLabel" type="Label" parent="Panel/StatsCard/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.58, 0.81, 1, 1)
+text = "TACTICAL VITALS"
+
+[node name="HPBlock" type="VBoxContainer" parent="Panel/StatsCard/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="HPHeader" type="HBoxContainer" parent="Panel/StatsCard/Margin/VBox/HPBlock"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HPIcon" type="ColorRect" parent="Panel/StatsCard/Margin/VBox/HPBlock/HPHeader"]
+custom_minimum_size = Vector2(14, 14)
+layout_mode = 2
+color = Color(0.95, 0.52, 0.52, 1)
+
+[node name="HPTag" type="Label" parent="Panel/StatsCard/Margin/VBox/HPBlock/HPHeader"]
+layout_mode = 2
+custom_minimum_size = Vector2(34, 0)
+theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(1, 0.78, 0.74, 1)
+text = "HP"
+
+[node name="HPLabel" type="Label" parent="Panel/StatsCard/Margin/VBox/HPBlock/HPHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.95, 0.98, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+text = "100 / 100"
+horizontal_alignment = 2
+
+[node name="HPBar" type="Control" parent="Panel/StatsCard/Margin/VBox/HPBlock"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 26)
+
+[node name="HPBarBG" type="ColorRect" parent="Panel/StatsCard/Margin/VBox/HPBlock/HPBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "HP  100 / 100"
-horizontal_alignment = 1
-vertical_alignment = 1
+color = Color(0.24, 0.08, 0.1, 0.95)
 
-[node name="HPBarBG" type="ColorRect" parent="Panel/VBox/HPBar"]
-layout_mode = 1
-anchors_preset = 0
-offset_left = 8.0
-offset_top = 4.0
-offset_right = 208.0
-offset_bottom = 24.0
-color = Color(0.15, 0.05, 0.05, 0.8)
-
-[node name="HPBarFill" type="ColorRect" parent="Panel/VBox/HPBar/HPBarBG"]
+[node name="HPBarFill" type="ColorRect" parent="Panel/StatsCard/Margin/VBox/HPBlock/HPBar/HPBarBG"]
 layout_mode = 1
 anchors_preset = 0
 offset_left = 2.0
 offset_top = 2.0
-offset_right = 198.0
-offset_bottom = 18.0
-color = Color(0.2, 0.8, 0.2, 1)
+offset_right = 328.0
+offset_bottom = 22.0
+color = Color(0.3, 0.93, 0.56, 1)
 
-[node name="TPBar" type="Control" parent="Panel/VBox"]
+[node name="TPBlock" type="VBoxContainer" parent="Panel/StatsCard/Margin/VBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(216, 28)
+theme_override_constants/separation = 4
 
-[node name="TPLabel" type="Label" parent="Panel/VBox/TPBar"]
+[node name="TPHeader" type="HBoxContainer" parent="Panel/StatsCard/Margin/VBox/TPBlock"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TPIcon" type="ColorRect" parent="Panel/StatsCard/Margin/VBox/TPBlock/TPHeader"]
+custom_minimum_size = Vector2(14, 14)
+layout_mode = 2
+color = Color(0.45, 0.75, 1, 1)
+
+[node name="TPTag" type="Label" parent="Panel/StatsCard/Margin/VBox/TPBlock/TPHeader"]
+layout_mode = 2
+custom_minimum_size = Vector2(34, 0)
+theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.72, 0.88, 1, 1)
+text = "TP"
+
+[node name="TPLabel" type="Label" parent="Panel/StatsCard/Margin/VBox/TPBlock/TPHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.95, 0.98, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+text = "0 / 100"
+horizontal_alignment = 2
+
+[node name="TPBar" type="Control" parent="Panel/StatsCard/Margin/VBox/TPBlock"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 26)
+
+[node name="TPBarBG" type="ColorRect" parent="Panel/StatsCard/Margin/VBox/TPBlock/TPBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "TP  0 / 100"
-horizontal_alignment = 1
-vertical_alignment = 1
+color = Color(0.07, 0.12, 0.28, 0.95)
 
-[node name="TPBarBG" type="ColorRect" parent="Panel/VBox/TPBar"]
-layout_mode = 1
-anchors_preset = 0
-offset_left = 8.0
-offset_top = 4.0
-offset_right = 208.0
-offset_bottom = 24.0
-color = Color(0.05, 0.05, 0.2, 0.8)
-
-[node name="TPBarFill" type="ColorRect" parent="Panel/VBox/TPBar/TPBarBG"]
+[node name="TPBarFill" type="ColorRect" parent="Panel/StatsCard/Margin/VBox/TPBlock/TPBar/TPBarBG"]
 layout_mode = 1
 anchors_preset = 0
 offset_left = 2.0
 offset_top = 2.0
-offset_right = 198.0
-offset_bottom = 18.0
-color = Color(0.2, 0.4, 0.9, 1)
+offset_right = 328.0
+offset_bottom = 22.0
+color = Color(0.22, 0.66, 1, 1)
 
-[node name="ComboCounter" type="Label" parent="Panel"]
+[node name="GoldBlock" type="HBoxContainer" parent="Panel/StatsCard/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="GoldIcon" type="ColorRect" parent="Panel/StatsCard/Margin/VBox/GoldBlock"]
+custom_minimum_size = Vector2(14, 14)
+layout_mode = 2
+color = Color(1, 0.88, 0.4, 1)
+
+[node name="GoldTag" type="Label" parent="Panel/StatsCard/Margin/VBox/GoldBlock"]
+layout_mode = 2
+custom_minimum_size = Vector2(34, 0)
+theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(1, 0.88, 0.4, 1)
+text = "GP"
+
+[node name="GoldLabel" type="Label" parent="Panel/StatsCard/Margin/VBox/GoldBlock"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(1, 0.93, 0.65, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+text = "0"
+horizontal_alignment = 2
+
+[node name="SubHintLabel" type="Label" parent="Panel/StatsCard/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.56, 0.79, 0.95, 1)
+text = "CHAIN HITS TO BUILD TACTICAL PRESSURE"
+
+[node name="ComboBadge" type="PanelContainer" parent="Panel"]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -200.0
-offset_top = 16.0
-offset_right = -16.0
-offset_bottom = 56.0
+offset_left = -300.0
+offset_top = 78.0
+offset_right = -20.0
+offset_bottom = 170.0
 grow_horizontal = 0
-text = "HIT 0"
+theme_override_styles/panel = SubResource("2")
+mouse_filter = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel/ComboBadge"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 10
+
+[node name="VBox" type="VBoxContainer" parent="Panel/ComboBadge/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="TitleRow" type="HBoxContainer" parent="Panel/ComboBadge/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ComboIcon" type="ColorRect" parent="Panel/ComboBadge/Margin/VBox/TitleRow"]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+color = Color(0.97, 0.81, 0.43, 1)
+
+[node name="ComboTitle" type="Label" parent="Panel/ComboBadge/Margin/VBox/TitleRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.72, 0.9, 1, 1)
+text = "TACTICAL CHAIN"
 horizontal_alignment = 2
 
-[node name="StateLabel" type="Label" parent="Panel"]
+[node name="ComboCounter" type="Label" parent="Panel/ComboBadge/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+theme_override_colors/font_color = Color(1, 0.92, 0.49, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+text = "HIT 0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ActionHints" type="PanelContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -320.0
+offset_top = -190.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("4")
+mouse_filter = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel/ActionHints"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="VBox" type="VBoxContainer" parent="Panel/ActionHints/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="HintsTitle" type="Label" parent="Panel/ActionHints/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.72, 0.89, 1, 1)
+text = "COMMAND SHORTCUTS"
+
+[node name="HintLight" type="Label" parent="Panel/ActionHints/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.92, 0.96, 1, 1)
+text = "Light Attack   [J]"
+
+[node name="HintHeavy" type="Label" parent="Panel/ActionHints/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.92, 0.96, 1, 1)
+text = "Heavy Attack  [K]"
+
+[node name="HintDodge" type="Label" parent="Panel/ActionHints/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.92, 0.96, 1, 1)
+text = "Dodge          [L]"
+
+[node name="StateBadge" type="PanelContainer" parent="Panel"]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -200.0
-offset_top = -80.0
-offset_right = 200.0
+offset_left = -320.0
+offset_top = -118.0
+offset_right = 320.0
+offset_bottom = -16.0
 grow_horizontal = 2
 grow_vertical = 0
+theme_override_styles/panel = SubResource("3")
+mouse_filter = 2
+
+[node name="StateLabel" type="Label" parent="Panel/StateBadge"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.87, 0.94, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.95)
+theme_override_constants/outline_size = 2
+autowrap_mode = 2
 horizontal_alignment = 1
+vertical_alignment = 1

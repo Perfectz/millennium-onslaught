@@ -1,25 +1,28 @@
 # scripts/core/player_states/
 
 ## Purpose
-Player finite-state implementations.
+Player state machine states. Each file implements one state for `PlayerController`'s `StateMachine`. States are `RefCounted` — they receive the controller as context and return transition requests.
 
-## Current Contents Snapshot
-Status: 23 files, 0 subfolders.
-- [file] `player_state_attack_heavy.gd`
-- [file] `player_state_attack_heavy.gd.uid`
-- [file] `player_state_attack_launcher.gd`
-- [file] `player_state_attack_launcher.gd.uid`
-- [file] `player_state_attack_light.gd`
-- [file] `player_state_attack_light.gd.uid`
-- [file] `player_state_dead.gd`
-- [file] `player_state_dead.gd.uid`
-- [file] `player_state_dodge.gd`
-- [file] `player_state_dodge.gd.uid`
-- ... (13 more entries)
+## States
 
-## AI Coding Guidance
-- Each file should represent one state with clear enter/exit/process rules.
-- Keep transition intent explicit and avoid hidden side effects.
+| State | File | Transitions To |
+|-------|------|----------------|
+| Idle | `player_state_idle.gd` | Run, Jump, AttackLight, AttackHeavy, AttackLauncher, Technique, Dodge, Hurt, Dead |
+| Run | `player_state_run.gd` | Idle, Jump, AttackLight, AttackHeavy, AttackLauncher, Technique, Dodge, Hurt |
+| Jump | `player_state_jump.gd` | Fall, Hurt |
+| Fall | `player_state_fall.gd` | Land, Hurt |
+| Land | `player_state_land.gd` | Idle |
+| AttackLight | `player_state_attack_light.gd` | Idle, AttackLight (chain), AttackHeavy (cancel), AttackLauncher (cancel), Dodge (cancel), Hurt |
+| AttackHeavy | `player_state_attack_heavy.gd` | Idle, Dodge (cancel), Hurt |
+| AttackLauncher | `player_state_attack_launcher.gd` | Idle, Dodge (cancel), Jump (cancel), Hurt |
+| Technique | `player_state_technique.gd` | Idle, Hurt |
+| Dodge | `player_state_dodge.gd` | Idle |
+| Hurt | `player_state_hurt.gd` | Idle, Dead |
+| Dead | `player_state_dead.gd` | (terminal) |
 
-## Maintenance
-- Update this README when folder role or conventions change.
+## Adding a New State
+1. Create a new `player_state_*.gd` extending `State` (RefCounted)
+2. Implement `enter()`, `physics_update()`, and optionally `exit()`
+3. Register in `PlayerController._ready()` via `state_machine.add_state()`
+4. Add transitions in source states
+5. Update INDEX.md Player States table
