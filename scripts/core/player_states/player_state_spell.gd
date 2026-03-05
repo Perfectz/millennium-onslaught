@@ -1,5 +1,5 @@
-## Spell casting state — triggered by right analog stick directions.
-## Supports 4 spell types: projectile (fireball DOT), heal, AOE burst, defense buff.
+## Spell casting state — triggered by dedicated spell buttons (LB/RT/LT).
+## Supports 3 spell types: heal, projectile (fireball DOT), AOE burst.
 ## Windup → execute → recovery. Dodge-cancellable during recovery.
 extends State
 
@@ -15,7 +15,7 @@ var _technique: TechniqueDef
 func enter(_previous_state: StringName) -> void:
 	var player: PlayerController = entity as PlayerController
 
-	# Resolve the spell queued by right stick input.
+	# Resolve the spell queued by a button press.
 	_technique = player.get_pending_spell()
 	if not _technique:
 		_phase = -1
@@ -44,6 +44,7 @@ func enter(_previous_state: StringName) -> void:
 	_phase = 0
 	_timer = Constants.SPELL_WINDUP_TIME
 	entity.velocity.x = 0.0
+	entity.velocity.z = 0.0
 
 	player.combo_tracker.reset()
 	var anim_name: StringName = &"attack_heavy"
@@ -68,6 +69,7 @@ func physics_process(delta: float) -> StringName:
 	_timer -= delta
 	player.apply_gravity(delta)
 	entity.move_and_slide()
+	player.clamp_to_bounds()
 
 	match _phase:
 		0:  # windup
@@ -108,9 +110,10 @@ func _cast_projectile() -> void:
 	var player: PlayerController = entity as PlayerController
 
 	var projectile: Area3D = _projectile_scene.instantiate()
-	var dir := Vector3.RIGHT if player.facing_right else Vector3.LEFT
+	var dir := player.facing_direction
 	var spawn_pos := entity.global_position + Vector3(0, 0.9, 0)
-	spawn_pos.x += Constants.HITBOX_X_OFFSET * (1.0 if player.facing_right else -1.0)
+	spawn_pos.x += Constants.HITBOX_X_OFFSET * player.facing_direction.x
+	spawn_pos.z += Constants.HITBOX_X_OFFSET * player.facing_direction.z
 
 	entity.get_tree().root.add_child(projectile)
 	projectile.global_position = spawn_pos
@@ -219,7 +222,7 @@ func _spawn_cast_particles(pos: Vector3, color: Color) -> void:
 	mat.scale_max = 0.12
 	mat.color = color
 	var player: PlayerController = entity as PlayerController
-	mat.direction = Vector3(1, 0, 0) if player.facing_right else Vector3(-1, 0, 0)
+	mat.direction = player.facing_direction
 	flash.process_material = mat
 
 	var draw_mat := StandardMaterial3D.new()

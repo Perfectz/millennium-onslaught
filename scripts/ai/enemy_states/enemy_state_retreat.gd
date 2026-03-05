@@ -15,10 +15,16 @@ func physics_process(delta: float) -> StringName:
 
 	enemy.update_facing_toward_target()
 
-	# Move AWAY from target on X axis.
-	var dir_x := signf(entity.global_position.x - enemy.target.global_position.x)
-	entity.velocity.x = dir_x * enemy.get_move_speed()
-	entity.velocity.z = 0.0
+	# Move AWAY from target on XZ plane.
+	var away_dir := entity.global_position - enemy.target.global_position
+	away_dir.y = 0.0
+	if away_dir.length_squared() > 0.001:
+		away_dir = away_dir.normalized()
+	else:
+		away_dir = -enemy.facing_direction
+	var speed := enemy.get_move_speed()
+	entity.velocity.x = away_dir.x * speed
+	entity.velocity.z = away_dir.z * speed
 
 	enemy.apply_gravity(delta)
 	entity.move_and_slide()

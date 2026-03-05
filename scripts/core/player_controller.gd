@@ -7,7 +7,7 @@ extends CharacterBody3D
 const _SPELL_FIREBALL := preload("res://resources/techniques/spell_fireball.tres")
 const _SPELL_HEAL := preload("res://resources/techniques/spell_heal.tres")
 const _SPELL_BURST := preload("res://resources/techniques/spell_radiant_burst.tres")
-const _SPELL_BARRIER := preload("res://resources/techniques/spell_barrier.tres")
+
 
 @onready var state_machine: StateMachine = $StateMachine
 @onready var model_pivot: Node3D = $ModelPivot
@@ -15,13 +15,23 @@ const _SPELL_BARRIER := preload("res://resources/techniques/spell_barrier.tres")
 @onready var hitbox: Hitbox = $Hitbox
 @onready var hurtbox: Hurtbox = $Hurtbox
 
-var facing_right: bool = true
+## Facing angle in radians. 0 = right (+X), PI/2 = forward (-Z).
+var facing_angle: float = 0.0
+## Unit direction vector on XZ plane derived from facing_angle.
+var facing_direction: Vector3 = Vector3.RIGHT
+## Backward-compatible facing flag (computed from facing_angle).
+var facing_right: bool:
+	get: return absf(facing_angle) < PI * 0.5
 var coyote_timer: float = 0.0
 var jump_buffer_timer: float = 0.0
 var was_on_floor: bool = false
 var dodge_cooldown_timer: float = 0.0
 var _parry_timer: float = 0.0
 var _is_block_held: bool = false
+
+## Lock-on targeting — currently locked enemy (null = no lock).
+var lock_target: Node3D = null
+var _lock_reticle: MeshInstance3D = null
 
 ## Player index for multiplayer. 0 = keyboard player.
 var player_index: int = 0
@@ -48,15 +58,8 @@ var status_effects: StatusEffectTracker
 ## Currently selected technique index.
 var active_technique_index: int = 0
 
-## Spell slots mapped to right stick directions. Loaded on _ready().
-var _spell_slots: Dictionary = {}
-
-## The spell queued by the right stick for the spell state to consume.
+## The spell queued by a button press for the spell state to consume.
 var _pending_spell: TechniqueDef = null
-
-## Tracks whether the right stick was already in an active zone last frame
-## (one-shot detection — prevents re-casting while stick is held).
-var _spell_stick_was_active: bool = false
 
 ## Dust particle timer for run footsteps.
 var _dust_run_timer: float = 0.0
@@ -97,7 +100,7 @@ func _ready() -> void:
 	hurtbox.hit_received.connect(_on_hit_received)
 	_bridge_eventbus_signals()
 	_load_character_from_game_state()
-	_load_spell_slots()
+	EventBus.enemy_died.connect(_on_any_enemy_died)
 	# Emit initial state after all nodes are ready so the HUD receives the values.
 	call_deferred(&"_emit_initial_state")
 
@@ -106,7 +109,7 @@ func _physics_process(delta: float) -> void:
 	var capped := minf(delta, Constants.DELTA_CAP)
 	was_on_floor = is_on_floor()
 
-	if Input.is_action_just_pressed(&"jump"):
+	if InputManager.is_action_just_pressed_for_player(player_index, &"jump"):
 		jump_buffer_timer = Constants.PLAYER_JUMP_BUFFER_TIME
 	elif jump_buffer_timer > 0.0:
 		jump_buffer_timer -= capped
@@ -136,27 +139,39 @@ func _physics_process(delta: float) -> void:
 ## (Engine.time_scale == 0). Records intents into the buffer so they
 ## survive until the next physics frame where a state can consume them.
 func _process(_delta: float) -> void:
-	if Input.is_action_just_pressed(&"attack_light"):
+	# Rapid-fire: record held attack buttons every frame so combos auto-chain.
+	if InputManager.is_action_just_pressed_for_player(player_index, &"attack_light") or InputManager.is_action_pressed_for_player(player_index, &"attack_light"):
 		intent_buffer.record(&"attack_light")
-	if Input.is_action_just_pressed(&"attack_heavy"):
+	if InputManager.is_action_just_pressed_for_player(player_index, &"attack_heavy") or InputManager.is_action_pressed_for_player(player_index, &"attack_heavy"):
 		intent_buffer.record(&"attack_heavy")
-	if Input.is_action_just_pressed(&"dodge"):
+	if InputManager.is_action_just_pressed_for_player(player_index, &"dodge"):
 		intent_buffer.record(&"dodge")
-	if Input.is_action_just_pressed(&"technique"):
-		print("[PC] technique pressed! state=%s" % state_machine.current_state_name)
+	if InputManager.is_action_just_pressed_for_player(player_index, &"technique"):
 		intent_buffer.record(&"technique")
-	if Input.is_action_just_pressed(&"block"):
+	if InputManager.is_action_just_pressed_for_player(player_index, &"block"):
 		_is_block_held = true
 		_parry_timer = Constants.PARRY_WINDOW
 	else:
-		_is_block_held = Input.is_action_pressed(&"block")
+		_is_block_held = InputManager.is_action_pressed_for_player(player_index, &"block")
 		if not _is_block_held:
 			_parry_timer = 0.0
 	# Launcher is triggered by attack_light + move_up — detected at consume time
 	# in idle/run states, not as its own input action.
 
-	# Right analog stick spell casting — one-shot detection per flick.
-	_poll_spell_stick()
+	# Lock-on targeting toggle/cycle.
+	if InputManager.is_action_just_pressed_for_player(player_index, &"lock_on"):
+		try_lock_on()
+
+	# Button-based spell casting (LB=heal, RT=projectile, LT=AoE).
+	if InputManager.is_action_just_pressed_for_player(player_index, &"heal_spell"):
+		_pending_spell = _SPELL_HEAL
+		intent_buffer.record(&"spell")
+	if InputManager.is_action_just_pressed_for_player(player_index, &"projectile_attack"):
+		_pending_spell = _SPELL_FIREBALL
+		intent_buffer.record(&"spell")
+	if InputManager.is_action_just_pressed_for_player(player_index, &"aoe_spell"):
+		_pending_spell = _SPELL_BURST
+		intent_buffer.record(&"spell")
 
 
 ## Apply gravity with fall multiplier.
@@ -176,41 +191,83 @@ func _update_platform_collision() -> void:
 	set_collision_mask_value(8, velocity.y <= 0.0)
 
 
-## Apply belt-depth (Z-axis) movement from input.
-func apply_belt_depth(delta: float) -> void:
-	var z_input := Input.get_axis(&"move_up", &"move_down")
-	if absf(z_input) > Constants.INPUT_DEADZONE:
-		velocity.z = z_input * Constants.PLAYER_BELT_DEPTH_SPEED
-	else:
-		velocity.z = move_toward(velocity.z, 0.0, Constants.PLAYER_BELT_DEPTH_SPEED * delta * Constants.BELT_DEPTH_DECEL_MULTIPLIER)
-
-
-## Clamp position to belt-depth range and arena bounds.
-func clamp_belt_depth() -> void:
-	position.z = clampf(
-		position.z,
-		-Constants.PLAYER_BELT_DEPTH_RANGE,
-		Constants.PLAYER_BELT_DEPTH_RANGE
-	)
+## Clamp position to arena/room bounds with soft pushback on all 4 edges.
+func clamp_to_bounds() -> void:
+	var min_x := -100.0
+	var max_x := 100.0
+	var min_z := -100.0
+	var max_z := 100.0
 	if GameState.room_bounds_active:
-		position.x = clampf(position.x, GameState.room_bounds_min_x, GameState.room_bounds_max_x)
+		min_x = GameState.room_bounds_min_x
+		max_x = GameState.room_bounds_max_x
+		min_z = GameState.room_bounds_min_z
+		max_z = GameState.room_bounds_max_z
 	elif GameState.encounter_active:
-		position.x = clampf(position.x, GameState.arena_lock_min_x, GameState.arena_lock_max_x)
+		min_x = GameState.arena_lock_min_x
+		max_x = GameState.arena_lock_max_x
+		min_z = GameState.arena_lock_min_z
+		max_z = GameState.arena_lock_max_z
+	# Soft pushback on all 4 edges.
+	var zone := Constants.BOUNDARY_PUSHBACK_ZONE
+	var force := Constants.BOUNDARY_PUSHBACK_FORCE
+	if position.x < min_x + zone:
+		var t := 1.0 - clampf((position.x - min_x) / zone, 0.0, 1.0)
+		velocity.x = maxf(velocity.x, t * force)
+	elif position.x > max_x - zone:
+		var t := 1.0 - clampf((max_x - position.x) / zone, 0.0, 1.0)
+		velocity.x = minf(velocity.x, -t * force)
+	if position.z < min_z + zone:
+		var t := 1.0 - clampf((position.z - min_z) / zone, 0.0, 1.0)
+		velocity.z = maxf(velocity.z, t * force)
+	elif position.z > max_z - zone:
+		var t := 1.0 - clampf((max_z - position.z) / zone, 0.0, 1.0)
+		velocity.z = minf(velocity.z, -t * force)
+	# Hard clamp as fallback.
+	position.x = clampf(position.x, min_x, max_x)
+	position.z = clampf(position.z, min_z, max_z)
 
 
-## Get horizontal movement input axis.
+## Get unified XZ movement input vector from stick/keyboard.
+func get_movement_input_vector() -> Vector2:
+	var x := InputManager.get_axis_for_player(player_index, &"move_left", &"move_right")
+	var z := InputManager.get_axis_for_player(player_index, &"move_up", &"move_down")
+	var input := Vector2(x, z)
+	if input.length() > 1.0:
+		input = input.normalized()
+	return input
+
+
+## Backward-compatible single-axis movement input.
 func get_movement_input() -> float:
-	return Input.get_axis(&"move_left", &"move_right")
+	return InputManager.get_axis_for_player(player_index, &"move_left", &"move_right")
 
 
-## Update facing direction based on input. Uses Y rotation (not scale) to avoid 3D culling issues.
+## Update facing angle and direction from 2D input. Smoothly rotates model.
+## When lock_target is set, facing auto-tracks the locked enemy instead.
+func update_facing_from_input(input: Vector2, delta: float) -> void:
+	if lock_target and is_instance_valid(lock_target):
+		var dir := lock_target.global_position - global_position
+		dir.y = 0.0
+		if dir.length_squared() > 0.001:
+			var target_angle := atan2(-dir.z, dir.x)
+			var weight := clampf(Constants.LOCK_ON_FACING_LERP_SPEED * delta, 0.0, 1.0)
+			facing_angle = lerp_angle(facing_angle, target_angle, weight)
+			if not is_finite(facing_angle):
+				facing_angle = target_angle
+			facing_direction = Vector3(cos(facing_angle), 0.0, -sin(facing_angle))
+			model_pivot.rotation.y = facing_angle
+		return
+	if input.length_squared() < Constants.INPUT_DEADZONE * Constants.INPUT_DEADZONE:
+		return
+	var target_angle := atan2(-input.y, input.x)
+	facing_angle = lerp_angle(facing_angle, target_angle, Constants.PLAYER_FACING_LERP_SPEED * delta)
+	facing_direction = Vector3(cos(facing_angle), 0.0, -sin(facing_angle))
+	model_pivot.rotation.y = facing_angle
+
+
+## Legacy facing update (deprecated — use update_facing_from_input).
 func update_facing(x_input: float) -> void:
-	if x_input > 0.0:
-		facing_right = true
-		model_pivot.rotation_degrees.y = 0.0
-	elif x_input < 0.0:
-		facing_right = false
-		model_pivot.rotation_degrees.y = 180.0
+	update_facing_from_input(Vector2(x_input, 0.0), 0.1)
 
 
 ## Consume the jump buffer after a successful jump.
@@ -354,22 +411,22 @@ func _on_hit_received(attack_data: AttackDef, attacker: Node3D) -> void:
 	# Apply elemental status effects from the incoming attack.
 	CombatSystem.apply_status_if_applicable(resolved_attack, self, status_effects)
 
-	# Apply knockback — horizontal only so characters slide back, not up/down.
-	var kb_dir := resolved_attack.knockback_direction
-	kb_dir.y = 0.0
-	if attacker.global_position.x > global_position.x:
-		kb_dir.x = -absf(kb_dir.x)
-	else:
-		kb_dir.x = absf(kb_dir.x)
-	var knockback_x := kb_dir.normalized().x * resolved_attack.knockback_force
-	velocity.x = _apply_edge_safe_knockback(knockback_x)
+	# Apply knockback — primarily X-axis, Z dampened for belt-scroller feel.
+	var push_dir := (global_position - attacker.global_position)
+	push_dir.y = 0.0
+	if push_dir.length_squared() < 0.001:
+		push_dir = -facing_direction
+	push_dir = push_dir.normalized()
+	var kb_force := resolved_attack.knockback_force
+	velocity.x = push_dir.x * kb_force
+	velocity.z = push_dir.z * kb_force * Constants.KNOCKBACK_Z_DAMPEN
 
 	if health.is_dead():
 		state_machine.transition_to(&"dead")
 	elif blocked:
 		# Guarded hits don't force hurt state; keep control responsive.
 		flash_mesh(Color(0.7, 0.9, 1.0))
-		restore_mesh()
+		get_tree().create_timer(Constants.BLOCK_FLASH_DURATION).timeout.connect(restore_mesh)
 	else:
 		state_machine.transition_to(&"hurt")
 
@@ -475,6 +532,8 @@ func _load_character_from_game_state() -> void:
 		var def := load(def_path) as CharacterDef
 		if def:
 			configure(def)
+			if character_model:
+				character_model.reload_model(def)
 	# Restore XP/level from save data.
 	if char_id in GameState.character_data:
 		var data: Dictionary = GameState.character_data[char_id]
@@ -531,51 +590,118 @@ func _apply_edge_safe_knockback(raw_knockback_x: float) -> float:
 	return raw_knockback_x * edge_scale
 
 
-## Assign preloaded spell resources to right stick direction slots.
-func _load_spell_slots() -> void:
-	_spell_slots = {
-		&"left": _SPELL_FIREBALL,
-		&"down": _SPELL_HEAL,
-		&"right": _SPELL_BURST,
-		&"up": _SPELL_BARRIER,
-	}
-
-
-## Poll right analog stick and record a spell intent when the stick crosses
-## the deadzone threshold. One-shot: only fires on the initial flick, not
-## while the stick is held.
-func _poll_spell_stick() -> void:
-	var rx := Input.get_joy_axis(0, JOY_AXIS_RIGHT_X)
-	var ry := Input.get_joy_axis(0, JOY_AXIS_RIGHT_Y)
-	var deadzone := Constants.SPELL_STICK_DEADZONE
-	var magnitude := Vector2(rx, ry).length()
-
-	if magnitude < deadzone:
-		_spell_stick_was_active = false
-		return
-
-	if _spell_stick_was_active:
-		return  # Already fired this flick — wait for stick to return to center.
-
-	_spell_stick_was_active = true
-
-	# Determine dominant cardinal direction.
-	var direction: StringName
-	if absf(rx) >= absf(ry):
-		direction = &"right" if rx > 0.0 else &"left"
-	else:
-		direction = &"down" if ry > 0.0 else &"up"
-
-	var spell: TechniqueDef = _spell_slots.get(direction) as TechniqueDef
-	if spell:
-		_pending_spell = spell
-		intent_buffer.record(&"spell")
-
-
-## Get the spell queued by the right stick. Clears after retrieval.
+## Get the spell queued by a button press. Clears after retrieval.
 func get_pending_spell() -> TechniqueDef:
 	var spell := _pending_spell
 	_pending_spell = null
 	return spell
+
+
+# ---------- Lock-On Targeting ----------
+
+
+## Toggle lock-on: if unlocked → lock nearest; if locked → cycle to next.
+func try_lock_on() -> void:
+	if lock_target and is_instance_valid(lock_target):
+		_cycle_lock_target()
+	else:
+		var nearest := _find_nearest_enemy()
+		if nearest:
+			_set_lock_target(nearest)
+
+
+## Find the closest alive enemy within range.
+func _find_nearest_enemy() -> Node3D:
+	var enemies := get_tree().get_nodes_in_group(&"enemies")
+	var best: Node3D = null
+	var best_dist := Constants.LOCK_ON_MAX_RANGE * Constants.LOCK_ON_MAX_RANGE
+	for e in enemies:
+		if not e is CharacterBody3D or not is_instance_valid(e):
+			continue
+		if "health" in e and e.health and e.health.is_dead():
+			continue
+		var d := global_position.distance_squared_to(e.global_position)
+		if d < best_dist:
+			best_dist = d
+			best = e
+	return best
+
+
+## Cycle to the next enemy by angular offset from current target.
+func _cycle_lock_target() -> void:
+	var enemies := get_tree().get_nodes_in_group(&"enemies")
+	var candidates: Array[Node3D] = []
+	for e in enemies:
+		if not e is CharacterBody3D or not is_instance_valid(e):
+			continue
+		if "health" in e and e.health and e.health.is_dead():
+			continue
+		if e != lock_target:
+			candidates.append(e)
+	if candidates.is_empty():
+		# Only one enemy or none — release lock.
+		_clear_lock_target()
+		return
+	# Sort by distance and pick the closest one that isn't the current target.
+	var origin := global_position
+	candidates.sort_custom(func(a: Node3D, b: Node3D) -> bool:
+		return origin.distance_squared_to(a.global_position) < origin.distance_squared_to(b.global_position)
+	)
+	_set_lock_target(candidates[0])
+
+
+## Set a new lock target and create the reticle visual.
+func _set_lock_target(target: Node3D) -> void:
+	lock_target = target
+	_destroy_reticle()
+	_create_reticle()
+	EventBus.combat_lock_on_changed.emit(self, lock_target)
+
+
+## Clear the lock target and remove the reticle.
+func _clear_lock_target() -> void:
+	lock_target = null
+	_destroy_reticle()
+	EventBus.combat_lock_on_changed.emit(self, null)
+
+
+## Handle an enemy dying — if it was our lock target, auto-switch or unlock.
+func _on_any_enemy_died(enemy: Node, _type: StringName, _pos: Vector3) -> void:
+	if enemy == lock_target:
+		var next := _find_nearest_enemy()
+		if next and next != enemy:
+			_set_lock_target(next)
+		else:
+			_clear_lock_target()
+
+
+## Create a gold ring reticle under the locked enemy.
+func _create_reticle() -> void:
+	if not lock_target or not is_instance_valid(lock_target):
+		return
+	_lock_reticle = MeshInstance3D.new()
+	var torus := TorusMesh.new()
+	torus.inner_radius = 0.6
+	torus.outer_radius = 0.8
+	torus.rings = 16
+	torus.ring_segments = 16
+	_lock_reticle.mesh = torus
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.85, 0.2, 0.8)
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.no_depth_test = true
+	mat.render_priority = 1
+	_lock_reticle.material_override = mat
+	_lock_reticle.rotation.x = -PI * 0.5
+	_lock_reticle.position.y = 0.1
+	lock_target.add_child(_lock_reticle)
+
+
+## Remove the reticle node if it exists.
+func _destroy_reticle() -> void:
+	if _lock_reticle and is_instance_valid(_lock_reticle):
+		_lock_reticle.queue_free()
+	_lock_reticle = null
 
 

@@ -6,18 +6,19 @@ extends Node
 
 # --- Movement ---
 const PLAYER_MAX_HP: float = 100.0
-const PLAYER_RUN_SPEED: float = 8.0
+const PLAYER_MOVE_SPEED: float = 8.0
+const PLAYER_RUN_SPEED: float = 8.0  ## Deprecated: use PLAYER_MOVE_SPEED
 const INPUT_DEADZONE: float = 0.1
-const BELT_DEPTH_DECEL_MULTIPLIER: float = 5.0
 const PLAYER_JUMP_VELOCITY: float = 14.0
 const PLAYER_GRAVITY: float = 35.0
 const PLAYER_FALL_GRAVITY_MULTIPLIER: float = 1.5
 const PLAYER_COYOTE_TIME: float = 0.1
 const PLAYER_JUMP_BUFFER_TIME: float = 0.12
-const PLAYER_BELT_DEPTH_SPEED: float = 3.0
-const PLAYER_BELT_DEPTH_RANGE: float = 1.2
 const PLAYER_VARIABLE_JUMP_DAMPEN: float = 0.5
 const PLAYER_LAND_RECOVERY_TIME: float = 0.08
+const BOUNDARY_PUSHBACK_ZONE: float = 2.0
+const BOUNDARY_PUSHBACK_FORCE: float = 12.0
+const PLAYER_FACING_LERP_SPEED: float = 12.0
 
 # --- Dodge ---
 const DODGE_SPEED: float = 14.0
@@ -32,7 +33,9 @@ const TECHNIQUE_BUFFER_WINDOW: float = 0.5
 
 # --- Combat ---
 const PLAYER_COMBO_MAX_STEPS: int = 3
-const HITBOX_X_OFFSET: float = 1.5
+const HITBOX_OFFSET_DISTANCE: float = 1.8
+const HITBOX_X_OFFSET: float = 1.8  ## Deprecated: use HITBOX_OFFSET_DISTANCE
+const KNOCKBACK_Z_DAMPEN: float = 0.3  ## Belt-scroller Z-knockback dampening (0=none, 1=full)
 const LIGHT_ATTACK_DAMAGE: float = 10.0
 const HEAVY_ATTACK_DAMAGE: float = 25.0
 const PLAYER_HIT_STUN_DURATION: float = 0.3
@@ -55,27 +58,37 @@ const MAX_JUGGLE_COUNT: int = 5
 const JUGGLE_LAUNCH_VELOCITY: float = 12.0
 const JUGGLE_GRAVITY_MULTIPLIER: float = 0.8
 
+# --- Lock-On ---
+const LOCK_ON_MAX_RANGE: float = 20.0
+const LOCK_ON_FACING_LERP_SPEED: float = 20.0
+const LOCK_ON_RETICLE_BOB_SPEED: float = 2.0
+
 # --- Block & Parry ---
 const BLOCK_DAMAGE_REDUCTION: float = 0.9
+const BLOCK_FLASH_DURATION: float = 0.1
 const PARRY_WINDOW: float = 0.15
 const PARRY_STUN_DURATION: float = 0.5
 
 # --- Camera ---
+const CAMERA_ISO_PITCH: float = -45.0
+const CAMERA_ISO_YAW: float = 45.0
+const CAMERA_ISO_DISTANCE: float = 18.0
+const CAMERA_ISO_OFFSET: Vector3 = Vector3(12.7, 12.7, 12.7)
 const CAMERA_SHAKE_LIGHT: float = 0.4
 const CAMERA_SHAKE_HEAVY: float = 0.8
 const CAMERA_SHAKE_KILL: float = 1.2
 const CAMERA_SHAKE_DURATION: float = 0.3
 const CAMERA_FOLLOW_SMOOTHING: float = 5.0
-const CAMERA_DEADZONE_X: float = 1.5
-const CAMERA_DEADZONE_Y: float = 1.0
-const CAMERA_ZOOM_MIN: float = 0.8
-const CAMERA_ZOOM_MAX: float = 1.5
+const CAMERA_DEADZONE_X: float = 1.2
+const CAMERA_DEADZONE_Y: float = 0.8
+const CAMERA_ZOOM_MIN: float = 0.6
+const CAMERA_ZOOM_MAX: float = 2.0
 const CAMERA_SPRING_STIFFNESS: float = 120.0
 const CAMERA_SPRING_DAMPING: float = 22.0
 const CAMERA_TRAUMA_DECAY_RATE: float = 2.5
 const CAMERA_MAX_SHAKE_OFFSET: float = 0.15
 const CAMERA_MAX_SHAKE_ROLL: float = 0.02
-const CAMERA_BREATH_AMPLITUDE: float = 0.012
+const CAMERA_BREATH_AMPLITUDE: float = 0.0
 const CAMERA_BREATH_SPEED: float = 1.8
 const CAMERA_LOOK_AHEAD_STRENGTH: float = 2.5
 const CAMERA_LOOK_AHEAD_SMOOTHING: float = 3.0
@@ -84,6 +97,10 @@ const CAMERA_THREAT_BIAS_SMOOTHING: float = 2.0
 const CAMERA_VELOCITY_CAP: float = 30.0
 const CAMERA_FOV_ZOOM_SPEED: float = 2.0
 const CAMERA_DIRECTOR_EASE_TIME: float = 0.6
+
+# --- Camera Manual Zoom ---
+const CAMERA_ZOOM_STICK_SPEED: float = 1.5
+const CAMERA_ZOOM_DEFAULT: float = 1.0
 
 # --- Enemy AI ---
 const ENEMY_HIT_STUN_DURATION: float = 0.7
@@ -98,6 +115,7 @@ const ENEMY_ATTACK_TOKEN_COUNT: int = 2
 const ENEMY_ATTACK_COOLDOWN: float = 1.5
 const ENEMY_RUSHER_SPEED: float = 4.0
 const ENEMY_RUSHER_ATTACK_RANGE: float = 1.5
+const ENEMY_ENGAGEMENT_RANGE: float = 8.0
 
 # --- Enemy: Ranged ---
 const ENEMY_RANGED_HP: float = 35.0
@@ -167,6 +185,15 @@ const HUD_HP_BAR_LERP_SPEED: float = 5.0
 const HIT_PARTICLE_COUNT: int = 8
 const DEATH_PARTICLE_COUNT: int = 16
 const SCREEN_FLASH_DURATION: float = 0.05
+const HIT_SPARK_POOL_SIZE: int = 8
+const HIT_SPARK_LIFETIME: float = 0.15
+const ELEMENT_COLORS: Dictionary = {
+	&"": Color(1, 0.95, 0.6),
+	&"fire": Color(1, 0.4, 0.1),
+	&"ice": Color(0.3, 0.7, 1.0),
+	&"lightning": Color(0.7, 0.5, 1.0),
+	&"dark": Color(0.5, 0.1, 0.6),
+}
 
 # --- Physics ---
 const WORLD_GRAVITY: float = 35.0
@@ -248,6 +275,7 @@ const SCENE_DUNGEON: String = "res://scenes/dungeon/dungeon_run.tscn"
 const SCENE_SPLASH: String = "res://scenes/ui/splash_screen.tscn"
 const SCENE_TITLE: String = "res://scenes/ui/title_screen.tscn"
 const SCENE_CUTSCENE: String = "res://scenes/ui/cutscene_player.tscn"
+const SCENE_CHARACTER_SELECT: String = "res://scenes/ui/character_select.tscn"
 
 # --- Juice & Polish ---
 const JUICE_SLOW_MO_SCALE: float = 0.15
@@ -272,6 +300,7 @@ const OVERWORLD_NODES: Array[String] = [
 # --- Town Data ---
 const TOWN_DATA: Dictionary = {
 	"piata": "res://resources/towns/piata.tres",
+	"zema": "res://resources/towns/zema.tres",
 }
 
 # --- Player Model ---
@@ -280,22 +309,40 @@ const TOWN_DATA: Dictionary = {
 const CHARACTER_DEFS: Dictionary = {
 	&"alys": "res://resources/characters/alys.tres",
 	&"chaz": "res://resources/characters/chaz.tres",
+	&"hahn": "res://resources/characters/hahn.tres",
 	&"rune": "res://resources/characters/rune.tres",
+	&"gryz": "res://resources/characters/gryz.tres",
+	&"rika": "res://resources/characters/rika.tres",
+	&"demi": "res://resources/characters/demi.tres",
 	&"wren": "res://resources/characters/wren.tres",
+	&"raja": "res://resources/characters/raja.tres",
+	&"kyra": "res://resources/characters/kyra.tres",
 }
 
 const CHARACTER_DISPLAY_NAMES: Dictionary = {
 	&"alys": "Alys Landale",
 	&"chaz": "Chaz Ashley",
+	&"hahn": "Hahn Mahlay",
 	&"rune": "Rune Walsh",
+	&"gryz": "Gryz",
+	&"rika": "Rika",
+	&"demi": "Demi",
 	&"wren": "Wren",
+	&"raja": "Raja",
+	&"kyra": "Kyra Tierney",
 }
 
 const CHARACTER_ROLES: Dictionary = {
 	&"alys": "Hunter",
 	&"chaz": "Warrior",
+	&"hahn": "Scholar",
 	&"rune": "Mage",
+	&"gryz": "Berserker",
+	&"rika": "Guardian",
+	&"demi": "Mechanic",
 	&"wren": "Android",
+	&"raja": "Bishop",
+	&"kyra": "Esper",
 }
 
 const PLAYER_MODEL_BASE_PATH: String = "res://assets/models/characters/alys/idle.fbx"
@@ -415,6 +462,13 @@ const TOUCH_BUTTON_SMALL_SIZE: float = 60.0
 const TOUCH_OPACITY_ACTIVE: float = 0.8
 const TOUCH_OPACITY_IDLE: float = 0.4
 const TOUCH_LAYER: int = 50
+
+# --- Object Pool ---
+const POOL_DEACTIVATE_POSITION: Vector3 = Vector3(9999, 9999, 9999)
+
+# --- Spawn Padding ---
+const ENCOUNTER_SPAWN_PADDING: float = 2.0
+const STAGE_SPAWN_PADDING: float = 3.0
 
 # --- Performance ---
 const OBJECT_POOL_ENEMY_COUNT: int = 20

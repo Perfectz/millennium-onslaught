@@ -22,8 +22,13 @@ func _ready() -> void:
 	monitorable = false
 
 
-## Configure the trigger's collision shape at the given world X position.
+## Configure the trigger's collision shape at the given world X position (backward compat).
 func setup_shape(world_x: float) -> void:
+	setup_shape_at(Vector3(world_x, Constants.STAGE_TRIGGER_BOX_HEIGHT * 0.5, 0.0))
+
+
+## Configure the trigger's collision shape at an arbitrary world position.
+func setup_shape_at(world_pos: Vector3) -> void:
 	var shape := BoxShape3D.new()
 	shape.size = Vector3(
 		Constants.STAGE_TRIGGER_BOX_WIDTH,
@@ -33,7 +38,7 @@ func setup_shape(world_x: float) -> void:
 	var col := CollisionShape3D.new()
 	col.shape = shape
 	add_child(col)
-	global_position = Vector3(world_x, Constants.STAGE_TRIGGER_BOX_HEIGHT * 0.5, 0.0)
+	global_position = world_pos
 
 
 ## Check if this trigger has already been activated.

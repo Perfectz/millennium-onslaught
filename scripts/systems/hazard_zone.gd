@@ -21,8 +21,18 @@ enum HazardType { DAMAGE_OVER_TIME, INSTANT, KNOCKBACK }
 ## Track entities inside and their tick timers.
 var _entities_in_zone: Dictionary = {}  # Node -> float (time since last tick)
 
+## Cached attack data to avoid per-tick allocation.
+var _cached_attack: AttackDef = null
+
 
 func _ready() -> void:
+	# Pre-allocate reusable AttackDef for damage application.
+	_cached_attack = AttackDef.new()
+	_cached_attack.base_damage = damage
+	_cached_attack.damage_multiplier = 1.0
+	_cached_attack.knockback_force = 0.0
+	_cached_attack.hitstop_duration = 0.0
+
 	collision_layer = 0
 	collision_mask = Constants.LAYER_PLAYER | Constants.LAYER_ENEMY
 	monitoring = true
@@ -73,13 +83,8 @@ func _apply_damage(entity: Node) -> void:
 	# Try to find a hurtbox on the entity.
 	var hurtbox := _find_hurtbox(entity)
 	if hurtbox:
-		var attack_data := {
-			"damage": damage,
-			"knockback": Vector3.ZERO,
-			"hitstop_duration": 0.0,
-			"attack_type": &"hazard",
-		}
-		hurtbox.hit_received.emit(attack_data, null)
+		_cached_attack.base_damage = damage
+		hurtbox.hit_received.emit(_cached_attack, self)
 
 
 ## Apply knockback force to an entity.

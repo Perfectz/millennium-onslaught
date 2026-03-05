@@ -1,9 +1,13 @@
 ## Manages a 3D character model loaded from FBX files.
 ## Loads base mesh from FBX, imports skeletal animations from separate FBX files,
 ## and handles material flash/restore for combat feedback.
+## Supports per-character models via CharacterDef, falling back to Constants.
 class_name CharacterModel
 extends Node3D
 
+
+## The active CharacterDef driving model/skin/animations.
+var _character_def: CharacterDef = null
 
 ## The loaded model root node.
 var _model_root: Node3D = null
@@ -30,18 +34,100 @@ func _ready() -> void:
 	_load_all_animations()
 
 
+## Set the CharacterDef before the model loads (call before _ready or use reload_model).
+func setup(def: CharacterDef) -> void:
+	_character_def = def
+
+
+## Reload the entire model with a new CharacterDef (used for mid-dungeon character switching).
+func reload_model(def: CharacterDef) -> void:
+	_character_def = def
+	_clear_model()
+	_load_base_model()
+	_apply_skin()
+	_load_all_animations()
+
+
+## Get the base model path from CharacterDef or fall back to Constants.
+func _get_base_path() -> String:
+	if _character_def and not _character_def.model_base_path.is_empty():
+		return _character_def.model_base_path
+	return Constants.PLAYER_MODEL_BASE_PATH
+
+
+## Get the skin texture path from CharacterDef or fall back to Constants.
+func _get_skin_path() -> String:
+	if _character_def and not _character_def.model_skin_path.is_empty():
+		return _character_def.model_skin_path
+	return Constants.PLAYER_MODEL_SKIN_PATH
+
+
+## Get the model scale from CharacterDef or fall back to Constants.
+func _get_model_scale() -> Vector3:
+	if _character_def:
+		return _character_def.model_scale
+	return Constants.PLAYER_MODEL_SCALE
+
+
+## Get the model offset from CharacterDef or fall back to Constants.
+func _get_model_offset() -> Vector3:
+	if _character_def:
+		return _character_def.model_offset
+	return Constants.PLAYER_MODEL_OFFSET
+
+
+## Get the model Y rotation from CharacterDef or fall back to Constants.
+func _get_rotation_y() -> float:
+	if _character_def:
+		return _character_def.model_rotation_y
+	return Constants.PLAYER_MODEL_ROTATION_Y
+
+
+## Get the animation dictionary from CharacterDef or fall back to Constants.
+func _get_animations() -> Dictionary:
+	if _character_def and not _character_def.model_animations.is_empty():
+		return _character_def.model_animations
+	return Constants.PLAYER_MODEL_ANIMATIONS
+
+
+## Remove old model and reset state for a fresh load.
+## Uses immediate free (not queue_free) so the old AnimationPlayer is fully gone
+## before the new model loads, preventing animation conflicts.
+func _clear_model() -> void:
+	if anim_player:
+		anim_player.stop()
+	anim_player = null
+	if _model_root:
+		remove_child(_model_root)
+		_model_root.free()
+		_model_root = null
+	# Remove fallback meshes that were added directly.
+	var to_remove: Array[Node] = []
+	for child in get_children():
+		if child.name == "FallbackMesh":
+			to_remove.append(child)
+	for child in to_remove:
+		remove_child(child)
+		child.free()
+	_mesh_instance = null
+	_all_meshes.clear()
+	_original_materials.clear()
+	_current_animation = &""
+
+
 ## Load the base FBX model which contains the mesh + skeleton.
 func _load_base_model() -> void:
-	var scene := load(Constants.PLAYER_MODEL_BASE_PATH) as PackedScene
+	var base_path := _get_base_path()
+	var scene := load(base_path) as PackedScene
 	if scene == null:
-		push_warning("CharacterModel: Failed to load model: " + Constants.PLAYER_MODEL_BASE_PATH)
+		push_warning("CharacterModel: Failed to load model: " + base_path)
 		_create_fallback_mesh()
 		return
 
 	_model_root = scene.instantiate() as Node3D
-	_model_root.scale = Constants.PLAYER_MODEL_SCALE
-	_model_root.position = Constants.PLAYER_MODEL_OFFSET
-	_model_root.rotation_degrees = Vector3(0.0, Constants.PLAYER_MODEL_ROTATION_Y, 0.0)
+	_model_root.scale = _get_model_scale()
+	_model_root.position = _get_model_offset()
+	_model_root.rotation_degrees = Vector3(0.0, _get_rotation_y(), 0.0)
 	add_child(_model_root)
 
 	_mesh_instance = _find_mesh_instance(_model_root)
@@ -70,9 +156,10 @@ func _load_base_model() -> void:
 
 ## Apply the skin texture to the model mesh.
 func _apply_skin() -> void:
-	if _mesh_instance == null or Constants.PLAYER_MODEL_SKIN_PATH == "":
+	var skin_path := _get_skin_path()
+	if _mesh_instance == null or skin_path.is_empty():
 		return
-	var tex := load(Constants.PLAYER_MODEL_SKIN_PATH) as Texture2D
+	var tex := load(skin_path) as Texture2D
 	if tex == null:
 		return
 	var mat := StandardMaterial3D.new()
@@ -84,12 +171,13 @@ func _apply_skin() -> void:
 	_save_original_materials()
 
 
-## Load all animations defined in Constants.PLAYER_MODEL_ANIMATIONS from FBX files.
+## Load all animations from the CharacterDef or Constants animation dictionary.
 func _load_all_animations() -> void:
 	if anim_player == null:
 		return
-	for anim_name: String in Constants.PLAYER_MODEL_ANIMATIONS:
-		var fbx_path: String = Constants.PLAYER_MODEL_ANIMATIONS[anim_name]
+	var animations := _get_animations()
+	for anim_name: String in animations:
+		var fbx_path: String = animations[anim_name]
 		_import_animation_from_fbx(anim_name, fbx_path)
 
 

@@ -181,18 +181,22 @@ func _on_save_game() -> void:
 
 
 func _on_open_party() -> void:
+	visible = false
 	var party_screen := PartyScreen.new()
 	party_screen.closed.connect(func() -> void:
 		party_screen.queue_free()
+		visible = true
 		_resume_btn.grab_focus()
 	)
 	add_child(party_screen)
 
 
 func _on_open_settings() -> void:
+	visible = false
 	var settings_screen := SettingsMenu.new()
 	settings_screen.closed.connect(func() -> void:
 		settings_screen.queue_free()
+		visible = true
 		_resume_btn.grab_focus()
 	)
 	add_child(settings_screen)

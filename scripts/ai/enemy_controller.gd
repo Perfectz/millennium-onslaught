@@ -17,7 +17,10 @@ var health: HealthComponent
 var juggle: JuggleTracker
 var status_effects: StatusEffectTracker
 var target: Node3D = null
-var facing_right: bool = true
+var facing_angle: float = 0.0
+var facing_direction: Vector3 = Vector3.RIGHT
+var facing_right: bool:
+	get: return absf(facing_angle) < PI * 0.5
 
 ## Shield enemy: hits absorbed before stagger.
 var _block_hits_remaining: int = 0
@@ -71,6 +74,7 @@ func _ready() -> void:
 	state_machine.add_state(&"block", EnemyStateBlock.new())
 	state_machine.add_state(&"stagger", EnemyStateStagger.new())
 	state_machine.add_state(&"boss_phase_check", EnemyStateBossPhaseCheck.new())
+	state_machine.add_state(&"dormant", EnemyStateDormant.new())
 
 	state_machine.set_initial_state(&"idle")
 	hurtbox.hit_received.connect(_on_hit_received)
@@ -97,6 +101,17 @@ func _physics_process(delta: float) -> void:
 		if health.is_dead():
 			state_machine.transition_to(&"dead")
 	_update_health_bar()
+	clamp_to_bounds()
+
+
+## Clamp enemy position to active arena/room bounds (X + Z).
+func clamp_to_bounds() -> void:
+	if GameState.room_bounds_active:
+		position.x = clampf(position.x, GameState.room_bounds_min_x, GameState.room_bounds_max_x)
+		position.z = clampf(position.z, GameState.room_bounds_min_z, GameState.room_bounds_max_z)
+	elif GameState.encounter_active:
+		position.x = clampf(position.x, GameState.arena_lock_min_x, GameState.arena_lock_max_x)
+		position.z = clampf(position.z, GameState.arena_lock_min_z, GameState.arena_lock_max_z)
 
 
 func set_target(new_target: Node3D) -> void:
@@ -106,18 +121,21 @@ func set_target(new_target: Node3D) -> void:
 func update_facing_toward_target() -> void:
 	if target == null or not is_instance_valid(target) or not is_inside_tree():
 		return
-	if target.global_position.x > global_position.x:
-		facing_right = true
-		model_pivot.rotation_degrees.y = 0.0
-	else:
-		facing_right = false
-		model_pivot.rotation_degrees.y = 180.0
+	var dir := target.global_position - global_position
+	dir.y = 0.0
+	if dir.length_squared() > 0.001:
+		facing_angle = atan2(-dir.z, dir.x)
+		facing_direction = dir.normalized()
+		model_pivot.rotation.y = facing_angle
 
 
+## Euclidean XZ distance to target (isometric — both axes matter equally).
 func get_horizontal_distance_to_target() -> float:
 	if target == null or not is_instance_valid(target) or not is_inside_tree():
 		return INF
-	return absf(global_position.x - target.global_position.x)
+	var diff := global_position - target.global_position
+	diff.y = 0.0
+	return diff.length()
 
 
 ## Get the move speed from enemy def or fall back to rusher speed.
@@ -189,9 +207,11 @@ func apply_gravity(delta: float) -> void:
 func _on_hit_received(attack_data: AttackDef, attacker: Node3D) -> void:
 	if not is_instance_valid(attacker):
 		return
-	# Shield enemies can block frontal attacks.
+	# Shield enemies can block frontal attacks (dot product check).
 	if is_blocking():
-		var attacker_in_front := (attacker.global_position.x > global_position.x) == facing_right
+		var to_attacker := (attacker.global_position - global_position).normalized()
+		to_attacker.y = 0.0
+		var attacker_in_front := facing_direction.dot(to_attacker) > 0.0
 		if attacker_in_front:
 			var reduced_damage := attack_data.base_damage * (1.0 - Constants.ENEMY_SHIELD_BLOCK_REDUCTION)
 			health.take_damage(reduced_damage)
@@ -221,17 +241,18 @@ func _on_hit_received(attack_data: AttackDef, attacker: Node3D) -> void:
 	_hit_lag_timer = lag_dur
 	_hit_lag_frozen = true
 
-	# Apply knockback — horizontal only so characters slide back, not up/down.
-	var kb_dir := attack_data.knockback_direction
-	kb_dir.y = 0.0
-	if attacker.global_position.x > global_position.x:
-		kb_dir.x = -absf(kb_dir.x)
-	else:
-		kb_dir.x = absf(kb_dir.x)
+	# Apply knockback — primarily X-axis, Z dampened for belt-scroller feel.
+	var push_dir := (global_position - attacker.global_position)
+	push_dir.y = 0.0
+	if push_dir.length_squared() < 0.001:
+		push_dir = -facing_direction
+	push_dir = push_dir.normalized()
 	var resistance := 0.0
 	if enemy_def:
 		resistance = clampf(enemy_def.knockback_resistance, 0.0, 0.95)
-	velocity.x = kb_dir.normalized().x * attack_data.knockback_force * (1.0 - resistance)
+	var kb_strength := attack_data.knockback_force * (1.0 - resistance)
+	velocity.x = push_dir.x * kb_strength
+	velocity.z = push_dir.z * kb_strength * Constants.KNOCKBACK_Z_DAMPEN
 
 	# Launcher check.
 	if attack_data.is_launcher and not juggle.is_airborne():
@@ -357,10 +378,18 @@ func _update_health_bar() -> void:
 
 
 func _apply_mesh_color(color: Color) -> void:
-	if enemy_model:
+	# Try the enemy model first, then fall back to a static Mesh child.
+	if enemy_model and enemy_model.has_method("set_base_color"):
+		enemy_model.set_base_color(color)
 		return
 
 	var mesh_instance := model_pivot.get_node_or_null("Mesh")
+	if mesh_instance == null and enemy_model:
+		# Search within the enemy model for a MeshInstance3D child.
+		for child in enemy_model.get_children():
+			if child is MeshInstance3D:
+				mesh_instance = child
+				break
 	if mesh_instance and mesh_instance is MeshInstance3D:
 		var mat := StandardMaterial3D.new()
 		mat.albedo_color = color
@@ -368,7 +397,8 @@ func _apply_mesh_color(color: Color) -> void:
 
 
 ## Configure this enemy from an EnemyDef at runtime (for pool reuse).
-func configure(def: EnemyDef, player_target: Node3D) -> void:
+## When start_dormant is true, the enemy stands idle until the player is in range.
+func configure(def: EnemyDef, player_target: Node3D, start_dormant: bool = false) -> void:
 	enemy_def = def
 	enemy_type = def.enemy_type
 	health.reset(def.base_hp)
@@ -384,8 +414,8 @@ func configure(def: EnemyDef, player_target: Node3D) -> void:
 	status_effects.clear_all()
 	_apply_mesh_color(def.mesh_color)
 	collision_layer = Constants.LAYER_ENEMY
-	collision_mask = Constants.LAYER_ENVIRONMENT | Constants.LAYER_PLATFORM
-	state_machine.set_initial_state(&"idle")
+	collision_mask = Constants.LAYER_ENVIRONMENT | Constants.LAYER_PLAYER | Constants.LAYER_ENEMY | Constants.LAYER_PLATFORM
+	state_machine.set_initial_state(&"dormant" if start_dormant else &"idle")
 
 
 ## Apply a stagger override used by parries/guard breaks.
@@ -396,10 +426,14 @@ func apply_parry_stun(duration: float, parry_player: Node3D = null) -> void:
 	stop_blocking()
 	hitbox.disable()
 	if is_instance_valid(parry_player):
-		var push_dir := signf(global_position.x - parry_player.global_position.x)
-		if is_zero_approx(push_dir):
-			push_dir = -1.0 if facing_right else 1.0
-		velocity.x = push_dir * maxf(Constants.KNOCKBACK_LIGHT * 0.8, 2.5)
+		var push_dir := (global_position - parry_player.global_position)
+		push_dir.y = 0.0
+		if push_dir.length_squared() < 0.001:
+			push_dir = -facing_direction
+		push_dir = push_dir.normalized()
+		var push_force := maxf(Constants.KNOCKBACK_LIGHT * 0.8, 2.5)
+		velocity.x = push_dir.x * push_force
+		velocity.z = push_dir.z * push_force * Constants.KNOCKBACK_Z_DAMPEN
 	state_machine.transition_to(&"stagger")
 
 

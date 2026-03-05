@@ -24,7 +24,7 @@ func physics_process(delta: float) -> StringName:
 	entity.velocity.z = move_toward(entity.velocity.z, 0.0, Constants.KNOCKBACK_FRICTION * delta)
 	player.apply_gravity(delta)
 	entity.move_and_slide()
-	player.clamp_belt_depth()
+	player.clamp_to_bounds()
 
 	if _timer <= 0.0:
 		# Consume any action buffered during stun for instant response on recovery.

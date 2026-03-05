@@ -18,9 +18,19 @@ func enter(_previous_state: StringName) -> void:
 	player.combo_tracker.reset()
 	player.play_animation(&"dodge")
 
-	var direction := 1.0 if player.facing_right else -1.0
-	entity.velocity.x = direction * Constants.DODGE_SPEED
+	# Dodge in input direction (360°), or facing direction if no input.
+	var input := player.get_movement_input_vector()
+	var dodge_dir: Vector3
+	if input.length() > Constants.INPUT_DEADZONE:
+		dodge_dir = Vector3(input.x, 0.0, input.y).normalized()
+		player.facing_angle = atan2(-input.y, input.x)
+		player.facing_direction = dodge_dir
+		player.model_pivot.rotation.y = player.facing_angle
+	else:
+		dodge_dir = player.facing_direction
+	entity.velocity.x = dodge_dir.x * Constants.DODGE_SPEED
 	entity.velocity.y = 0.0
+	entity.velocity.z = dodge_dir.z * Constants.DODGE_SPEED
 	EventBus.combat_dodge.emit(player)
 
 
@@ -49,13 +59,13 @@ func physics_process(delta: float) -> StringName:
 
 	player.apply_gravity(delta)
 	entity.move_and_slide()
-	player.clamp_belt_depth()
+	player.clamp_to_bounds()
 
 	if _timer <= 0.0:
 		if entity.is_on_floor():
 			# Consume buffered actions for instant post-dodge response.
 			if player.intent_buffer.consume(&"attack_light"):
-				if Input.is_action_pressed("move_up"):
+				if InputManager.is_action_pressed_for_player(player.player_index, &"move_up"):
 					return &"attack_launcher"
 				return &"attack_light"
 			if player.intent_buffer.consume(&"attack_heavy"):

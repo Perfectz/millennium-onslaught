@@ -41,12 +41,13 @@ func set_initial_state(state_name: StringName) -> void:
 	_current_state.enter(&"")
 
 
-## Transition to a new state by name.
+## Transition to a new state by name. Self-transitions are allowed (re-enters the state).
 func transition_to(new_state_name: StringName) -> void:
-	if new_state_name == current_state_name:
-		return
 	if new_state_name not in _states:
 		push_error("StateMachine: State not found: " + str(new_state_name))
+		return
+	if _current_state == null:
+		push_error("StateMachine: No current state set. Call set_initial_state() first.")
 		return
 	_current_state.exit()
 	previous_state_name = current_state_name
@@ -63,6 +64,8 @@ func get_current_state() -> State:
 func _process(delta: float) -> void:
 	if _current_state == null or not is_instance_valid(entity):
 		return
+	if get_tree().paused:
+		return
 	var next := _current_state.process(delta)
 	if next != &"":
 		transition_to(next)
@@ -70,6 +73,8 @@ func _process(delta: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	if _current_state == null or not is_instance_valid(entity):
+		return
+	if get_tree().paused:
 		return
 	var capped := minf(delta, Constants.DELTA_CAP)
 	var next := _current_state.physics_process(capped)

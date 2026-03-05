@@ -1,0 +1,22 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/techniques/technique_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+technique_id = &"nafoi"
+display_name = "Nafoi"
+description = "Launches a searing fireball that incinerates on contact."
+tp_cost = 22.0
+base_damage = 24.0
+element_type = &"fire"
+status_effect_chance = 0.35
+status_effect_duration = 3.0
+knockback_force = 9.0
+is_projectile = true
+projectile_speed = 18.0
+aoe_radius = 0.0
+animation_name = &"attack_heavy"
+particle_color = Color(1, 0.4, 0.15, 1)
+unlock_level = 1
+scales_with_magic = true

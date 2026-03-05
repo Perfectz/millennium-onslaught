@@ -23,3 +23,6 @@ extends Resource
 
 ## Optional: when set, this dungeon uses continuous stage mode instead of rooms.
 @export var stage_def: StageDef = null
+
+## Optional: multi-stage mode — multiple continuous stages played sequentially (e.g. 3 floors).
+@export var stage_defs: Array[StageDef] = []

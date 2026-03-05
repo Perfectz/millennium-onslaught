@@ -1,0 +1,93 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/ui/hub_screen_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+screen_background_title = "%TOWN% DISTRICT"
+screen_background_subtitle = "PETRIFIED SETTLEMENT / NO IMAGE ATTACHED"
+left_header = "Facilities"
+info_header = "Facility Details"
+hint_text = "UP/DOWN OR D-PAD: NAVIGATE   ENTER/A: ENTER   B/ESC: LEAVE TOWN"
+default_accent = Color(0.6, 0.55, 0.7, 1)
+dialogue_header = "TOWN TALK"
+entries = [{
+"accent": Color(0.92, 0.72, 0.32, 1),
+"context_subtitle": "EQUIPMENT DISPLAY PLACEHOLDER",
+"context_title": "INTERIOR: ZEMA TRADERS",
+"description": "A makeshift trading post set up by a traveling merchant. Stocks valley-forged weapons and armor suited for mid-range expeditions.",
+"dialogue": "Even in a town of stone, there's business to be done. The valley ores make fine weapons -- take a look.",
+"id": "zema_shop",
+"level": "Stock: Available",
+"menu_label": "Zema Traders",
+"portrait_code": "MERCHANT / TRADER",
+"speaker": "Traveling Merchant",
+"story_subtitle": "SHOP INVENTORY / 16:9 PLACEHOLDER",
+"story_title": "LOCAL INTEL",
+"title": "Zema Traders"
+}, {
+"accent": Color(0.45, 0.85, 0.55, 1),
+"context_subtitle": "REST AREA PLACEHOLDER",
+"context_title": "INTERIOR: ZEMA REST HOUSE",
+"description": "A small shelter maintained by travelers. More expensive than Piata, but a full rest restores your party before venturing into the valley.",
+"dialogue": "Not the coziest place, but it beats sleeping in the canyon. Rest up -- the valley doesn't show mercy.",
+"id": "zema_inn",
+"level": "Rest Cost: 75 Meseta",
+"menu_label": "Zema Rest House",
+"portrait_code": "INNKEEPER / HOST",
+"speaker": "Rest House Keeper",
+"story_subtitle": "INN EXTERIOR / 16:9 PLACEHOLDER",
+"story_title": "LOCAL INTEL",
+"title": "Zema Rest House"
+}, {
+"accent": Color(0.55, 0.55, 0.75, 1),
+"context_subtitle": "STONE STATUES PLACEHOLDER",
+"context_title": "EXTERIOR: STONE STATUE SQUARE",
+"description": "The town square, now a silent gallery of petrified residents. Their frozen expressions tell a story of terror and surprise.",
+"dialogue": "... ... ... The stone figure stares ahead, mouth frozen mid-sentence. Whatever happened here struck without warning.",
+"dialogue_thread": [{
+"speaker": "Petrified Elder",
+"dialogue": "... ... ... (The stone figure stares ahead, mouth frozen mid-sentence. Whatever happened here struck without warning.)",
+"portrait_code": "ELDER / PETRIFIED"
+}, {
+"speaker": "Wandering Scholar",
+"dialogue": "Every inhabitant, petrified in an instant. The ancient texts mention a medicine called Alshline that could reverse this.",
+"portrait_code": "HAHN / SCHOLAR",
+"portrait_image": "res://assets/textures/portraits/hahn_portrait.png"
+}],
+"id": "statue_square",
+"level": "Petrified Inhabitants",
+"menu_label": "Stone Statue Square",
+"portrait_code": "HAHN / SCHOLAR",
+"portrait_image": "res://assets/textures/portraits/hahn_portrait.png",
+"speaker": "Wandering Scholar",
+"story_subtitle": "TOWN CENTER / 16:9 PLACEHOLDER",
+"story_title": "LOCAL INTEL",
+"title": "Stone Statue Square"
+}, {
+"accent": Color(0.65, 0.55, 0.9, 1),
+"context_subtitle": "ARCHIVE TERMINAL PLACEHOLDER",
+"context_title": "INTERIOR: PETRIFIED ARCHIVE",
+"description": "A small library within Zema, its shelves and scrolls untouched by the petrification. Records here may hold clues about the Alshline cure.",
+"dialogue": "If we could retrieve the Alshline from Birth Valley, perhaps we could save these people. But the valley is crawling with monsters.",
+"dialogue_thread": [{
+"speaker": "Wandering Scholar",
+"dialogue": "The Alshline plant only grows deep in Birth Valley. It's our only hope to reverse the petrification.",
+"portrait_code": "HAHN / SCHOLAR",
+"portrait_image": "res://assets/textures/portraits/hahn_portrait.png"
+}, {
+"speaker": "Wandering Scholar",
+"dialogue": "Be careful if you go looking for it. The creatures in the valley are far more dangerous than anything near Piata.",
+"portrait_code": "HAHN / SCHOLAR",
+"portrait_image": "res://assets/textures/portraits/hahn_portrait.png"
+}],
+"id": "petrified_archive",
+"level": "Archives: Accessible",
+"menu_label": "Petrified Archive",
+"portrait_code": "HAHN / SCHOLAR",
+"portrait_image": "res://assets/textures/portraits/hahn_portrait.png",
+"speaker": "Wandering Scholar",
+"story_subtitle": "ANCIENT RECORDS / 16:9 PLACEHOLDER",
+"story_title": "LOCAL INTEL",
+"title": "Petrified Archive"
+}]

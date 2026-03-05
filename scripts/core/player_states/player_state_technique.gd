@@ -58,6 +58,7 @@ func enter(_previous_state: StringName) -> void:
 	_elapsed = 0.0
 	_timer = _attack_data.windup_time
 	entity.velocity.x = 0.0
+	entity.velocity.z = 0.0
 
 	player.combo_tracker.reset()
 	var anim_name: StringName = &"attack_heavy"
@@ -89,9 +90,10 @@ func _fire_projectile() -> void:
 		_projectile_scene = load("res://scenes/projectiles/player_projectile.tscn")
 	# Spawn projectile at player position offset by facing direction.
 	var projectile: Area3D = _projectile_scene.instantiate()
-	var dir := Vector3.RIGHT if player.facing_right else Vector3.LEFT
+	var dir := player.facing_direction
 	var spawn_pos := entity.global_position + Vector3(0, 0.9, 0)
-	spawn_pos.x += Constants.HITBOX_X_OFFSET * (1.0 if player.facing_right else -1.0)
+	spawn_pos.x += Constants.HITBOX_X_OFFSET * player.facing_direction.x
+	spawn_pos.z += Constants.HITBOX_X_OFFSET * player.facing_direction.z
 
 	# Must add to tree before setting global_position.
 	entity.get_tree().root.add_child(projectile)
@@ -131,6 +133,7 @@ func physics_process(delta: float) -> StringName:
 	_elapsed += delta
 	player.apply_gravity(delta)
 	entity.move_and_slide()
+	player.clamp_to_bounds()
 
 	match _phase:
 		0:  # windup
@@ -168,10 +171,7 @@ func _spawn_muzzle_flash(pos: Vector3) -> void:
 	mat.color = particle_col
 
 	var player: PlayerController = entity as PlayerController
-	if player.facing_right:
-		mat.direction = Vector3(1, 0, 0)
-	else:
-		mat.direction = Vector3(-1, 0, 0)
+	mat.direction = player.facing_direction
 	flash.process_material = mat
 
 	var draw_mat := StandardMaterial3D.new()

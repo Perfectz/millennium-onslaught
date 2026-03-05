@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/equipment/equipment_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+equipment_id = &"stone_edge"
+display_name = "Stone Edge"
+description = "A jagged blade carved from petrified stone."
+cost = 350
+slot = &"weapon"
+stat_bonuses = {"strength": 6}
+passive_effects = {}
+required_level = 5

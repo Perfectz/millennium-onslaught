@@ -28,9 +28,14 @@ var _enemy_group: String = "enemies"
 var _trauma: float = 0.0
 var _shake_time: float = 0.0
 var _prev_shake_ticks: int = 0
+var _prev_shake_offset_x: float = 0.0
+var _prev_shake_offset_y: float = 0.0
+var _prev_shake_roll: float = 0.0
 
 ## Subtle breathing (micro-motion when idle).
 var _breath_time: float = 0.0
+var _prev_breath_offset_x: float = 0.0
+var _prev_breath_offset_y: float = 0.0
 
 ## Arena lock state.
 var _arena_locked: bool = false
@@ -41,8 +46,18 @@ var _arena_max_z: float = 100.0
 ## Easing progress (0 = unlocked, 1 = fully locked).
 var _lock_blend: float = 0.0
 
+## Stage-mode forward bounds (always hard-clamp when active).
+var _stage_bounds_active: bool = false
+var _stage_min_x: float = -100.0
+var _stage_max_x: float = 100.0
+var _stage_min_z: float = -100.0
+var _stage_max_z: float = 100.0
+
 ## Dynamic FOV zoom.
 var _base_fov: float = 40.0
+
+## Manual zoom via right stick Y axis.
+var _manual_zoom: float = Constants.CAMERA_ZOOM_DEFAULT
 
 ## Director cue state.
 var _director_target: Vector3 = Vector3.ZERO
@@ -65,13 +80,19 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	if target_path:
 		_target = get_node(target_path) as Node3D
-	if _target:
-		_offset = position - _target.position
+	# Isometric camera offset and rotation.
+	_offset = Constants.CAMERA_ISO_OFFSET
+	rotation_degrees = Vector3(Constants.CAMERA_ISO_PITCH, Constants.CAMERA_ISO_YAW, 0.0)
 	_base_fov = fov
 	_prev_shake_ticks = Time.get_ticks_usec()
 
+	# Snap camera to correct position on first frame (no spring lag).
+	if _target:
+		position = _target.position + _offset
+
 	EventBus.encounter_arena_locked.connect(_on_arena_locked)
 	EventBus.encounter_arena_unlocked.connect(_on_arena_unlocked)
+	EventBus.stage_bounds_updated.connect(_on_stage_bounds_updated)
 	EventBus.camera_director_cue.connect(_on_director_cue)
 	EventBus.camera_director_return.connect(_on_director_return)
 
@@ -108,7 +129,7 @@ func _physics_process(delta: float) -> void:
 		_process_photo_mode(delta)
 		return
 
-	if _target == null:
+	if _target == null or not is_instance_valid(_target):
 		return
 
 	var capped_delta := minf(delta, Constants.DELTA_CAP)
@@ -119,13 +140,20 @@ func _physics_process(delta: float) -> void:
 		Mode.DIRECTOR:
 			_process_director(capped_delta)
 
+	# --- Manual zoom (right stick Y) ---
+	_update_manual_zoom(capped_delta)
+
 	# --- Trauma shake (real-time, works during hitstop) ---
 	_update_trauma_shake()
 
-	# --- Breathing ---
+	# --- Breathing (subtract previous offset before applying new) ---
+	position.x -= _prev_breath_offset_x
+	position.y -= _prev_breath_offset_y
 	_breath_time += capped_delta * Constants.CAMERA_BREATH_SPEED
-	position.y += sin(_breath_time) * Constants.CAMERA_BREATH_AMPLITUDE
-	position.x += sin(_breath_time * 0.7) * Constants.CAMERA_BREATH_AMPLITUDE * 0.3
+	_prev_breath_offset_y = sin(_breath_time) * Constants.CAMERA_BREATH_AMPLITUDE
+	_prev_breath_offset_x = sin(_breath_time * 0.7) * Constants.CAMERA_BREATH_AMPLITUDE * 0.3
+	position.y += _prev_breath_offset_y
+	position.x += _prev_breath_offset_x
 
 	# --- Dynamic FOV zoom ---
 	_update_dynamic_fov(capped_delta)
@@ -133,7 +161,10 @@ func _physics_process(delta: float) -> void:
 
 ## Main follow mode — dead zones, look-ahead, threat bias, arena lock, spring.
 func _process_follow(delta: float) -> void:
-	var desired := _target.position + _offset
+	# Scale zoom along the offset direction only (no lateral drift).
+	var zoom_dir := _offset.normalized()
+	var zoom_offset := _offset + zoom_dir * (_manual_zoom - 1.0) * _offset.length()
+	var desired := _target.position + zoom_offset
 
 	# --- Velocity look-ahead (anticipation beats reaction) ---
 	_update_look_ahead(delta)
@@ -159,6 +190,11 @@ func _process_follow(delta: float) -> void:
 	var free_z := desired.z
 	var clamped_z := clampf(desired.z, _arena_min_z + _offset.z, _arena_max_z + _offset.z)
 	desired.z = lerpf(free_z, clamped_z, _lock_blend)
+
+	# --- Stage-mode forward bounds (hard clamp, always active) ---
+	if _stage_bounds_active:
+		desired.x = clampf(desired.x, _stage_min_x + _offset.x, _stage_max_x + _offset.x)
+		desired.z = clampf(desired.z, _stage_min_z + _offset.z, _stage_max_z + _offset.z)
 
 	# --- X dead zone — ignore minor horizontal corrections ---
 	var x_diff := desired.x - position.x
@@ -209,9 +245,9 @@ func _update_look_ahead(delta: float) -> void:
 	# Horizontal look-ahead proportional to movement speed.
 	if absf(body.velocity.x) > 0.5:
 		target_look.x = signf(body.velocity.x) * Constants.CAMERA_LOOK_AHEAD_STRENGTH
-	# Slight Z look-ahead for belt-depth.
-	if absf(body.velocity.z) > 0.3:
-		target_look.z = signf(body.velocity.z) * Constants.CAMERA_LOOK_AHEAD_STRENGTH * 0.4
+	# Z look-ahead at equal strength (isometric — all directions matter equally).
+	if absf(body.velocity.z) > 0.5:
+		target_look.z = signf(body.velocity.z) * Constants.CAMERA_LOOK_AHEAD_STRENGTH
 	_look_ahead_offset = _look_ahead_offset.lerp(target_look, delta * Constants.CAMERA_LOOK_AHEAD_SMOOTHING)
 
 
@@ -264,6 +300,17 @@ func _update_dynamic_fov(delta: float) -> void:
 	fov = lerpf(fov, target_fov, delta * Constants.CAMERA_FOV_ZOOM_SPEED)
 
 
+## Update manual zoom from right stick Y / keyboard +/- and R3 reset.
+## Uses Godot action system (no hardcoded device IDs).
+func _update_manual_zoom(delta: float) -> void:
+	var zoom_axis := Input.get_axis(&"camera_zoom_in", &"camera_zoom_out")
+	if absf(zoom_axis) > 0.01:
+		_manual_zoom += zoom_axis * Constants.CAMERA_ZOOM_STICK_SPEED * delta
+		_manual_zoom = clampf(_manual_zoom, Constants.CAMERA_ZOOM_MIN, Constants.CAMERA_ZOOM_MAX)
+	if Input.is_action_just_pressed(&"camera_reset"):
+		_manual_zoom = Constants.CAMERA_ZOOM_DEFAULT
+
+
 ## Add trauma for screen shake (0-1 range, squared for intensity curve).
 func add_trauma(amount: float) -> void:
 	_trauma = minf(_trauma + amount, 1.0)
@@ -278,7 +325,15 @@ func _update_trauma_shake() -> void:
 	# Clamp real_delta to avoid explosion after long pauses.
 	real_delta = minf(real_delta, 0.1)
 
+	# Remove previous frame's shake offset before applying new.
+	position.x -= _prev_shake_offset_x
+	position.y -= _prev_shake_offset_y
+	rotation.z -= _prev_shake_roll
+
 	if _trauma <= 0.0:
+		_prev_shake_offset_x = 0.0
+		_prev_shake_offset_y = 0.0
+		_prev_shake_roll = 0.0
 		return
 
 	_shake_time += real_delta * 30.0
@@ -293,9 +348,16 @@ func _update_trauma_shake() -> void:
 	position.y += offset_y
 	rotation.z += roll
 
+	_prev_shake_offset_x = offset_x
+	_prev_shake_offset_y = offset_y
+	_prev_shake_roll = roll
+
 	_trauma = maxf(_trauma - Constants.CAMERA_TRAUMA_DECAY_RATE * real_delta, 0.0)
 	if _trauma <= 0.001:
 		_trauma = 0.0
+		_prev_shake_offset_x = 0.0
+		_prev_shake_offset_y = 0.0
+		_prev_shake_roll = 0.0
 		rotation.z = 0.0
 
 
@@ -361,6 +423,14 @@ func _on_arena_locked(min_x: float, max_x: float, min_z: float, max_z: float) ->
 
 func _on_arena_unlocked() -> void:
 	_arena_locked = false
+
+
+func _on_stage_bounds_updated(min_x: float, max_x: float, min_z: float, max_z: float) -> void:
+	_stage_bounds_active = true
+	_stage_min_x = min_x
+	_stage_max_x = max_x
+	_stage_min_z = min_z
+	_stage_max_z = max_z
 
 
 ## Director cue: cut/glide camera to a target position, hold, then return.

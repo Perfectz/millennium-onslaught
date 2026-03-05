@@ -47,6 +47,10 @@ func return_instance(instance: Node) -> void:
 	if not instance.get_meta(&"pool_active", false):
 		push_warning("ObjectPool: Double-return detected for pool '%s'. Ignoring." % key)
 		return
+	if key not in _pools:
+		push_warning("ObjectPool: Key '%s' not registered in pool. Freeing instead." % key)
+		instance.queue_free()
+		return
 	_deactivate(instance)
 	_pools[key].append(instance)
 	_active_counts[key] = maxi(0, _active_counts.get(key, 1) - 1)
@@ -74,4 +78,4 @@ func _deactivate(instance: Node) -> void:
 	instance.visible = false
 	instance.set_meta(&"pool_active", false)
 	if instance is Node3D:
-		instance.position = Vector3(9999, 9999, 9999)
+		instance.position = Constants.POOL_DEACTIVATE_POSITION

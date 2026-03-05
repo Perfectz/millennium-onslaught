@@ -12,6 +12,7 @@ const DefaultDungeonData := preload("res://resources/dungeons/dungeon_1.tres")
 ## Registry mapping dungeon_id to resource path.
 const DUNGEON_REGISTRY: Dictionary = {
 	&"dungeon_1": "res://resources/dungeons/dungeon_1.tres",
+	&"birth_valley": "res://resources/dungeons/birth_valley.tres",
 }
 const PauseMenuScript := preload("res://scripts/ui/pause_menu.gd")
 const LevelUpScreenScript := preload("res://scripts/ui/level_up_screen.gd")
@@ -28,9 +29,14 @@ var _hud: Node = null
 var _transitioning: bool = false
 var _pause_menu: CanvasLayer = null
 var _char_switch_cooldown: float = 0.0
+var _stage_defs: Array[StageDef] = []
+var _current_stage_index: int = 0
 
 
 func _ready() -> void:
+	# Start with black screen to cover loading.
+	fade_rect.color = Color(0, 0, 0, 1)
+
 	# Log connected controllers for debugging.
 	var joypads := Input.get_connected_joypads()
 	if joypads.is_empty():
@@ -53,11 +59,23 @@ func _ready() -> void:
 	# Resolve which dungeon to load.
 	var dungeon_def := _resolve_dungeon_def()
 
-	# Route: stage mode vs room mode.
-	if dungeon_def.stage_def != null:
+	# Route: multi-stage vs single-stage vs room mode.
+	if dungeon_def.stage_defs.size() > 0:
+		_start_multi_stage_mode(dungeon_def)
+	elif dungeon_def.stage_def != null:
 		_start_stage_mode(dungeon_def)
 	else:
 		_start_room_mode(dungeon_def)
+
+	# Fade in from loading screen after everything is set up.
+	_fade_in_from_loading()
+
+
+## Fade in from loading screen after stage setup completes.
+func _fade_in_from_loading() -> void:
+	await get_tree().process_frame
+	var tween := create_tween()
+	tween.tween_property(fade_rect, "color:a", 0.0, 0.5)
 
 
 func _setup_juice_systems() -> void:
@@ -104,6 +122,73 @@ func _start_stage_mode(dungeon_def: DungeonDef) -> void:
 	_stage_runner.setup(
 		dungeon_def.stage_def, player, _wave_system, EnemyScene, self)
 	_dungeon_manager.start_dungeon(dungeon_def, _wave_system)
+
+
+## Start in multi-stage mode — multiple continuous stages played sequentially.
+func _start_multi_stage_mode(dungeon_def: DungeonDef) -> void:
+	_active_dungeon_def = dungeon_def
+	_stage_defs = dungeon_def.stage_defs
+	_current_stage_index = 0
+	# Set total encounters across ALL stages.
+	var total := 0
+	for stage_def in _stage_defs:
+		total += stage_def.get_encounter_count()
+	GameState.stage_total_encounters = total
+	GameState.stage_encounters_completed = 0
+	GameState.current_stage_index = 0
+	# Listen for individual stage completions.
+	EventBus.stage_completed.connect(_on_stage_completed)
+	# Load first stage.
+	_load_stage(0)
+	_dungeon_manager.start_dungeon(dungeon_def, _wave_system)
+
+
+## Load a specific stage by index, cleaning up the previous one.
+func _load_stage(index: int) -> void:
+	# Clean up previous stage runner.
+	if _stage_runner:
+		_wave_system.clear_all_enemies()
+		_stage_runner.queue_free()
+		_stage_runner = null
+	_current_stage_index = index
+	GameState.current_stage_index = index
+	_stage_runner = StageRunner.new()
+	_stage_runner.name = "StageRunner"
+	add_child(_stage_runner)
+	_stage_runner.setup(
+		_stage_defs[index], player, _wave_system, EnemyScene, self)
+
+
+## Handle stage completion in multi-stage mode — transition to next floor.
+func _on_stage_completed(_stage_id: StringName) -> void:
+	if _stage_defs.is_empty():
+		return  # Not in multi-stage mode.
+	if _current_stage_index + 1 >= _stage_defs.size():
+		return  # Last stage — DungeonManager handles dungeon completion.
+	# Transition to next stage with fade.
+	_do_stage_transition(_current_stage_index + 1)
+
+
+## Fade transition between stages (floors).
+func _do_stage_transition(next_index: int) -> void:
+	_transitioning = true
+	var half_time := Constants.DUNGEON_ROOM_TRANSITION_TIME * 0.5
+	# Fade out.
+	var tween := create_tween()
+	tween.tween_property(fade_rect, "color:a", 1.0, half_time)
+	await tween.finished
+	# Load next stage.
+	_load_stage(next_index)
+	# Fade in.
+	tween = create_tween()
+	tween.tween_property(fade_rect, "color:a", 0.0, half_time)
+	await tween.finished
+	_transitioning = false
+	var stage_name := _stage_defs[next_index].stage_name if next_index < _stage_defs.size() else ""
+	if stage_name != "":
+		ToastSystem.show_toast(stage_name, Color(0.8, 0.9, 1.0))
+	else:
+		ToastSystem.show_toast("FLOOR %d" % (next_index + 1), Color(0.8, 0.9, 1.0))
 
 
 ## Start in legacy room-based mode.
@@ -154,13 +239,19 @@ func _load_room(index: int) -> void:
 		player.global_position = spawn.global_position
 	player.velocity = Vector3.ZERO
 
-	# Set wave system spawn points from room markers.
+	# Set wave system spawn points from room markers (4 edges for isometric).
 	var left := _current_room.get_node_or_null("SpawnPoints/EnemySpawnLeft") as Node3D
 	var right := _current_room.get_node_or_null("SpawnPoints/EnemySpawnRight") as Node3D
+	var top := _current_room.get_node_or_null("SpawnPoints/EnemySpawnTop") as Node3D
+	var bottom := _current_room.get_node_or_null("SpawnPoints/EnemySpawnBottom") as Node3D
 	if left:
 		_wave_system.spawn_left = left.global_position
 	if right:
 		_wave_system.spawn_right = right.global_position
+	if top:
+		_wave_system.spawn_top = top.global_position
+	if bottom:
+		_wave_system.spawn_bottom = bottom.global_position
 
 	_update_room_bounds(_current_room)
 
@@ -170,7 +261,8 @@ func _update_room_bounds(room: Node3D) -> void:
 	if bounds.x >= bounds.y:
 		GameState.clear_room_bounds()
 		return
-	GameState.set_room_bounds(bounds.x, bounds.y)
+	var z_bounds := _extract_room_bounds_z(room)
+	GameState.set_room_bounds(bounds.x, bounds.y, z_bounds.x, z_bounds.y)
 
 
 func _extract_room_bounds(room: Node3D) -> Vector2:
@@ -206,6 +298,22 @@ func _extract_box_bounds_x(collision_shape: CollisionShape3D) -> Vector2:
 	var half_x := box.size.x * absf(collision_shape.global_transform.basis.get_scale().x) * 0.5
 	var center_x := collision_shape.global_position.x
 	return Vector2(center_x - half_x, center_x + half_x)
+
+
+## Extract Z bounds from room floor collision shape.
+func _extract_room_bounds_z(room: Node3D) -> Vector2:
+	var floor_shape := room.get_node_or_null("Floor/CollisionShape3D") as CollisionShape3D
+	if floor_shape:
+		var box := floor_shape.shape as BoxShape3D
+		if box:
+			var half_z := box.size.z * absf(floor_shape.global_transform.basis.get_scale().z) * 0.5
+			var center_z := floor_shape.global_position.z
+			var min_z := center_z - half_z + Constants.ROOM_BOUNDS_INNER_PADDING
+			var max_z := center_z + half_z - Constants.ROOM_BOUNDS_INNER_PADDING
+			if min_z < max_z:
+				return Vector2(min_z, max_z)
+	# Default Z bounds for isometric play area.
+	return Vector2(-8.0, 8.0)
 
 
 ## Feed XP to the active player in real-time when an enemy dies.
@@ -375,7 +483,7 @@ func _switch_character(direction: int) -> void:
 	# Save current character HP/TP to GameState.
 	if current_id in GameState.character_data:
 		GameState.character_data[current_id]["hp"] = player.health.get_current_hp()
-		GameState.character_data[current_id]["tp"] = player.tp_tracker.get_tp()
+		GameState.character_data[current_id]["tp"] = player.tp_tracker.get_current_tp()
 	# Rotate active_party so new character is at index 0.
 	var old_id := current_id
 	GameState.active_party.erase(new_id)

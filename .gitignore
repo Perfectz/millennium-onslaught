@@ -32,3 +32,4 @@ reports/
 
 # Asset staging (not production)
 humandropbox/
+.claude/worktrees/

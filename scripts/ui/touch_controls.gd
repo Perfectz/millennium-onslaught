@@ -78,9 +78,9 @@ func _build_ui() -> void:
 		Color(0.3, 0.5, 0.8, Constants.TOUCH_OPACITY_IDLE))
 
 	# Secondary row (above primary).
-	_add_action_button(&"technique", "TEC", btn_small,
+	_add_action_button(&"heal_spell", "HEAL", btn_small,
 		Vector2(right_x, bottom_y - btn_size * 1.4),
-		Color(0.6, 0.3, 0.8, Constants.TOUCH_OPACITY_IDLE))
+		Color(0.3, 0.8, 0.4, Constants.TOUCH_OPACITY_IDLE))
 	_add_action_button(&"block", "BLK", btn_small,
 		Vector2(right_x + btn_small * 1.2, bottom_y - btn_size * 1.4),
 		Color(0.4, 0.6, 0.7, Constants.TOUCH_OPACITY_IDLE))
@@ -142,7 +142,7 @@ func _on_touch_end(idx: int) -> void:
 		var action: StringName = _button_touches[idx]
 		_button_touches.erase(idx)
 		if action in _button_nodes:
-			(_button_nodes[action] as Control).modulate.a = 1.0
+			(_button_nodes[action] as Control).modulate.a = Constants.TOUCH_OPACITY_IDLE
 		_inject_action_release(action)
 
 

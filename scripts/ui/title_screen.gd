@@ -286,19 +286,23 @@ func _on_new_game_pressed() -> void:
 
 
 func _on_continue_pressed() -> void:
+	visible = false
 	var save_load_menu := preload("res://scripts/ui/save_load_menu.gd").new()
 	save_load_menu.load_only = true
 	save_load_menu.closed.connect(func() -> void:
 		save_load_menu.queue_free()
+		visible = true
 		_focus_first_available()
 	)
 	add_child(save_load_menu)
 
 
 func _on_options_pressed() -> void:
+	visible = false
 	var settings := SettingsMenu.new()
 	settings.closed.connect(func() -> void:
 		settings.queue_free()
+		visible = true
 		_focus_first_available()
 	)
 	add_child(settings)
@@ -331,6 +335,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		or event.is_action_pressed("jump") \
 		or event.is_action_pressed("ui_accept"):
 		var focused := vp.gui_get_focus_owner()
-		if focused is Button:
+		if focused is Button and not (focused as Button).disabled:
 			(focused as Button).emit_signal("pressed")
 			vp.set_input_as_handled()

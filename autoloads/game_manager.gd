@@ -135,6 +135,12 @@ func go_to_town(town_id: StringName) -> void:
 	transition_to_scene(Constants.SCENE_TOWN)
 
 
+## Navigate to character select before entering a dungeon.
+func go_to_character_select(dungeon_id: StringName) -> void:
+	GameState.pending_dungeon_id = dungeon_id
+	transition_to_scene(Constants.SCENE_CHARACTER_SELECT)
+
+
 ## Navigate to a dungeon by dungeon_id.
 func go_to_dungeon(dungeon_id: StringName) -> void:
 	GameState.pending_dungeon_id = dungeon_id

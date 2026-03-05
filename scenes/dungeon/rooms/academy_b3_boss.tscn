@@ -1,0 +1,157 @@
+[gd_scene load_steps=19 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_basecolor.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_normal.png" id="tex_floor_normal"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_roughness.png" id="tex_floor_roughness"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_ambientOcclusion.png" id="tex_floor_ao"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/wall_pbr/Cracked_Mud_001_COLOR.jpg" id="tex_wall_color"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/wall_pbr/Cracked_Mud_001_NORM.jpg" id="tex_wall_normal"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/wall_pbr/Cracked_Mud_001_ROUGH.jpg" id="tex_wall_rough"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/wall_pbr/Cracked_Mud_001_OCC.jpg" id="tex_wall_ao"]
+[ext_resource type="PackedScene" path="res://assets/models/dungeon_props/column2.fbx" id="column2"]
+[ext_resource type="PackedScene" path="res://assets/models/dungeon_props/torch.fbx" id="torch"]
+[ext_resource type="PackedScene" path="res://assets/models/dungeon_props/skull.fbx" id="skull"]
+[ext_resource type="PackedScene" path="res://assets/models/dungeon_props/banner_wall.fbx" id="banner_wall"]
+
+[sub_resource type="BoxShape3D" id="floor_shape"]
+size = Vector3(28, 1, 28)
+
+[sub_resource type="BoxMesh" id="floor_mesh"]
+size = Vector3(28, 1, 28)
+
+[sub_resource type="StandardMaterial3D" id="floor_mat"]
+albedo_texture = ExtResource("1")
+normal_enabled = true
+normal_texture = ExtResource("tex_floor_normal")
+roughness_texture = ExtResource("tex_floor_roughness")
+ao_enabled = true
+ao_light_affect = 1.0
+ao_texture = ExtResource("tex_floor_ao")
+uv1_scale = Vector3(9, 9, 1)
+texture_filter = 3
+
+[sub_resource type="StandardMaterial3D" id="wall_mat"]
+albedo_color = Color(0.35, 0.25, 0.3, 1)
+albedo_texture = ExtResource("tex_wall_color")
+normal_enabled = true
+normal_texture = ExtResource("tex_wall_normal")
+roughness_texture = ExtResource("tex_wall_rough")
+ao_enabled = true
+ao_light_affect = 1.0
+ao_texture = ExtResource("tex_wall_ao")
+uv1_scale = Vector3(2, 1, 1)
+texture_filter = 3
+roughness = 0.9
+
+[sub_resource type="BoxShape3D" id="wall_ns_shape"]
+size = Vector3(28, 3, 1)
+
+[sub_resource type="BoxMesh" id="wall_ns_mesh"]
+size = Vector3(28, 3, 1)
+
+[sub_resource type="BoxMesh" id="foundation_mesh"]
+size = Vector3(30, 10, 30)
+
+[node name="AcademyB3Boss" type="Node3D"]
+
+[node name="Floor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, -0.5, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("floor_shape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("floor_mesh")
+surface_material_override/0 = SubResource("floor_mat")
+
+[node name="WallNorth" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 1.5, -14)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WallNorth"]
+shape = SubResource("wall_ns_shape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="WallNorth"]
+mesh = SubResource("wall_ns_mesh")
+surface_material_override/0 = SubResource("wall_mat")
+
+[node name="WallSouth" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 1.5, 14)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WallSouth"]
+shape = SubResource("wall_ns_shape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="WallSouth"]
+mesh = SubResource("wall_ns_mesh")
+surface_material_override/0 = SubResource("wall_mat")
+
+[node name="Props" type="Node3D" parent="."]
+
+[node name="Column2NW" parent="Props" instance=ExtResource("column2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, -9)
+
+[node name="Column2NE" parent="Props" instance=ExtResource("column2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 0, -9)
+
+[node name="Column2SW" parent="Props" instance=ExtResource("column2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 9)
+
+[node name="Column2SE" parent="Props" instance=ExtResource("column2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 0, 9)
+
+[node name="TorchNW" parent="Props" instance=ExtResource("torch")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, -9)
+
+[node name="TorchNE" parent="Props" instance=ExtResource("torch")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 0, -9)
+
+[node name="TorchSW" parent="Props" instance=ExtResource("torch")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 9)
+
+[node name="TorchSE" parent="Props" instance=ExtResource("torch")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 0, 9)
+
+[node name="SkullNW" parent="Props" instance=ExtResource("skull")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -12)
+
+[node name="SkullNE" parent="Props" instance=ExtResource("skull")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -12)
+
+[node name="SkullS" parent="Props" instance=ExtResource("skull")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, 12)
+
+[node name="BannerLeft" parent="Props" instance=ExtResource("banner_wall")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -13.5)
+
+[node name="BannerCenter" parent="Props" instance=ExtResource("banner_wall")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -13.5)
+
+[node name="BannerRight" parent="Props" instance=ExtResource("banner_wall")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, -13.5)
+
+[node name="Foundation" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, -6, 0)
+mesh = SubResource("foundation_mesh")
+surface_material_override/0 = SubResource("wall_mat")
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+
+[node name="PlayerSpawn" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.1, 0)
+
+[node name="EnemySpawnRight" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 1, 0)
+
+[node name="EnemySpawnLeft" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1, 0)
+
+[node name="EnemySpawnTop" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 1, -16)
+
+[node name="EnemySpawnBottom" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 1, 16)

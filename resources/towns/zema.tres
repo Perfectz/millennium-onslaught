@@ -1,0 +1,20 @@
+[gd_resource type="Resource" load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://resources/towns/town_def.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/equipment/silver_sword.tres" id="2"]
+[ext_resource type="Resource" path="res://resources/equipment/frost_blade.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/equipment/platinum_armor.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/equipment/stone_edge.tres" id="5"]
+[ext_resource type="Resource" path="res://resources/equipment/guardian_plate.tres" id="6"]
+[ext_resource type="Resource" path="res://resources/equipment/speed_boots.tres" id="7"]
+[ext_resource type="Resource" path="res://resources/equipment/antidote_charm.tres" id="8"]
+[ext_resource type="Resource" path="res://resources/equipment/healing_herb.tres" id="9"]
+
+[resource]
+script = ExtResource("1")
+town_id = &"zema"
+town_name = "Zema \u2014 Petrified Town"
+shop_items = [ExtResource("2"), ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7"), ExtResource("8"), ExtResource("9")]
+has_inn = true
+inn_cost_multiplier = 1.5
+npcs = [{"name": "Petrified Elder", "lines": ["... ... ... (The stone figure stares ahead, mouth frozen mid-sentence. Whatever happened here struck without warning.)", "If you look closely, you can see the terror in their eyes. They knew it was coming -- but only for a second."], "requires_flag": ""}, {"name": "Wandering Scholar", "lines": ["I came from Piata to study this phenomenon. Every inhabitant, petrified in an instant.", "The ancient texts mention a medicine called Alshline that could reverse petrification. But it only grows deep in Birth Valley.", "If we could retrieve the Alshline, perhaps we could save these people. But the valley is crawling with monsters."], "requires_flag": ""}, {"name": "Traveling Merchant", "lines": ["Even in a town of stone, there's business to be done. The valley ores make fine weapons.", "I set up shop here after the petrification. Someone has to serve the hunters passing through.", "Be careful in the valley. The creatures there are stronger than anything in Piata's basement."], "requires_flag": ""}]

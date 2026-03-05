@@ -1,4 +1,4 @@
-## Attack collision area with belt-depth (Z) tolerance.
+## Attack collision area with radial offset based on facing angle.
 ## Enable with AttackDef data, auto-tracks which targets were already hit.
 class_name Hitbox
 extends Area3D
@@ -14,11 +14,12 @@ func _ready() -> void:
 	disable()
 
 
-## Activate the hitbox with attack data. Positions shape based on facing.
-func enable(data: AttackDef, face_right: bool = true) -> void:
+## Activate the hitbox with attack data. Positions shape radially based on facing angle.
+func enable(data: AttackDef, facing_angle: float = 0.0) -> void:
 	attack_data = data
 	_hit_targets.clear()
-	_collision_shape.position.x = Constants.HITBOX_X_OFFSET if face_right else -Constants.HITBOX_X_OFFSET
+	_collision_shape.position.x = cos(facing_angle) * Constants.HITBOX_OFFSET_DISTANCE
+	_collision_shape.position.z = -sin(facing_angle) * Constants.HITBOX_OFFSET_DISTANCE
 	_collision_shape.disabled = false
 	monitoring = true
 	call_deferred("_process_overlap_hits")
@@ -57,16 +58,8 @@ func _try_apply_hit(area: Area3D) -> void:
 	var hurtbox := area as Hurtbox
 	if hurtbox in _hit_targets:
 		return
-	if not _z_check(hurtbox):
-		return
 	var parent := get_parent()
 	if not is_instance_valid(parent):
 		return
 	_hit_targets.append(hurtbox)
 	hurtbox.receive_hit(attack_data, parent)
-
-
-## Check if the hit target is within belt-depth tolerance.
-func _z_check(hurtbox: Hurtbox) -> bool:
-	var z_diff := absf(global_position.z - hurtbox.global_position.z)
-	return z_diff <= Constants.Z_HIT_TOLERANCE

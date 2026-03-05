@@ -7,13 +7,13 @@
 [ext_resource type="Script" path="res://scripts/core/enemy_model.gd" id="5"]
 
 [sub_resource type="BoxShape3D" id="1"]
-size = Vector3(0.8, 1.6, 0.8)
+size = Vector3(0.5, 1.6, 0.5)
 
 [sub_resource type="BoxShape3D" id="4"]
 size = Vector3(1.0, 1.2, 1.0)
 
 [sub_resource type="BoxShape3D" id="5"]
-size = Vector3(1.4, 1.8, 1.4)
+size = Vector3(1.8, 1.8, 1.8)
 
 [node name="EnemyRusher" type="CharacterBody3D"]
 collision_layer = 4

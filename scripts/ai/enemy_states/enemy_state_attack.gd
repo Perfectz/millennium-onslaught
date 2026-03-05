@@ -17,6 +17,7 @@ func enter(_previous_state: StringName) -> void:
 	else:
 		_attack_data = preload("res://resources/attacks/enemy_rusher_attack.tres")
 	entity.velocity.x = 0.0
+	entity.velocity.z = 0.0
 	enemy.update_facing_toward_target()
 	_phase = 0
 	_timer = _attack_data.windup_time
@@ -30,7 +31,7 @@ func _start_active() -> void:
 	_phase = 1
 	_timer = _attack_data.active_time
 	var enemy := entity as EnemyController
-	enemy.hitbox.enable(_attack_data, enemy.facing_right)
+	enemy.hitbox.enable(_attack_data, enemy.facing_angle)
 	enemy.flash_mesh(Color(1.0, 0.3, 0.3))
 
 

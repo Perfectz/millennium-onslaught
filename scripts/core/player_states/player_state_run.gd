@@ -11,13 +11,13 @@ func enter(_previous_state: StringName) -> void:
 func physics_process(delta: float) -> StringName:
 	var player: PlayerController = entity as PlayerController
 
-	var x_input := player.get_movement_input()
-	entity.velocity.x = x_input * Constants.PLAYER_RUN_SPEED
-	player.update_facing(x_input)
+	var input := player.get_movement_input_vector()
+	entity.velocity.x = input.x * Constants.PLAYER_MOVE_SPEED
+	entity.velocity.z = input.y * Constants.PLAYER_MOVE_SPEED
+	player.update_facing_from_input(input, delta)
 	player.apply_gravity(delta)
-	player.apply_belt_depth(delta)
 	entity.move_and_slide()
-	player.clamp_belt_depth()
+	player.clamp_to_bounds()
 	player.tick_run_dust(delta)
 
 	if not entity.is_on_floor():
@@ -29,19 +29,20 @@ func physics_process(delta: float) -> StringName:
 
 	# Buffered action intents — survives hitstop and cross-state transitions.
 	if player.intent_buffer.consume(&"attack_light"):
-		if Input.is_action_pressed("move_up"):
+		if InputManager.is_action_pressed_for_player(player.player_index, &"move_up"):
 			return &"attack_launcher"
 		return &"attack_light"
 	if player.intent_buffer.consume(&"attack_heavy"):
 		return &"attack_heavy"
-	if player.intent_buffer.consume(&"dodge") and player.can_dodge():
+	if player.intent_buffer.has_buffered(&"dodge") and player.can_dodge():
+		player.intent_buffer.consume(&"dodge")
 		return &"dodge"
-	if player.intent_buffer.consume(&"technique") or Input.is_action_just_pressed(&"technique"):
+	if player.intent_buffer.consume(&"technique"):
 		return &"technique"
 	if player.intent_buffer.consume(&"spell"):
 		return &"spell"
 
-	if absf(x_input) < Constants.INPUT_DEADZONE:
+	if input.length() < Constants.INPUT_DEADZONE:
 		return &"idle"
 
 	return &""

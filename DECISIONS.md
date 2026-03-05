@@ -500,3 +500,27 @@
 **Alternatives Considered:**
 - Always show touch on Android: Would overlap with controller buttons.
 - Manual toggle in settings: Extra step for users; auto-detect is more intuitive.
+
+---
+
+## 2026-03-04 — Month 1 Foundation Hardening (Year-Long Roadmap)
+
+**Decision:** Executed Month 1 of the year-long AI development roadmap. Applied baseline audit (115 issues: 12 P0, 36 P1, 67 P2), fixed critical runtime bugs, added safety infrastructure.
+
+**Why:** The codebase had accumulated technical debt and latent bugs across MVPs 0-6. Foundation hardening makes the project "boringly deterministic and safe to modify" — a prerequisite for reliable AI-driven updates.
+
+**What Changed:**
+1. **WaveSystem enemy ownership tracking:** `_on_enemy_died` now verifies the dying enemy is in `_spawned_enemies` before decrementing, preventing counter desync between overlapping encounters.
+2. **StateMachine null guard:** `transition_to()` checks `_current_state != null` before calling `exit()`.
+3. **CameraFollow validity check:** `is_instance_valid(_target)` prevents crash on freed player during scene transitions.
+4. **ObjectPool deactivate constant:** Magic `Vector3(9999,9999,9999)` replaced with `Constants.POOL_DEACTIVATE_POSITION`.
+5. **HazardZone cached AttackDef:** Pre-allocated in `_ready()` instead of creating per tick.
+6. **Spawn padding constants:** `ENCOUNTER_SPAWN_PADDING` and `STAGE_SPAWN_PADDING` replace hardcoded values.
+7. **UI P0 fixes:** Title screen disabled button guard, level-up screen elif fix, touch control opacity restore.
+8. **Known-issue freeze list:** Added to INDEX.md — 14 tracked issues with severity and target month.
+9. **CI pipeline:** GitHub Actions workflow for parse check + GdUnit4 headless tests.
+10. **Documentation:** ROADMAP_EXECUTION_STATE.md, CONVENTIONS.md, audit report, month-end review template.
+
+**Alternatives Considered:**
+- Fix all 115 issues at once: Would take weeks and risk regressions. Instead, fixed critical P0s and infrastructure, deferred P1/P2 to appropriate months.
+- Separate CI system (Jenkins, GitLab CI): GitHub Actions is simpler for a single-repo project already on GitHub.

@@ -2,10 +2,34 @@
 
 > Purpose: authoritative implementation snapshot for systems, files, and test coverage.
 
-Current Snapshot Date: 2026-03-03
+Current Snapshot Date: 2026-03-04
 Current MVP: MVP 6 "Together" (in progress — save hardening, settings, remapping, Android)
+Roadmap Phase: Month 1 "Foundation Hardening" — COMPLETE
 Runtime Main Scene: `res://scenes/ui/main_menu.tscn`
 Dev Test Scene: `res://scenes/dungeon/rooms/test_arena.tscn`
+
+---
+
+## Known-Issue Freeze List
+
+> **Purpose:** No unresolved risk is silently buried. All known issues are tracked here with severity and target resolution.
+
+| ID | Severity | Description | File(s) | Target |
+|----|----------|-------------|---------|--------|
+| KI-01 | P0 | Dust particles not pooled — unbounded node leak on Android | player_controller.gd:300 | Month 2 |
+| KI-02 | P0 | HealthComponent replacement leaks old signal closures (kill-heal lost after char switch) | player_controller.gd:547 | Month 2 |
+| KI-03 | P0 | Spell state `await physics_frame` can desync state machine | player_state_spell.gd:165 | Month 2 |
+| KI-04 | P0 | DamageNumberSpawner parents pooled Label3D under current_scene (freed on transition) | damage_number_spawner.gd:63 | Month 2 |
+| KI-05 | P1 | VFX finished signal leak on pooled particles returned early | vfx_system.gd:67 | Month 2 |
+| KI-06 | P1 | Zoom punch FOV drift from overlapping calls | juice_manager.gd:159 | Month 2 |
+| KI-07 | P1 | EnemyController.configure() calls set_initial_state without exiting old state | enemy_controller.gd:418 | Month 2 |
+| KI-08 | P1 | Per-frame O(N^2) group query in enemy_state_chase flanking | enemy_state_chase.gd:66 | Month 3 |
+| KI-09 | P1 | Missing is_instance_valid(target) in 6+ enemy states | multiple enemy states | Month 2 |
+| KI-10 | P1 | Missing bounds clamping in retreat, hurt, stagger, attack, shoot, boss_phase_check states | multiple enemy states | Month 2 |
+| KI-11 | P2 | 30+ hardcoded gameplay values across states | various | Month 4 |
+| KI-12 | P2 | Resource definitions have no validate() methods | various resource defs | Month 4 |
+| KI-13 | P1 | Pause menu bypasses GameManager for scene transition | pause_menu.gd:208 | Month 2 |
+| KI-14 | P2 | Legacy emit_signal("pressed") pattern across 9 UI files | various UI scripts | Month 3 |
 
 ---
 

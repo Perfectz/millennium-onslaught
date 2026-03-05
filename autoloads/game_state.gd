@@ -75,16 +75,19 @@ var arena_lock_max_x: float = 100.0
 var arena_lock_min_z: float = -100.0
 var arena_lock_max_z: float = 100.0
 
-## Current room bounds (always-on clamp while active).
+## Current room bounds (always-on clamp while active, X + Z).
 var room_bounds_active: bool = false
 var room_bounds_min_x: float = -100.0
 var room_bounds_max_x: float = 100.0
+var room_bounds_min_z: float = -100.0
+var room_bounds_max_z: float = 100.0
 
 ## Stage mode (transient — lost on dungeon death).
 var stage_mode: bool = false
 var current_stage_id: StringName = &""
 var stage_encounters_completed: int = 0
 var stage_total_encounters: int = 0
+var current_stage_index: int = 0
 
 
 ## Current game phase.
@@ -128,10 +131,11 @@ func _load_display_settings() -> void:
 
 ## Start a fresh new game with default state.
 func start_new_game() -> void:
-	party_roster = [&"alys"]
+	party_roster = [&"alys", &"chaz"]
 	active_party = [&"alys"]
 	character_data.clear()
 	init_character(&"alys")
+	init_character(&"chaz")
 	inventory.clear()
 	gold = 100
 	story_flags.clear()
@@ -186,23 +190,28 @@ func reset_dungeon() -> void:
 	current_stage_id = &""
 	stage_encounters_completed = 0
 	stage_total_encounters = 0
+	current_stage_index = 0
 
 
-## Set active room X bounds used for player clamping and safer knockback.
-func set_room_bounds(min_x: float, max_x: float) -> void:
+## Set active room bounds (X + Z) used for player clamping and safer knockback.
+func set_room_bounds(min_x: float, max_x: float, min_z: float = -100.0, max_z: float = 100.0) -> void:
 	if min_x >= max_x:
 		clear_room_bounds()
 		return
 	room_bounds_active = true
 	room_bounds_min_x = min_x
 	room_bounds_max_x = max_x
+	room_bounds_min_z = min_z
+	room_bounds_max_z = max_z
 
 
-## Disable room X bounds and restore wide defaults.
+## Disable room bounds and restore wide defaults.
 func clear_room_bounds() -> void:
 	room_bounds_active = false
 	room_bounds_min_x = -100.0
 	room_bounds_max_x = 100.0
+	room_bounds_min_z = -100.0
+	room_bounds_max_z = 100.0
 
 
 ## Bank transient rewards into persistent state. Called on dungeon completion.
@@ -316,4 +325,12 @@ func deserialize_persistent(data: Dictionary) -> bool:
 			active_party.append(StringName(entry))
 
 	current_overworld_node = StringName(data.get("current_overworld_node", "piata"))
+
+	# Roster migration — ensure all defined characters are available.
+	for char_id: StringName in Constants.CHARACTER_DEFS:
+		if char_id not in party_roster:
+			party_roster.append(char_id)
+		if char_id not in character_data:
+			init_character(char_id)
+
 	return true

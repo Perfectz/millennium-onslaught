@@ -33,7 +33,7 @@ const CONTROLLER_BINDINGS_PATH: String = "user://controller_bindings.cfg"
 ## Actions that can be remapped (button-based, not axis-movement).
 const REMAPPABLE_ACTIONS: Array[StringName] = [
 	&"jump", &"attack_light", &"attack_heavy", &"dodge",
-	&"block", &"technique", &"technique_cycle", &"pause",
+	&"block", &"heal_spell", &"camera_reset", &"lock_on", &"pause",
 ]
 
 ## Human-readable labels for remappable actions.
@@ -42,21 +42,23 @@ const ACTION_DISPLAY_NAMES: Dictionary = {
 	&"attack_light": "Light Attack",
 	&"attack_heavy": "Heavy Attack",
 	&"dodge": "Dodge",
-	&"block": "Block",
-	&"technique": "Technique",
-	&"technique_cycle": "Cycle Technique",
+	&"block": "Block / Parry",
+	&"heal_spell": "Heal Spell",
+	&"camera_reset": "Reset Camera",
+	&"lock_on": "Lock-On",
 	&"pause": "Pause",
 }
 
 ## Default joypad button index for each remappable action (SDL standard).
 const DEFAULT_JOYPAD_BUTTONS: Dictionary = {
 	&"jump": 0,
-	&"attack_light": 2,
-	&"attack_heavy": 3,
+	&"attack_light": 3,
+	&"attack_heavy": 2,
 	&"dodge": 1,
-	&"block": 4,
-	&"technique": 5,
-	&"technique_cycle": 6,
+	&"block": 5,
+	&"heal_spell": 4,
+	&"camera_reset": 9,
+	&"lock_on": 8,
 	&"pause": 7,
 }
 
@@ -67,8 +69,9 @@ const DEFAULT_KEYBOARD_KEYS: Dictionary = {
 	&"attack_heavy": KEY_K,
 	&"dodge": KEY_L,
 	&"block": KEY_I,
-	&"technique": KEY_U,
-	&"technique_cycle": KEY_TAB,
+	&"heal_spell": KEY_1,
+	&"camera_reset": KEY_C,
+	&"lock_on": KEY_TAB,
 	&"pause": KEY_ESCAPE,
 }
 

@@ -1,0 +1,289 @@
+[gd_scene load_steps=27 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_basecolor.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_normal.png" id="tex_floor_normal"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_roughness.png" id="tex_floor_roughness"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_ambientOcclusion.png" id="tex_floor_ao"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/wall_pbr/Cracked_Mud_001_COLOR.jpg" id="tex_wall_color"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/wall_pbr/Cracked_Mud_001_NORM.jpg" id="tex_wall_normal"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/wall_pbr/Cracked_Mud_001_ROUGH.jpg" id="tex_wall_rough"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/wall_pbr/Cracked_Mud_001_OCC.jpg" id="tex_wall_ao"]
+[ext_resource type="PackedScene" path="res://assets/models/dungeon_props/crate.fbx" id="crate"]
+[ext_resource type="PackedScene" path="res://assets/models/dungeon_props/barrel.fbx" id="barrel"]
+[ext_resource type="PackedScene" path="res://assets/models/dungeon_props/torch.fbx" id="torch"]
+[ext_resource type="PackedScene" path="res://assets/models/dungeon_props/chest.fbx" id="chest"]
+[ext_resource type="PackedScene" path="res://assets/models/dungeon_props/arch_door.fbx" id="arch_door"]
+[ext_resource type="PackedScene" path="res://assets/models/dungeon_props/cobweb.fbx" id="cobweb"]
+
+[sub_resource type="BoxShape3D" id="floor_shape"]
+size = Vector3(36, 1, 24)
+
+[sub_resource type="BoxMesh" id="floor_mesh"]
+size = Vector3(36, 1, 24)
+
+[sub_resource type="StandardMaterial3D" id="floor_mat"]
+albedo_texture = ExtResource("1")
+normal_enabled = true
+normal_texture = ExtResource("tex_floor_normal")
+roughness_texture = ExtResource("tex_floor_roughness")
+ao_enabled = true
+ao_light_affect = 1.0
+ao_texture = ExtResource("tex_floor_ao")
+uv1_scale = Vector3(12, 8, 1)
+texture_filter = 3
+
+[sub_resource type="StandardMaterial3D" id="wall_mat"]
+albedo_color = Color(0.35, 0.25, 0.3, 1)
+albedo_texture = ExtResource("tex_wall_color")
+normal_enabled = true
+normal_texture = ExtResource("tex_wall_normal")
+roughness_texture = ExtResource("tex_wall_rough")
+ao_enabled = true
+ao_light_affect = 1.0
+ao_texture = ExtResource("tex_wall_ao")
+uv1_scale = Vector3(2, 1, 1)
+texture_filter = 3
+roughness = 0.9
+
+[sub_resource type="BoxShape3D" id="wall_ns_shape"]
+size = Vector3(36, 3, 1)
+
+[sub_resource type="BoxMesh" id="wall_ns_mesh"]
+size = Vector3(36, 3, 1)
+
+[sub_resource type="BoxShape3D" id="iwall_vert_shape"]
+size = Vector3(1, 3, 6)
+
+[sub_resource type="BoxMesh" id="iwall_vert_mesh"]
+size = Vector3(1, 3, 6)
+
+[sub_resource type="BoxShape3D" id="iwall_horiz_shape"]
+size = Vector3(14, 3, 1)
+
+[sub_resource type="BoxMesh" id="iwall_horiz_mesh"]
+size = Vector3(14, 3, 1)
+
+[sub_resource type="BoxShape3D" id="crate_col_shape"]
+size = Vector3(1, 0.8, 1)
+
+[sub_resource type="BoxShape3D" id="barrel_col_shape"]
+size = Vector3(1, 0.8, 1)
+
+[sub_resource type="BoxMesh" id="foundation_mesh"]
+size = Vector3(36, 10, 24)
+
+[node name="AcademyB2Storage" type="Node3D"]
+
+[node name="Floor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, -0.5, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("floor_shape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("floor_mesh")
+surface_material_override/0 = SubResource("floor_mat")
+
+[node name="WallNorth" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 1.5, -12)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WallNorth"]
+shape = SubResource("wall_ns_shape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="WallNorth"]
+mesh = SubResource("wall_ns_mesh")
+surface_material_override/0 = SubResource("wall_mat")
+
+[node name="WallSouth" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 1.5, 12)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WallSouth"]
+shape = SubResource("wall_ns_shape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="WallSouth"]
+mesh = SubResource("wall_ns_mesh")
+surface_material_override/0 = SubResource("wall_mat")
+
+[node name="InternalWalls" type="Node3D" parent="."]
+
+[node name="LabDividerTop" type="StaticBody3D" parent="InternalWalls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1.5, -6)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InternalWalls/LabDividerTop"]
+shape = SubResource("iwall_vert_shape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="InternalWalls/LabDividerTop"]
+mesh = SubResource("iwall_vert_mesh")
+surface_material_override/0 = SubResource("wall_mat")
+
+[node name="ChestAlcoveWallTop" type="StaticBody3D" parent="InternalWalls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 1.5, -6)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InternalWalls/ChestAlcoveWallTop"]
+shape = SubResource("iwall_vert_shape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="InternalWalls/ChestAlcoveWallTop"]
+mesh = SubResource("iwall_vert_mesh")
+surface_material_override/0 = SubResource("wall_mat")
+
+[node name="StorageCorridorTop" type="StaticBody3D" parent="InternalWalls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1.5, 6)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InternalWalls/StorageCorridorTop"]
+shape = SubResource("iwall_horiz_shape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="InternalWalls/StorageCorridorTop"]
+mesh = SubResource("iwall_horiz_mesh")
+surface_material_override/0 = SubResource("wall_mat")
+
+[node name="StorageCorridorBottom" type="StaticBody3D" parent="InternalWalls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1.5, 8)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InternalWalls/StorageCorridorBottom"]
+shape = SubResource("iwall_horiz_shape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="InternalWalls/StorageCorridorBottom"]
+mesh = SubResource("iwall_horiz_mesh")
+surface_material_override/0 = SubResource("wall_mat")
+
+[node name="JumpableProps" type="Node3D" parent="."]
+
+[node name="CrateA" type="StaticBody3D" parent="JumpableProps"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, -3)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="JumpableProps/CrateA"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+shape = SubResource("crate_col_shape")
+
+[node name="Model" parent="JumpableProps/CrateA" instance=ExtResource("crate")]
+
+[node name="CrateB" type="StaticBody3D" parent="JumpableProps"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, -2)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="JumpableProps/CrateB"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+shape = SubResource("crate_col_shape")
+
+[node name="Model" parent="JumpableProps/CrateB" instance=ExtResource("crate")]
+
+[node name="CrateC" type="StaticBody3D" parent="JumpableProps"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 2)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="JumpableProps/CrateC"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+shape = SubResource("crate_col_shape")
+
+[node name="Model" parent="JumpableProps/CrateC" instance=ExtResource("crate")]
+
+[node name="CrateD" type="StaticBody3D" parent="JumpableProps"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 0, 3)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="JumpableProps/CrateD"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+shape = SubResource("crate_col_shape")
+
+[node name="Model" parent="JumpableProps/CrateD" instance=ExtResource("crate")]
+
+[node name="CrateE" type="StaticBody3D" parent="JumpableProps"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 0, 3)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="JumpableProps/CrateE"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+shape = SubResource("crate_col_shape")
+
+[node name="Model" parent="JumpableProps/CrateE" instance=ExtResource("crate")]
+
+[node name="BarrelA" type="StaticBody3D" parent="JumpableProps"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 9)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="JumpableProps/BarrelA"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+shape = SubResource("barrel_col_shape")
+
+[node name="Model" parent="JumpableProps/BarrelA" instance=ExtResource("barrel")]
+
+[node name="Props" type="Node3D" parent="."]
+
+[node name="CobwebNW" parent="Props" instance=ExtResource("cobweb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 2.5, -11.5)
+
+[node name="CobwebNE" parent="Props" instance=ExtResource("cobweb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29, 2.5, -11.5)
+
+[node name="CobwebSW" parent="Props" instance=ExtResource("cobweb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 2.5, 11.5)
+
+[node name="CobwebSE" parent="Props" instance=ExtResource("cobweb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29, 2.5, 11.5)
+
+[node name="Chest" parent="Props" instance=ExtResource("chest")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 0, -10)
+
+[node name="ArchDoor" parent="Props" instance=ExtResource("arch_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 0, 10)
+
+[node name="TorchNW" parent="Props" instance=ExtResource("torch")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, -11.5)
+
+[node name="TorchNE" parent="Props" instance=ExtResource("torch")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 0, -11.5)
+
+[node name="TorchSW" parent="Props" instance=ExtResource("torch")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 11.5)
+
+[node name="TorchSE" parent="Props" instance=ExtResource("torch")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 0, 11.5)
+
+[node name="TorchMidN" parent="Props" instance=ExtResource("torch")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, -11.5)
+
+[node name="TorchMidS" parent="Props" instance=ExtResource("torch")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, 11.5)
+
+[node name="Foundation" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, -6, 0)
+mesh = SubResource("foundation_mesh")
+surface_material_override/0 = SubResource("wall_mat")
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+
+[node name="PlayerSpawn" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.1, 0)
+
+[node name="EnemySpawnLeft" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1, 0)
+
+[node name="EnemySpawnRight" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 1, 0)
+
+[node name="EnemySpawnTop" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 1, -14)
+
+[node name="EnemySpawnBottom" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 1, 14)

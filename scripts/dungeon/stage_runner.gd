@@ -20,6 +20,9 @@ var _triggers: Array[EncounterTrigger] = []
 ## Index of the currently active encounter (-1 = none).
 var _current_encounter_index: int = -1
 
+## Pre-spawned enemies indexed by encounter index.
+var _pre_spawned_enemies: Dictionary = {}
+
 ## How many encounters have been completed.
 var _encounters_completed: int = 0
 
@@ -51,6 +54,7 @@ func setup(stage_def: StageDef, player: Node3D, wave_system: WaveSystem,
 	# Build the stage.
 	_load_all_chunks()
 	_place_encounter_triggers()
+	_pre_spawn_all_encounters()
 	_add_video_background()
 
 	# Position player at start.
@@ -96,10 +100,65 @@ func _place_encounter_triggers() -> void:
 		_triggers.append(trigger)
 
 
+## Pre-spawn all enemies for every encounter at stage load time.
+## Enemies are placed in dormant state at their grid positions.
+func _pre_spawn_all_encounters() -> void:
+	for enc_idx in _stage_def.encounters.size():
+		var entry := _stage_def.encounters[enc_idx]
+		var enc := entry.encounter_def.duplicate() as EncounterDef
+		enc.arena_min_x = entry.trigger_x - entry.arena_half_width
+		enc.arena_max_x = entry.trigger_x + entry.arena_half_width
+		enc.arena_min_z = entry.arena_min_z
+		enc.arena_max_z = entry.arena_max_z
+
+		# Collect all spawn entries from all waves.
+		var all_entries: Array[SpawnEntry] = []
+		for wave in enc.waves:
+			for spawn_entry in wave.spawn_entries:
+				all_entries.append(spawn_entry)
+
+		var total_enemies: int = 0
+		for spawn_entry in all_entries:
+			if spawn_entry.enemy_def != null:
+				total_enemies += spawn_entry.count
+
+		# Compute placement bounds (pad inward from edges).
+		var pad := Constants.STAGE_SPAWN_PADDING
+		var min_x := enc.arena_min_x + pad
+		var max_x := enc.arena_max_x - pad
+		var min_z := enc.arena_min_z + pad * 0.5
+		var max_z := enc.arena_max_z - pad * 0.5
+
+		# Cap spawn Z by belt_depth to keep enemies in visible corridor.
+		var half_belt := _stage_def.belt_depth * 0.5
+		min_z = maxf(min_z, -half_belt)
+		max_z = minf(max_z, half_belt)
+
+		var enemies: Array = []
+		var spawn_index: int = 0
+		for spawn_entry in all_entries:
+			if spawn_entry.enemy_def == null:
+				continue
+			for i in spawn_entry.count:
+				var enemy := _enemy_scene.instantiate() as EnemyController
+				_enemy_container.add_child(enemy)
+				enemy.configure(spawn_entry.enemy_def, _player, true)
+
+				var t_x: float = float(spawn_index) / maxf(total_enemies - 1, 1)
+				var z_row: float = float(spawn_index % 3) / 2.0
+				var x_pos := lerpf(min_x, max_x, t_x)
+				var z_pos := lerpf(min_z, max_z, z_row)
+				enemy.global_position = Vector3(x_pos, 0.0, z_pos)
+
+				enemies.append(enemy)
+				spawn_index += 1
+
+		_pre_spawned_enemies[enc_idx] = enemies
+
+
 ## Called when a player enters an encounter trigger zone.
 func _on_encounter_triggered(trigger_index: int) -> void:
 	if _current_encounter_index >= 0:
-		# Already in an encounter — ignore overlapping triggers.
 		return
 	if trigger_index < 0 or trigger_index >= _stage_def.encounters.size():
 		push_error("StageRunner: Invalid trigger index %d" % trigger_index)
@@ -116,14 +175,9 @@ func _on_encounter_triggered(trigger_index: int) -> void:
 	enc.arena_min_z = entry.arena_min_z
 	enc.arena_max_z = entry.arena_max_z
 
-	# Set spawn points relative to arena edges.
-	_wave_system.spawn_left = Vector3(
-		enc.arena_min_x - Constants.STAGE_SPAWN_OFFSET_X, 1.0, 0.0)
-	_wave_system.spawn_right = Vector3(
-		enc.arena_max_x + Constants.STAGE_SPAWN_OFFSET_X, 1.0, 0.0)
-
-	# Start the encounter.
-	_wave_system.start_encounter(enc, _enemy_scene)
+	# Start encounter with pre-spawned enemies (no new spawning).
+	var enemies: Array = _pre_spawned_enemies.get(trigger_index, [])
+	_wave_system.start_encounter_prescreened(enc, enemies)
 
 	# Encounter start juice.
 	JuiceManager.screen_flash(Color(1.0, 0.85, 0.4, 0.18), 0.1)
@@ -156,6 +210,12 @@ func _on_wave_cleared() -> void:
 func _update_forward_bounds() -> void:
 	var min_x := 0.0
 	var max_x: float
+	var min_z := -8.0
+	var max_z := 8.0
+
+	var half_depth: float = _stage_def.belt_depth * 0.5
+	min_z = -half_depth
+	max_z = half_depth
 
 	if _encounters_completed < _stage_def.encounters.size():
 		# Player can walk up to next encounter trigger + buffer.
@@ -165,8 +225,8 @@ func _update_forward_bounds() -> void:
 		# All encounters cleared — full stage freedom.
 		max_x = _stage_def.get_total_width()
 
-	GameState.set_room_bounds(min_x, max_x)
-	EventBus.stage_bounds_updated.emit(min_x, max_x)
+	GameState.set_room_bounds(min_x, max_x, min_z, max_z)
+	EventBus.stage_bounds_updated.emit(min_x, max_x, min_z, max_z)
 
 
 ## Stage completed — all encounters cleared, player reached the end.
@@ -203,7 +263,7 @@ func _add_video_background() -> void:
 	canvas.add_child(player)
 
 
-## Clean up all chunks and triggers.
+## Clean up all chunks, triggers, and pre-spawned enemies.
 func cleanup() -> void:
 	if EventBus.enemy_wave_cleared.is_connected(_on_wave_cleared):
 		EventBus.enemy_wave_cleared.disconnect(_on_wave_cleared)
@@ -215,6 +275,13 @@ func cleanup() -> void:
 		if is_instance_valid(chunk):
 			chunk.queue_free()
 	_chunks.clear()
+	# Free any pre-spawned enemies that were never activated.
+	for enc_idx in _pre_spawned_enemies:
+		var enemies: Array = _pre_spawned_enemies[enc_idx]
+		for enemy in enemies:
+			if is_instance_valid(enemy) and enemy.is_inside_tree():
+				enemy.queue_free()
+	_pre_spawned_enemies.clear()
 
 
 func _exit_tree() -> void:

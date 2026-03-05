@@ -859,6 +859,7 @@ func _toggle_pause_menu() -> void:
 	if _pause_menu != null:
 		_resume_from_pause()
 		return
+	visible = false
 	_pause_menu = CanvasLayer.new()
 	_pause_menu.set_script(PauseMenuScript)
 	add_child(_pause_menu)
@@ -870,5 +871,6 @@ func _resume_from_pause() -> void:
 	if _pause_menu != null:
 		_pause_menu.queue_free()
 		_pause_menu = null
+	visible = true
 	get_tree().paused = false
 	_restore_focus()

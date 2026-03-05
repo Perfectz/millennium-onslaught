@@ -20,9 +20,8 @@ func physics_process(delta: float) -> StringName:
 
 	_timer -= delta
 	player.apply_gravity(delta)
-	player.apply_belt_depth(delta)
 	entity.move_and_slide()
-	player.clamp_belt_depth()
+	player.clamp_to_bounds()
 
 	# Jump buffer takes priority even during landing recovery.
 	if player.jump_buffer_timer > 0.0:
@@ -32,7 +31,7 @@ func physics_process(delta: float) -> StringName:
 	if _timer <= 0.0:
 		# Consume buffered actions so presses during landing aren't lost.
 		if player.intent_buffer.consume(&"attack_light"):
-			if Input.is_action_pressed("move_up"):
+			if InputManager.is_action_pressed_for_player(player.player_index, &"move_up"):
 				return &"attack_launcher"
 			return &"attack_light"
 		if player.intent_buffer.consume(&"attack_heavy"):

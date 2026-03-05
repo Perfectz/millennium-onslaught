@@ -1,0 +1,43 @@
+[gd_resource type="Resource" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://resources/encounters/encounter_def.gd" id="1"]
+[ext_resource type="Script" path="res://resources/encounters/wave_def.gd" id="2"]
+[ext_resource type="Script" path="res://resources/encounters/spawn_entry.gd" id="3"]
+[ext_resource type="Resource" path="res://resources/enemies/brute_def.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/enemies/sniper_def.tres" id="5"]
+
+[sub_resource type="Resource" id="spawn_w1_brutes"]
+script = ExtResource("3")
+enemy_def = ExtResource("4")
+count = 3
+spawn_side = &"both"
+
+[sub_resource type="Resource" id="wave1"]
+script = ExtResource("2")
+spawn_entries = [SubResource("spawn_w1_brutes")]
+delay_before_spawn = 1.0
+
+[sub_resource type="Resource" id="spawn_w2_brutes"]
+script = ExtResource("3")
+enemy_def = ExtResource("4")
+count = 2
+spawn_side = &"left"
+
+[sub_resource type="Resource" id="spawn_w2_sniper"]
+script = ExtResource("3")
+enemy_def = ExtResource("5")
+count = 1
+spawn_side = &"right"
+
+[sub_resource type="Resource" id="wave2"]
+script = ExtResource("2")
+spawn_entries = [SubResource("spawn_w2_brutes"), SubResource("spawn_w2_sniper")]
+delay_before_spawn = 1.5
+
+[resource]
+script = ExtResource("1")
+encounter_id = &"stage2_encounter_a"
+waves = [SubResource("wave1"), SubResource("wave2")]
+arena_lock = true
+arena_min_x = -10.0
+arena_max_x = 10.0

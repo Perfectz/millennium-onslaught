@@ -1,0 +1,27 @@
+[gd_resource type="Resource" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://resources/encounters/encounter_def.gd" id="1"]
+[ext_resource type="Script" path="res://resources/encounters/wave_def.gd" id="2"]
+[ext_resource type="Script" path="res://resources/encounters/spawn_entry.gd" id="3"]
+[ext_resource type="Resource" path="res://resources/enemies/boss_def.tres" id="4"]
+
+[sub_resource type="Resource" id="spawn_boss"]
+script = ExtResource("3")
+enemy_def = ExtResource("4")
+count = 1
+spawn_side = &"right"
+
+[sub_resource type="Resource" id="wave1"]
+script = ExtResource("2")
+spawn_entries = [SubResource("spawn_boss")]
+delay_before_spawn = 2.0
+
+[resource]
+script = ExtResource("1")
+encounter_id = &"academy_boss"
+waves = [SubResource("wave1")]
+arena_lock = true
+arena_min_x = -11.0
+arena_max_x = 11.0
+arena_min_z = -11.0
+arena_max_z = 11.0

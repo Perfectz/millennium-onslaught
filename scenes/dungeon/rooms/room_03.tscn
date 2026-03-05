@@ -4,14 +4,14 @@
 [ext_resource type="VideoStream" path="res://assets/textures/dreamy_background.ogv" id="2"]
 
 [sub_resource type="BoxShape3D" id="floor_shape"]
-size = Vector3(80, 1, 6)
+size = Vector3(80, 1, 16)
 
 [sub_resource type="BoxMesh" id="floor_mesh"]
-size = Vector3(80, 1, 6)
+size = Vector3(80, 1, 16)
 
 [sub_resource type="StandardMaterial3D" id="floor_mat"]
 albedo_texture = ExtResource("1")
-uv1_scale = Vector3(26, 2, 1)
+uv1_scale = Vector3(26, 5, 1)
 texture_filter = 3
 
 [sub_resource type="BoxShape3D" id="plat_low_shape"]
@@ -38,17 +38,17 @@ uv1_scale = Vector3(1, 1, 1)
 texture_filter = 3
 
 [sub_resource type="BoxShape3D" id="wall_shape"]
-size = Vector3(1, 10, 6)
+size = Vector3(1, 10, 16)
 
 [sub_resource type="BoxMesh" id="wall_mesh"]
-size = Vector3(1, 20, 6)
+size = Vector3(1, 20, 16)
 
 [sub_resource type="StandardMaterial3D" id="wall_mat"]
 albedo_color = Color(0.12, 0.1, 0.14, 1)
 roughness = 0.9
 
 [sub_resource type="BoxMesh" id="foundation_mesh"]
-size = Vector3(80, 10, 6)
+size = Vector3(80, 10, 16)
 
 [node name="Room03" type="Node3D"]
 

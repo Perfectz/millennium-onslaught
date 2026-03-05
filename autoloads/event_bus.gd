@@ -23,6 +23,7 @@ signal combat_attack_started(attacker: Node, attack_type: StringName)
 signal combat_spell_cast(player: Node, spell_id: StringName, tp_cost: float)
 signal combat_spell_heal(player: Node, amount: float)
 signal combat_spell_buff(player: Node, stat: StringName, amount: float, duration: float)
+signal combat_lock_on_changed(player: Node, target: Node)
 
 # --- Juggle ---
 signal combat_juggle_launched(target: Node, launcher: Node)
@@ -60,7 +61,7 @@ signal dungeon_failed()
 signal stage_encounter_triggered(encounter_index: int)
 signal stage_encounter_cleared(encounter_index: int)
 signal stage_completed(stage_id: StringName)
-signal stage_bounds_updated(min_x: float, max_x: float)
+signal stage_bounds_updated(min_x: float, max_x: float, min_z: float, max_z: float)
 
 # --- Overworld ---
 signal overworld_node_selected(node_id: StringName)

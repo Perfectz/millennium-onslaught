@@ -219,3 +219,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel") or event.is_action_pressed("dodge"):
 		vp.set_input_as_handled()
 		closed.emit()
+		return
+	if event.is_action_pressed("attack_light") or event.is_action_pressed("jump") or event.is_action_pressed("ui_accept"):
+		var focused := vp.gui_get_focus_owner()
+		if focused is Button and not (focused as Button).disabled:
+			vp.set_input_as_handled()
+			(focused as Button).emit_signal("pressed")

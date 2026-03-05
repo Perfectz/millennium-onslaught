@@ -7,11 +7,11 @@
 [ext_resource type="Script" path="res://scripts/core/character_model.gd" id="5_cm"]
 
 [sub_resource type="CapsuleShape3D" id="1"]
-radius = 0.4
+radius = 0.25
 height = 1.8
 
 [sub_resource type="BoxShape3D" id="4"]
-size = Vector3(2.0, 1.6, 2.0)
+size = Vector3(2.6, 1.8, 3.0)
 
 [sub_resource type="CapsuleShape3D" id="5"]
 radius = 0.45

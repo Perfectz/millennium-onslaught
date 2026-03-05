@@ -16,9 +16,11 @@ var _between_wave_breather_timer: float = 0.0
 ## Reference to the player for targeting enemies.
 var player: Node3D = null
 
-## Spawn positions (set by room).
+## Spawn positions (set by room or stage runner, 4 edges for isometric).
 var spawn_left: Vector3 = Vector3(-8, 1, 0)
 var spawn_right: Vector3 = Vector3(8, 1, 0)
+var spawn_top: Vector3 = Vector3(0, 1, -8)
+var spawn_bottom: Vector3 = Vector3(0, 1, 8)
 
 ## Enemy scene to instantiate.
 var enemy_scene: PackedScene = null
@@ -34,21 +36,12 @@ func _ready() -> void:
 	EventBus.enemy_died.connect(_on_enemy_died)
 
 
-func _process(delta: float) -> void:
-	if not _is_active:
-		return
-	if _waiting_for_spawn:
-		_spawn_delay_timer -= delta
-		if _spawn_delay_timer <= 0.0:
-			_waiting_for_spawn = false
-			_spawn_current_wave()
-	if _between_wave_breather_timer > 0.0:
-		_between_wave_breather_timer -= delta
-		if _between_wave_breather_timer <= 0.0:
-			_begin_wave()
+func _process(_delta: float) -> void:
+	pass
 
 
 ## Start an encounter from an EncounterDef.
+## Pre-places all enemies at fixed positions within the arena in dormant mode.
 func start_encounter(encounter: EncounterDef, enemy_packed_scene: PackedScene) -> void:
 	_encounter = encounter
 	enemy_scene = enemy_packed_scene
@@ -68,63 +61,72 @@ func start_encounter(encounter: EncounterDef, enemy_packed_scene: PackedScene) -
 		_finish_encounter()
 		return
 
-	_begin_wave()
+	# Pre-place all enemies from all waves at fixed positions immediately.
+	_spawn_all_waves_preplaced()
 
 
-## Begin the current wave.
-func _begin_wave() -> void:
-	if _current_wave_index >= _encounter.waves.size():
-		_finish_encounter()
-		return
-
-	var wave := _encounter.waves[_current_wave_index]
-	_spawn_delay_timer = wave.delay_before_spawn
-	_waiting_for_spawn = true
-
-
-## Spawn all enemies in the current wave.
-func _spawn_current_wave() -> void:
-	var wave := _encounter.waves[_current_wave_index]
+## Pre-place all enemies from every wave at fixed positions within the arena.
+## Enemies start in dormant state and wake up when the player is nearby.
+func _spawn_all_waves_preplaced() -> void:
 	_enemies_alive = 0
+	# Collect all spawn entries from all waves.
+	var all_entries: Array[SpawnEntry] = []
+	for wave in _encounter.waves:
+		for entry in wave.spawn_entries:
+			all_entries.append(entry)
 
-	for entry in wave.spawn_entries:
-		_spawn_entry(entry)
+	# Count total enemies for position distribution.
+	var total_enemies: int = 0
+	for entry in all_entries:
+		if entry.enemy_def != null:
+			total_enemies += entry.count
 
+	# Compute arena bounds for placement (pad inward from edges).
+	var pad := Constants.ENCOUNTER_SPAWN_PADDING
+	var min_x := _encounter.arena_min_x + pad
+	var max_x := _encounter.arena_max_x - pad
+	var min_z := _encounter.arena_min_z + pad * 0.5
+	var max_z := _encounter.arena_max_z - pad * 0.5
+
+	var spawn_index: int = 0
+	for entry in all_entries:
+		if entry.enemy_def == null:
+			continue
+		for i in entry.count:
+			var enemy := enemy_scene.instantiate() as EnemyController
+			var parent: Node = enemy_container if enemy_container else get_tree().root
+			parent.add_child(enemy)
+			_spawned_enemies.append(enemy)
+
+			# Configure in dormant mode — enemy stands idle until player approaches.
+			enemy.configure(entry.enemy_def, player, true)
+
+			# Distribute at fixed grid positions within the arena.
+			var t_x: float = float(spawn_index) / maxf(total_enemies - 1, 1)
+			var z_row: float = float(spawn_index % 3) / 2.0
+			var x_pos := lerpf(min_x, max_x, t_x)
+			var z_pos := lerpf(min_z, max_z, z_row)
+			enemy.global_position = Vector3(x_pos, 0.0, z_pos)
+
+			_enemies_alive += 1
+			spawn_index += 1
+
+	# Mark the last wave as current so _advance_wave finishes the encounter.
+	_current_wave_index = _encounter.waves.size() - 1
 	GameState.encounter_enemies_alive = _enemies_alive
 
-
-## Spawn enemies from a single SpawnEntry.
-func _spawn_entry(entry: SpawnEntry) -> void:
-	if entry.enemy_def == null:
-		return
-	for i in entry.count:
-		var enemy := enemy_scene.instantiate() as EnemyController
-		var parent: Node = enemy_container if enemy_container else get_tree().root
-		parent.add_child(enemy)
-		_spawned_enemies.append(enemy)
-
-		# Configure from definition.
-		enemy.configure(entry.enemy_def, player)
-
-		# Position based on spawn side.
-		match entry.spawn_side:
-			&"left":
-				enemy.global_position = spawn_left + Vector3(randf_range(-1.0, 1.0), 0, randf_range(-0.5, 0.5))
-			&"right":
-				enemy.global_position = spawn_right + Vector3(randf_range(-1.0, 1.0), 0, randf_range(-0.5, 0.5))
-			_:  # "both" — alternate
-				if i % 2 == 0:
-					enemy.global_position = spawn_left + Vector3(randf_range(-1.0, 1.0), 0, randf_range(-0.5, 0.5))
-				else:
-					enemy.global_position = spawn_right + Vector3(randf_range(-1.0, 1.0), 0, randf_range(-0.5, 0.5))
-
-		_enemies_alive += 1
+	# Guard: if no valid enemies were spawned, finish immediately to avoid stall.
+	if _enemies_alive <= 0:
+		_finish_encounter()
 
 
-func _on_enemy_died(_enemy: Node, _enemy_type: StringName, _position: Vector3) -> void:
+func _on_enemy_died(enemy: Node, _enemy_type: StringName, _position: Vector3) -> void:
 	if not _is_active or _encounter == null:
 		return
-	_enemies_alive -= 1
+	# Only decrement for enemies belonging to this encounter (prevents cross-encounter desync).
+	if enemy not in _spawned_enemies:
+		return
+	_enemies_alive = maxi(0, _enemies_alive - 1)
 	GameState.encounter_enemies_alive = _enemies_alive
 	if _enemies_alive <= 0:
 		_advance_wave()
@@ -168,6 +170,41 @@ func clear_all_enemies() -> void:
 	_between_wave_breather_timer = 0.0
 	GameState.encounter_active = false
 	GameState.encounter_enemies_alive = 0
+
+
+## Start an encounter using enemies that were already pre-spawned and placed.
+## Does arena-lock + death tracking only (no instantiation).
+func start_encounter_prescreened(encounter: EncounterDef, enemies: Array) -> void:
+	_encounter = encounter
+	_current_wave_index = 0
+	_is_active = true
+	_between_wave_breather_timer = 0.0
+	GameState.encounter_active = true
+
+	if _encounter.arena_lock:
+		GameState.arena_lock_min_x = _encounter.arena_min_x
+		GameState.arena_lock_max_x = _encounter.arena_max_x
+		GameState.arena_lock_min_z = _encounter.arena_min_z
+		GameState.arena_lock_max_z = _encounter.arena_max_z
+		EventBus.encounter_arena_locked.emit(
+			_encounter.arena_min_x, _encounter.arena_max_x,
+			_encounter.arena_min_z, _encounter.arena_max_z)
+
+	if enemies.is_empty():
+		_finish_encounter()
+		return
+
+	_enemies_alive = 0
+	for enemy in enemies:
+		if is_instance_valid(enemy) and not enemy.health.is_dead():
+			_spawned_enemies.append(enemy)
+			_enemies_alive += 1
+
+	_current_wave_index = _encounter.waves.size() - 1
+	GameState.encounter_enemies_alive = _enemies_alive
+
+	if _enemies_alive <= 0:
+		_finish_encounter()
 
 
 ## Check if an encounter is currently active.

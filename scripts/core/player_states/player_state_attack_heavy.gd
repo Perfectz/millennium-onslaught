@@ -18,10 +18,13 @@ func enter(_previous_state: StringName) -> void:
 	else:
 		_attack_data = preload("res://resources/attacks/heavy_attack.tres").duplicate()
 	entity.velocity.x = 0.0
+	entity.velocity.z = 0.0
 	player.combo_tracker.reset()
 	_phase = 0
 	_elapsed = 0.0
 	var spd := Constants.PLAYER_ATTACK_SPEED_SCALE
+	if player.character_def:
+		spd *= player.character_def.attack_speed_scale
 	player.play_animation(&"attack_heavy", spd)
 
 	# Derive phase timers from actual animation duration, scaled by attack speed.
@@ -41,7 +44,7 @@ func _start_active() -> void:
 	_phase = 1
 	_timer = _attack_data.active_time
 	var player: PlayerController = entity as PlayerController
-	player.hitbox.enable(_attack_data, player.facing_right)
+	player.hitbox.enable(_attack_data, player.facing_angle)
 	entity.velocity.x = 0.0
 	player.flash_mesh(Color(1.0, 1.0, 1.0))
 	EventBus.combat_attack_started.emit(player, &"heavy")
@@ -69,12 +72,13 @@ func physics_process(delta: float) -> StringName:
 	_elapsed += delta
 	player.apply_gravity(delta)
 	entity.move_and_slide()
+	player.clamp_to_bounds()
 
 	# Cancel window: dodge or technique during recovery.
-	if player.intent_buffer.consume(&"dodge") and player.can_dodge():
-		if ComboCancelChecker.check(_attack_data, _elapsed, &"dodge"):
-			return &"dodge"
-	if _phase == 2 and (player.intent_buffer.consume(&"technique") or Input.is_action_just_pressed(&"technique")):
+	if player.intent_buffer.has_buffered(&"dodge") and player.can_dodge() and ComboCancelChecker.check(_attack_data, _elapsed, &"dodge"):
+		player.intent_buffer.consume(&"dodge")
+		return &"dodge"
+	if _phase == 2 and player.intent_buffer.consume(&"technique"):
 		return &"technique"
 
 	match _phase:
@@ -86,6 +90,9 @@ func physics_process(delta: float) -> StringName:
 				_start_recovery()
 		2:
 			if _timer <= 0.0:
+				# Rapid-fire: repeat heavy if button still held.
+				if InputManager.is_action_pressed_for_player(player.player_index, &"attack_heavy"):
+					return &"attack_heavy"
 				if entity.is_on_floor():
 					return &"idle"
 				return &"fall"

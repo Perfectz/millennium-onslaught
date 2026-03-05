@@ -1,4 +1,4 @@
-## Enemy chase state. Moves toward target with belt-depth tracking.
+## Enemy chase state. Moves toward target with circular flanking on XZ plane.
 class_name EnemyStateChase
 extends State
 
@@ -18,20 +18,25 @@ func physics_process(delta: float) -> StringName:
 
 	enemy.update_facing_toward_target()
 
-	# Move toward target X position.
-	var dir_x := signf(enemy.target.global_position.x - entity.global_position.x)
-	var speed := enemy.get_move_speed()
-	entity.velocity.x = dir_x * speed
+	# Compute flanking offset so enemies spread around the player.
+	var flank_offset := _compute_flank_offset(enemy)
+	var target_pos := enemy.target.global_position + flank_offset
 
-	# Belt-depth: nudge Z toward target.
-	var z_diff := enemy.target.global_position.z - entity.global_position.z
-	if absf(z_diff) > Constants.ENEMY_Z_DEADZONE:
-		entity.velocity.z = signf(z_diff) * speed * Constants.ENEMY_Z_SPEED_RATIO
+	# Move toward flanked target on XZ plane at equal speed.
+	var move_dir := target_pos - entity.global_position
+	move_dir.y = 0.0
+	var speed := enemy.get_move_speed()
+	if move_dir.length_squared() > 0.01:
+		move_dir = move_dir.normalized()
+		entity.velocity.x = move_dir.x * speed
+		entity.velocity.z = move_dir.z * speed
 	else:
+		entity.velocity.x = 0.0
 		entity.velocity.z = 0.0
 
 	enemy.apply_gravity(delta)
 	entity.move_and_slide()
+	enemy.clamp_to_bounds()
 
 	# Ranged enemies prefer distance — switch to retreat/shoot.
 	var dist := enemy.get_horizontal_distance_to_target()
@@ -53,3 +58,22 @@ func physics_process(delta: float) -> StringName:
 			return &"attack"
 
 	return &""
+
+
+## Compute circular flanking offset so enemies distribute around the player.
+## Each enemy gets a radial position at TAU * idx / count.
+func _compute_flank_offset(enemy: EnemyController) -> Vector3:
+	var enemies := enemy.get_tree().get_nodes_in_group(&"enemies")
+	var active: Array[Node] = []
+	for e in enemies:
+		if e is EnemyController and (e as EnemyController).health and not (e as EnemyController).health.is_dead():
+			active.append(e)
+	if active.size() <= 1:
+		return Vector3.ZERO
+	var idx := active.find(enemy)
+	if idx < 0:
+		return Vector3.ZERO
+	# Circular distribution: each enemy gets an angle slice around the player.
+	var angle := TAU * float(idx) / float(active.size())
+	var radius := 1.5
+	return Vector3(cos(angle) * radius, 0.0, sin(angle) * radius)

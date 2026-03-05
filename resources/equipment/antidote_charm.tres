@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/equipment/equipment_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+equipment_id = &"antidote_charm"
+display_name = "Antidote Charm"
+description = "A charm said to ward off petrification."
+cost = 300
+slot = &"accessory"
+stat_bonuses = {"defense": 1, "magic": 2}
+passive_effects = {"hp_regen": 0.02}
+required_level = 4

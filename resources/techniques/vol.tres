@@ -1,0 +1,23 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/techniques/technique_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+technique_id = &"vol"
+display_name = "Vol"
+description = "Calls down a bolt of lightning on nearby foes."
+tp_cost = 20.0
+base_damage = 22.0
+element_type = &"lightning"
+status_effect_chance = 0.3
+status_effect_duration = 2.5
+knockback_force = 8.0
+is_projectile = false
+projectile_speed = 0.0
+aoe_radius = 2.5
+animation_name = &"attack_heavy"
+particle_color = Color(1, 1, 0.3, 1)
+unlock_level = 1
+scales_with_magic = true
+spell_type = 2

@@ -44,5 +44,8 @@ extends Resource
 @export var model_rotation_y: float = 90.0
 @export var model_animations: Dictionary = {}
 
+## Per-character attack speed multiplier applied on top of PLAYER_ATTACK_SPEED_SCALE.
+@export var attack_speed_scale: float = 1.0
+
 ## Tint color for placeholder model (until unique models exist).
 @export var tint_color: Color = Color.WHITE

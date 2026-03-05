@@ -4,6 +4,7 @@ extends State
 
 
 var _timer: float = 0.0
+var _flash_timer: float = 0.0
 
 
 func enter(_previous_state: StringName) -> void:
@@ -12,10 +13,16 @@ func enter(_previous_state: StringName) -> void:
 	enemy.hitbox.disable()
 	enemy.stop_blocking()
 	enemy.play_animation(&"hurt")
+	enemy.flash_mesh(Color(1, 1, 1))
+	_flash_timer = 0.08
 
 
 func physics_process(delta: float) -> StringName:
 	_timer -= delta
+	if _flash_timer > 0.0:
+		_flash_timer -= delta
+		if _flash_timer <= 0.0:
+			(entity as EnemyController).restore_mesh()
 
 	entity.velocity.x = move_toward(entity.velocity.x, 0.0, Constants.ENEMY_KNOCKBACK_FRICTION * delta)
 	entity.velocity.z = move_toward(entity.velocity.z, 0.0, Constants.ENEMY_KNOCKBACK_FRICTION * delta)

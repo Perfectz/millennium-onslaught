@@ -1,0 +1,45 @@
+[gd_resource type="Resource" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://resources/encounters/encounter_def.gd" id="1"]
+[ext_resource type="Script" path="res://resources/encounters/wave_def.gd" id="2"]
+[ext_resource type="Script" path="res://resources/encounters/spawn_entry.gd" id="3"]
+[ext_resource type="Resource" path="res://resources/enemies/rusher_def.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/enemies/ranged_def.tres" id="5"]
+
+[sub_resource type="Resource" id="spawn_w1_rushers"]
+script = ExtResource("3")
+enemy_def = ExtResource("4")
+count = 2
+spawn_side = &"both"
+
+[sub_resource type="Resource" id="wave1"]
+script = ExtResource("2")
+spawn_entries = [SubResource("spawn_w1_rushers")]
+delay_before_spawn = 1.0
+
+[sub_resource type="Resource" id="spawn_w2_rusher"]
+script = ExtResource("3")
+enemy_def = ExtResource("4")
+count = 1
+spawn_side = &"left"
+
+[sub_resource type="Resource" id="spawn_w2_ranged"]
+script = ExtResource("3")
+enemy_def = ExtResource("5")
+count = 1
+spawn_side = &"right"
+
+[sub_resource type="Resource" id="wave2"]
+script = ExtResource("2")
+spawn_entries = [SubResource("spawn_w2_rusher"), SubResource("spawn_w2_ranged")]
+delay_before_spawn = 1.5
+
+[resource]
+script = ExtResource("1")
+encounter_id = &"academy_b1_entry"
+waves = [SubResource("wave1"), SubResource("wave2")]
+arena_lock = true
+arena_min_x = -9.0
+arena_max_x = 9.0
+arena_min_z = -8.0
+arena_max_z = 8.0

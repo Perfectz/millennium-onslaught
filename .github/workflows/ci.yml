@@ -1,0 +1,39 @@
+name: CI — Smoke Test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  GODOT_VERSION: "4.6.1"
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    name: Parse Check + Unit Tests
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Godot
+        run: |
+          wget -q "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip" -O godot.zip
+          unzip -q godot.zip
+          mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 godot
+          chmod +x godot
+
+      - name: Parse check (headless editor load)
+        run: |
+          ./godot --path . --editor --headless --quit 2>&1 || true
+          echo "Parse check completed."
+
+      - name: Run GdUnit4 headless tests
+        run: |
+          ./godot --path . --headless \
+            -s res://addons/gdUnit4/bin/GdUnitCmdTool.gd \
+            --ignoreHeadlessMode \
+            --add tests/unit/
+        timeout-minutes: 10

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/dungeons/dungeon_def.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/stages/birth_valley.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+dungeon_id = &"birth_valley"
+dungeon_name = "Birth Valley"
+room_scenes = []
+room_encounters = []
+requires_story_flag = &"dungeon_1_complete"
+stage_def = ExtResource("2")

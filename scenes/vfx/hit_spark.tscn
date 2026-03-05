@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3]
+
+[sub_resource type="QuadMesh" id="1"]
+size = Vector2(0.6, 0.6)
+
+[sub_resource type="StandardMaterial3D" id="2"]
+transparency = 1
+blend_mode = 1
+shading_mode = 0
+no_depth_test = true
+billboard_mode = 1
+albedo_color = Color(1, 1, 0.8, 1)
+emission_enabled = true
+emission = Color(1, 0.95, 0.6, 1)
+emission_energy_multiplier = 4.0
+
+[node name="HitSpark" type="MeshInstance3D"]
+mesh = SubResource("1")
+material_override = SubResource("2")

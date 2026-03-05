@@ -1,0 +1,30 @@
+[gd_resource type="Resource" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://resources/characters/character_def.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/attacks/light_attack_1.tres" id="2"]
+[ext_resource type="Resource" path="res://resources/attacks/light_attack_2.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/attacks/light_attack_3.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/attacks/heavy_attack.tres" id="5"]
+[ext_resource type="Resource" path="res://resources/attacks/launcher_attack.tres" id="6"]
+[ext_resource type="Resource" path="res://resources/techniques/nafoi.tres" id="7"]
+[ext_resource type="Resource" path="res://resources/techniques/medice.tres" id="8"]
+
+[resource]
+script = ExtResource("1")
+character_id = &"kyra"
+display_name = "Kyra Tierney"
+role = "Esper"
+base_stats = {"strength": 3, "magic": 8, "defense": 4, "agility": 7}
+combo_chain = [ExtResource("2"), ExtResource("3"), ExtResource("4")]
+heavy_attack = ExtResource("5")
+launcher_attack = ExtResource("6")
+techniques = [ExtResource("7"), ExtResource("8")]
+skill_tree_id = &"kyra_tree"
+model_base_path = "res://assets/models/characters/alys/idle.fbx"
+model_skin_path = "res://assets/models/characters/alys/alys_texture_0.png"
+model_scale = Vector3(1, 1, 1)
+model_offset = Vector3(0, 0, 0)
+model_rotation_y = 90.0
+model_animations = {"idle": "res://assets/models/characters/alys/idle.fbx", "run": "res://assets/models/characters/alys/run.fbx", "jump": "res://assets/models/characters/alys/jump.fbx", "attack_light_1": "res://assets/models/characters/alys/attack_light_1.fbx", "attack_light_2": "res://assets/models/characters/alys/attack_light_2.fbx", "attack_light_3": "res://assets/models/characters/alys/attack_light_3.fbx", "attack_heavy": "res://assets/models/characters/alys/attack_heavy.fbx", "attack_launcher": "res://assets/models/characters/alys/attack_light_3.fbx", "hurt": "res://assets/models/characters/alys/hurt.fbx", "dead": "res://assets/models/characters/alys/dead.fbx", "dodge": "res://assets/models/characters/alys/dodge.fbx"}
+attack_speed_scale = 1.1
+tint_color = Color(0.4, 0.6, 1, 1)

@@ -1,6 +1,10 @@
 extends "res://scripts/ui/split_hub_screen.gd"
 
-const TOWN_HUB_DATA_PATH := "res://resources/ui/town_hub_screen.tres"
+const TOWN_HUB_DATA_PATHS: Dictionary = {
+	&"piata": "res://resources/ui/town_hub_screen.tres",
+	&"zema": "res://resources/ui/zema_hub_screen.tres",
+}
+const DEFAULT_TOWN_HUB_DATA_PATH := "res://resources/ui/town_hub_screen.tres"
 const ShopScreenScript = preload("res://scripts/ui/shop_screen.gd")
 
 var _town_id: StringName = &"piata"
@@ -19,9 +23,9 @@ func _ready() -> void:
 func _on_entry_activated(entry: Dictionary) -> void:
 	var entry_id := str(entry.get("id", ""))
 	match entry_id:
-		"academy_shop":
+		"academy_shop", "zema_shop":
 			_open_shop()
-		"piata_inn":
+		"piata_inn", "zema_inn":
 			_use_inn()
 		_:
 			ToastSystem.show_toast(
@@ -97,9 +101,10 @@ func _load_town_identity() -> void:
 
 
 func _build_town_config() -> Dictionary:
-	var data: Resource = load(TOWN_HUB_DATA_PATH)
+	var hub_path: String = TOWN_HUB_DATA_PATHS.get(_town_id, DEFAULT_TOWN_HUB_DATA_PATH)
+	var data: Resource = load(hub_path)
 	if data == null or not data.has_method("to_config"):
-		push_warning("TownController: missing hub screen data resource at %s" % TOWN_HUB_DATA_PATH)
+		push_warning("TownController: missing hub screen data resource at %s" % hub_path)
 		return {}
 
 	var config: Dictionary = data.call("to_config")

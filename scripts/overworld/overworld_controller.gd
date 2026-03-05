@@ -36,12 +36,12 @@ func _on_entry_activated(entry: Dictionary) -> void:
 		"go_town":
 			GameManager.go_to_town(target_id)
 		"go_dungeon":
-			GameManager.go_to_dungeon(target_id)
+			GameManager.go_to_character_select(target_id)
 		_:
 			if node_def.node_type == &"town":
 				GameManager.go_to_town(node_id)
 			elif node_def.node_type == &"dungeon":
-				GameManager.go_to_dungeon(node_id)
+				GameManager.go_to_character_select(node_id)
 			else:
 				ToastSystem.show_toast(
 					"Stage intel synchronized: %s" % str(entry.get("menu_label", "Unknown")),

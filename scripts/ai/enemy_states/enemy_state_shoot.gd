@@ -47,5 +47,5 @@ func _fire_projectile(enemy: EnemyController) -> void:
 	projectile.global_position = entity.global_position + Vector3(0.0, 0.8, 0.0)
 
 	if projectile.has_method("setup"):
-		var dir := Vector3.RIGHT if enemy.facing_right else Vector3.LEFT
+		var dir := enemy.facing_direction
 		projectile.setup(dir, Constants.ENEMY_PROJECTILE_SPEED, Constants.ENEMY_PROJECTILE_DAMAGE)

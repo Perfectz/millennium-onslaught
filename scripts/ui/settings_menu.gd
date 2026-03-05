@@ -402,9 +402,11 @@ func _on_scanlines_toggled(enabled: bool) -> void:
 
 
 func _on_open_remap() -> void:
+	visible = false
 	var ctrl_screen := ControllerSettings.new()
 	ctrl_screen.closed.connect(func() -> void:
 		ctrl_screen.queue_free()
+		visible = true
 		_controls_tab_btn.grab_focus()
 	)
 	add_child(ctrl_screen)

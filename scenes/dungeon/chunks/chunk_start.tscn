@@ -1,20 +1,58 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=21 format=3]
 
-[ext_resource type="Texture2D" path="res://assets/textures/piata_floor.jpeg" id="1"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_basecolor.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_normal.png" id="tex_floor_normal"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_roughness.png" id="tex_floor_roughness"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_ambientOcclusion.png" id="tex_floor_ao"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/piata_foundation.jpeg" id="tex_foundation"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/wall_pbr/Cracked_Mud_001_COLOR.jpg" id="tex_wall_trim"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/wall_pbr/Cracked_Mud_001_NORM.jpg" id="tex_wall_normal"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/wall_pbr/Cracked_Mud_001_ROUGH.jpg" id="tex_wall_rough"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/wall_pbr/Cracked_Mud_001_OCC.jpg" id="tex_wall_ao"]
+[ext_resource type="PackedScene" path="res://assets/models/dungeon_props/arch_door.fbx" id="arch_door"]
+[ext_resource type="PackedScene" path="res://assets/models/dungeon_props/torch.fbx" id="torch"]
+[ext_resource type="PackedScene" path="res://assets/models/dungeon_props/barrel.fbx" id="barrel"]
+[ext_resource type="PackedScene" path="res://assets/models/dungeon_props/crate.fbx" id="crate"]
+[ext_resource type="PackedScene" path="res://assets/models/dungeon_props/wall_modular.fbx" id="wall"]
 
 [sub_resource type="BoxShape3D" id="floor_shape"]
-size = Vector3(24, 1, 6)
+size = Vector3(24, 1, 32)
 
 [sub_resource type="BoxMesh" id="floor_mesh"]
-size = Vector3(24, 1, 6)
+size = Vector3(24, 1, 32)
 
 [sub_resource type="StandardMaterial3D" id="floor_mat"]
 albedo_texture = ExtResource("1")
-uv1_scale = Vector3(8, 2, 1)
+normal_enabled = true
+normal_texture = ExtResource("tex_floor_normal")
+roughness_texture = ExtResource("tex_floor_roughness")
+ao_enabled = true
+ao_light_affect = 1.0
+ao_texture = ExtResource("tex_floor_ao")
+uv1_scale = Vector3(8, 10, 1)
 texture_filter = 3
 
 [sub_resource type="BoxMesh" id="foundation_mesh"]
-size = Vector3(24, 10, 6)
+size = Vector3(24, 10, 32)
+
+[sub_resource type="StandardMaterial3D" id="foundation_mat"]
+albedo_texture = ExtResource("tex_foundation")
+uv1_scale = Vector3(4, 4, 1)
+texture_filter = 3
+
+[sub_resource type="BoxMesh" id="wall_trim_mesh"]
+size = Vector3(24, 1.5, 0.15)
+
+[sub_resource type="StandardMaterial3D" id="wall_trim_mat"]
+albedo_texture = ExtResource("tex_wall_trim")
+normal_enabled = true
+normal_texture = ExtResource("tex_wall_normal")
+roughness_texture = ExtResource("tex_wall_rough")
+ao_enabled = true
+ao_light_affect = 1.0
+ao_texture = ExtResource("tex_wall_ao")
+uv1_scale = Vector3(4, 1, 1)
+texture_filter = 3
 
 [node name="ChunkStart" type="Node3D"]
 
@@ -33,3 +71,38 @@ surface_material_override/0 = SubResource("floor_mat")
 [node name="Foundation" type="MeshInstance3D" parent="Floor"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -5.5, 0)
 mesh = SubResource("foundation_mesh")
+surface_material_override/0 = SubResource("foundation_mat")
+
+[node name="WallTrim" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 4.5, -7.45)
+mesh = SubResource("wall_trim_mesh")
+surface_material_override/0 = SubResource("wall_trim_mat")
+
+[node name="Props" type="Node3D" parent="."]
+
+[node name="ArchDoor" parent="Props" instance=ExtResource("arch_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -7.5)
+
+[node name="BackWall1" parent="Props" instance=ExtResource("wall")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -7.5)
+
+[node name="BackWall2" parent="Props" instance=ExtResource("wall")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -7.5)
+
+[node name="BackWall3" parent="Props" instance=ExtResource("wall")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, -7.5)
+
+[node name="TorchLeft" parent="Props" instance=ExtResource("torch")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, -7.2)
+
+[node name="TorchRight" parent="Props" instance=ExtResource("torch")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -7.2)
+
+[node name="Barrel1" parent="Props" instance=ExtResource("barrel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 7.2)
+
+[node name="Barrel2" parent="Props" instance=ExtResource("barrel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, 7.5)
+
+[node name="Crate1" parent="Props" instance=ExtResource("crate")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 0, 7.0)

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/enemies/enemy_def.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/attacks/enemy_rusher_attack.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+enemy_name = &"Brute"
+enemy_type = &"rusher"
+base_hp = 75.0
+move_speed = 3.5
+attack_range = 1.8
+perception_delay = 0.25
+attack_cooldown = 1.3
+attack = ExtResource("2")
+behavior = &"rusher"
+can_block = false
+block_damage_reduction = 0.0
+knockback_resistance = 0.3
+mesh_color = Color(0.45, 0.28, 0.15, 1)
+xp_reward = 18
+gold_reward = 10
