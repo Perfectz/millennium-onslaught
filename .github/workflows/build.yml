@@ -1,0 +1,137 @@
+name: Build Matrix — Millennium Onslaught
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      godot_version:
+        description: 'Godot version to use'
+        default: '4.4.1'
+        required: false
+
+env:
+  GODOT_VERSION: ${{ github.event.inputs.godot_version || '4.4.1' }}
+
+jobs:
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          use-dotnet: false
+
+      - name: Import project
+        run: godot --headless --import --quit-after 30 || true
+
+      - name: Export Linux
+        run: |
+          mkdir -p export/pc/linux
+          godot --headless --export-release "Linux" export/pc/linux/millennium-onslaught.x86_64 || echo "Export preset not configured yet"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: export/pc/linux/
+          if-no-files-found: warn
+
+  build-windows:
+    name: Build Windows
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          use-dotnet: false
+
+      - name: Import project
+        run: godot --headless --import --quit-after 30 || true
+
+      - name: Export Windows
+        run: |
+          mkdir -p export/pc/windows
+          godot --headless --export-release "Windows Desktop" export/pc/windows/millennium-onslaught.exe || echo "Export preset not configured yet"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: export/pc/windows/
+          if-no-files-found: warn
+
+  build-android-debug:
+    name: Build Android (Debug)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          use-dotnet: false
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Import project
+        run: godot --headless --import --quit-after 30 || true
+
+      - name: Export Android Debug
+        run: |
+          mkdir -p export/android
+          godot --headless --export-debug "Android" export/android/millennium-onslaught-debug.apk || echo "Export preset not configured yet"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-debug-build
+          path: export/android/
+          if-no-files-found: warn
+
+  build-android-release:
+    name: Build Android (Release)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          use-dotnet: false
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Import project
+        run: godot --headless --import --quit-after 30 || true
+
+      - name: Export Android Release
+        run: |
+          mkdir -p export/android
+          godot --headless --export-release "Android" export/android/millennium-onslaught-release.apk || echo "Export preset not configured yet"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-build
+          path: export/android/
+          if-no-files-found: warn

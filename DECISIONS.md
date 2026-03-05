@@ -76,3 +76,80 @@
 | 8 | platform | One-way and solid platforms |
 | 9 | trigger | Area triggers (room transitions, events) |
 | 10 | pickup | Collectible items |
+
+---
+
+## 2026-03-05 — Typed Event Contracts (Month 2)
+
+**Decision:** Replace loose signal parameters with typed RefCounted payload classes (EventContracts.HitEvent, KillEvent, etc.).
+
+**Why:** Loose parameters (attacker: Node, target: Node, damage: float, hit_position: Vector3) have no validation and are easy to misorder. Typed contracts enforce required fields, enable validation, and provide to_dict() for logging.
+
+**Alternatives Considered:**
+- Keep loose parameters: Simpler but no validation, easy to introduce bugs when signal signatures change.
+- Dictionary payloads: Flexible but no type safety, keys are stringly-typed.
+
+**Trade-off:** Slightly more boilerplate per event type, but catch errors at emit time rather than runtime crash.
+
+---
+
+## 2026-03-05 — Data-Driven Input Action Sets (Month 2)
+
+**Decision:** Extract InputManager action mappings into InputActionSet data objects per InputContext.
+
+**Why:** Hardcoded action mappings in InputManager make remapping difficult and testing impossible. Data-driven action sets can be swapped per context and are testable without the scene tree.
+
+---
+
+## 2026-03-05 — Stateless Service Layer (Month 3)
+
+**Decision:** Game logic services (CombatService, EncounterService, SpawnService) are stateless — all calculations use passed parameters, no persistent member variables.
+
+**Why:** Stateless services are trivially testable (no setup/teardown), thread-safe, and impossible to have stale state bugs. The DamageFlow orchestrator coordinates the pipeline without services knowing about each other.
+
+**Alternatives Considered:**
+- Stateful service singletons: Simpler API but harder to test and debug.
+- Pure functions only: Too granular, loses encapsulation of related operations.
+
+---
+
+## 2026-03-05 — Save Versioning with CRC32 Checksums (Month 5)
+
+**Decision:** Every save file includes a `save_version` integer and a CRC32 checksum. Loading verifies checksum and runs version migration chain.
+
+**Why:** Save format will change as features are added. Without versioning, old saves break silently. Without checksums, corrupted saves load with garbage data causing hard-to-debug crashes.
+
+**Migration Strategy:** Linear chain (v0 → v1 → v2 → ... → vN). Each migration adds missing fields with defaults. Old saves are upgraded transparently.
+
+---
+
+## 2026-03-05 — Video Background Z-Ordering Fix (Month 2)
+
+**Decision:** StageRunner's video background uses CanvasLayer with layer=-1, placing it BEHIND the 3D viewport. 3D gameplay renders at the default layer (0). UI CanvasLayer at layer 10.
+
+**Why:** Without explicit layer assignment, CanvasLayer defaults to layer 0, which renders ON TOP of 3D content, making players and enemies invisible behind the video. Negative layer values ensure the video is always behind 3D.
+
+**Scene Tree:**
+```
+Stage (Node3D)
+├── VideoBackground (CanvasLayer, layer = -1)  ← BEHIND 3D
+│   └── VideoStreamPlayer
+├── DungeonRoom (Node3D)                        ← 3D at default layer
+└── UI (CanvasLayer, layer = 10)                ← On top
+```
+
+---
+
+## 2026-03-05 — Feature Flags for Controlled Rollout (Month 11)
+
+**Decision:** Boolean and variant feature flags loaded from JSON config (local file, extensible to remote). Flags gate code paths at runtime.
+
+**Why:** Allows testing new features without branching, gradual rollout, and quick rollback by changing config rather than code.
+
+**Pattern:**
+```gdscript
+if feature_flags.is_enabled("new_combat_system"):
+    # New path
+else:
+    # Existing path
+```

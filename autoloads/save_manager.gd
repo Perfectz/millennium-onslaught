@@ -14,9 +14,10 @@ func _ready() -> void:
 	_ensure_save_dir()
 
 
-## Save persistent game state to a slot.
+## Save persistent game state to a slot. Includes version and checksum.
 func save_game(slot: int = 0) -> bool:
 	var data := GameState.serialize_persistent()
+	data = SaveMigration.prepare_for_save(data)
 	var json_string := JSON.stringify(data, "\t")
 	var final_path := _get_save_path(slot)
 	var temp_path := final_path + ".tmp"
@@ -84,7 +85,32 @@ func load_game(slot: int = 0) -> bool:
 		EventBus.log_event(&"load_failed", {"slot": slot, "error": error_msg})
 		return false
 
-	GameState.deserialize_persistent(json.data)
+	var save_data: Dictionary = json.data
+	# Validate structure.
+	var structure_errors: Array[String] = SaveMigration.validate_structure(save_data)
+	if not structure_errors.is_empty():
+		var error_msg := "Save structure invalid: " + ", ".join(structure_errors)
+		push_error(error_msg)
+		EventBus.load_failed.emit(slot, error_msg)
+		EventBus.log_event(&"load_failed", {"slot": slot, "error": error_msg})
+		return false
+	# Verify checksum if present.
+	if "checksum" in save_data:
+		if not SaveMigration.verify_checksum(save_data):
+			var error_msg := "Save file checksum mismatch — possible corruption"
+			push_error(error_msg)
+			EventBus.load_failed.emit(slot, error_msg)
+			EventBus.log_event(&"load_failed", {"slot": slot, "error": error_msg})
+			return false
+	# Migrate if needed.
+	if SaveMigration.needs_migration(save_data):
+		save_data = SaveMigration.migrate(save_data)
+		EventBus.log_event(&"save_migrated", {
+			"slot": slot,
+			"from_version": SaveMigration.get_version(json.data),
+			"to_version": SaveMigration.CURRENT_VERSION,
+		})
+	GameState.deserialize_persistent(save_data)
 	EventBus.load_completed.emit(slot)
 	EventBus.log_event(&"load_completed", {"slot": slot})
 	return true

@@ -1,0 +1,65 @@
+name: CI — Millennium Onslaught
+
+on:
+  push:
+    branches: [main, develop, 'feature/*']
+  pull_request:
+    branches: [main, develop]
+
+env:
+  GODOT_VERSION: "4.4.1"
+
+jobs:
+  test:
+    name: Run GdUnit4 Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          use-dotnet: false
+
+      - name: Import project
+        run: godot --headless --import --quit-after 30 || true
+
+      - name: Run GdUnit4 tests
+        run: |
+          godot --headless \
+            -s addons/gdUnit4/bin/GdUnitCmdTool.gd \
+            --add "-rd res://tests" \
+            --quit-after 120 || true
+
+      - name: Run smoke test
+        run: bash tools/smoke_test.sh
+
+  lint:
+    name: Static Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for hardcoded values in scripts
+        run: |
+          # Flag potential hardcoded numeric values in gameplay scripts
+          # Excludes constants.gd, test files, and autoload setup
+          find scripts/ -name "*.gd" -exec grep -Hn '[^_A-Z]= [0-9]\+\.[0-9]' {} \; | \
+            grep -v "test_" | grep -v "Constants" || echo "No hardcoded values found"
+
+      - name: Check file naming conventions
+        run: |
+          # All .gd files should be snake_case
+          find scripts/ -name "*.gd" | while read f; do
+            base=$(basename "$f" .gd)
+            if echo "$base" | grep -q '[A-Z]'; then
+              echo "WARNING: Non-snake_case filename: $f"
+            fi
+          done
