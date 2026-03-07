@@ -17,12 +17,41 @@ func before_test() -> void:
 
 func test_serialize_returns_all_required_fields() -> void:
 	var data: Dictionary = GameState.serialize_persistent()
+	assert_bool(data.has("save_schema")).is_true()
 	assert_bool(data.has("party_roster")).is_true()
 	assert_bool(data.has("character_data")).is_true()
 	assert_bool(data.has("inventory")).is_true()
 	assert_bool(data.has("gold")).is_true()
 	assert_bool(data.has("story_flags")).is_true()
 	assert_bool(data.has("active_party")).is_true()
+
+
+func test_serialize_normalizes_character_record_shape() -> void:
+	GameState.character_data[&"alys"] = {
+		"level": 0,
+		"xp": -10,
+		"hp": 150.0,
+		"max_hp": 80.0,
+		"tp": 999.0,
+		"stats": {"strength": 8},
+		"stat_points": 3,
+		"equipment": {"weapon": "iron_sword"},
+		"techniques": ["fire_slash"],
+		"skill_tree": {"tier_1_attack": 1},
+	}
+	var data: Dictionary = GameState.serialize_persistent()
+	var roster: Array = data.get("party_roster", [])
+	assert_int(roster.size()).is_equal(1)
+	var serialized_chars: Dictionary = data.get("character_data", {})
+	var alys: Dictionary = serialized_chars.get(&"alys", {})
+	assert_int(alys.get("level", 0) as int).is_equal(1)
+	assert_int(alys.get("xp", 0) as int).is_equal(0)
+	assert_float(alys.get("hp", 0.0) as float).is_equal(80.0)
+	assert_float(alys.get("max_hp", 0.0) as float).is_equal(80.0)
+	assert_float(alys.get("tp", 0.0) as float).is_equal(Constants.TP_MAX)
+	assert_int(alys.get("stat_points_available", 0) as int).is_equal(3)
+	assert_str(str(alys.get("equipped", {}).get("weapon", ""))).is_equal("iron_sword")
+	assert_bool(alys.get("skill_tree_progress", {}).get("tier_1_attack", false) as bool).is_true()
 
 
 # --- Round-Trips ---

@@ -7,13 +7,18 @@ signal continue_pressed
 const UIStyleRef = preload("res://scripts/ui/ui_style.gd")
 
 @onready var _overlay: ColorRect = $Overlay
+@onready var _panel_root: Control = $Panel
+@onready var _glow: ColorRect = $Panel/Glow
 @onready var _card: PanelContainer = $Panel/Card
 @onready var _title_label: Label = $Panel/Card/Margin/VBox/TitleLabel
+@onready var _subtitle_label: Label = $Panel/Card/Margin/VBox/SubTitleLabel
 @onready var _rank_label: Label = $Panel/Card/Margin/VBox/RankLabel
 @onready var _kills_label: Label = $Panel/Card/Margin/VBox/KillsLabel
 @onready var _time_label: Label = $Panel/Card/Margin/VBox/TimeLabel
 @onready var _combo_label: Label = $Panel/Card/Margin/VBox/ComboLabel
+@onready var _score_panel: PanelContainer = $Panel/Card/Margin/VBox/ScorePanel
 @onready var _score_label: Label = $Panel/Card/Margin/VBox/ScorePanel/ScoreLabel
+@onready var _footer_hint: Label = $Panel/Card/Margin/VBox/FooterHint
 @onready var _continue_btn: Button = $Panel/Card/Margin/VBox/ContinueButton
 
 
@@ -21,26 +26,28 @@ func _ready() -> void:
 	UIStyleRef.apply_theme($Panel)
 	_continue_btn.pressed.connect(func() -> void: continue_pressed.emit())
 	UIStyleRef.wire_button_sounds(_continue_btn)
+	UIStyleRef.add_press_feedback(_continue_btn, 0.975)
 	_continue_btn.grab_focus()
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 	# Override .tscn styles with glass-morphism.
 	_card.add_theme_stylebox_override("panel", UIStyleRef.create_panel_style(
-		Color(0.06, 0.08, 0.14, 0.55),
-		Color(0.38, 0.8, 1.0, 0.25),
-		6
+		Color(0.06, 0.08, 0.14, 0.82),
+		Color(0.38, 0.8, 1.0, 0.42),
+		10
 	))
-	var score_panel := $Panel/Card/Margin/VBox/ScorePanel as PanelContainer
-	if score_panel:
-		score_panel.add_theme_stylebox_override("panel", UIStyleRef.create_panel_style(
-			Color(0.05, 0.07, 0.12, 0.5),
-			Color(0.3, 0.6, 0.9, 0.2),
-			4
+	if _score_panel:
+		_score_panel.add_theme_stylebox_override("panel", UIStyleRef.create_panel_style(
+			Color(0.05, 0.07, 0.12, 0.72),
+			Color(0.3, 0.6, 0.9, 0.32),
+			8
 		))
 	UIStyleRef.style_button(_continue_btn, Color.BLACK, Color(0.38, 0.8, 1.0))
 
 	# Screen FX: blue glow + particles + vignette + scanlines.
-	UIStyleRef.apply_screen_effects($Panel, Color(1.0, 0.88, 0.5, 0.12), 20, Color(0.12, 0.35, 0.8))
+	UIStyleRef.apply_screen_effects(_panel_root, Color(1.0, 0.88, 0.5, 0.08), 14, Color(0.12, 0.35, 0.8))
+	_refresh_layout()
+	get_viewport().size_changed.connect(_refresh_layout)
 
 	_play_intro()
 
@@ -112,11 +119,34 @@ func display_stats(tracker: ScoreTracker, xp_earned: int = 0, gold_earned: int =
 		rewards_label.text = " | ".join(reward_parts)
 		rewards_label.modulate.a = 0.0
 		vbox.add_child(rewards_label)
-		vbox.move_child(rewards_label, vbox.get_child_count() - 1)
+		vbox.move_child(rewards_label, max(vbox.get_child_count() - 2, 0))
 		var reward_tween := rewards_label.create_tween()
 		reward_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 		reward_tween.tween_interval(1.0)
 		reward_tween.tween_property(rewards_label, "modulate:a", 1.0, 0.3)
+
+
+func _refresh_layout() -> void:
+	var vp := get_viewport()
+	if vp == null:
+		return
+	var size := vp.get_visible_rect().size
+	var width := clampf(size.x * 0.34, 420.0, 600.0)
+	var height := clampf(size.y * 0.52, 360.0, 520.0)
+	_card.offset_left = -width * 0.5
+	_card.offset_top = -height * 0.5
+	_card.offset_right = width * 0.5
+	_card.offset_bottom = height * 0.5
+	_glow.offset_left = -(width * 0.74)
+	_glow.offset_top = -(height * 0.72)
+	_glow.offset_right = width * 0.74
+	_glow.offset_bottom = height * 0.72
+	var compact := size.x < 1360.0 or size.y < 860.0
+	_title_label.add_theme_font_size_override("font_size", 34 if compact else 40)
+	_subtitle_label.add_theme_font_size_override("font_size", 14 if compact else 16)
+	_rank_label.add_theme_font_size_override("font_size", 42 if compact else 48)
+	_continue_btn.custom_minimum_size.y = 52 if compact else 56
+	_footer_hint.visible = not compact
 
 
 func _compute_rank(score: int, kills: int, max_combo: int, elapsed_seconds: float) -> String:

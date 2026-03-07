@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="path" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7b4b31"/>
+      <stop offset="1" stop-color="#5b2f1f"/>
+    </linearGradient>
+    <pattern id="earth" width="128" height="128" patternUnits="userSpaceOnUse">
+      <rect width="128" height="128" fill="url(#path)"/>
+      <path d="M10 20c26 10 34-6 58 8s30 6 50 0" fill="none" stroke="#a66f45" stroke-width="10" opacity="0.45"/>
+      <path d="M8 72c24-8 46-4 60 10s32 18 52 8" fill="none" stroke="#432114" stroke-width="12" opacity="0.4"/>
+      <path d="M28 108l18-14 20 10 18-12 20 8" fill="none" stroke="#d49a6b" stroke-width="4" opacity="0.24"/>
+      <circle cx="28" cy="36" r="4" fill="#d3a06f" opacity="0.26"/>
+      <circle cx="96" cy="84" r="5" fill="#2d170f" opacity="0.24"/>
+    </pattern>
+  </defs>
+  <rect width="512" height="512" fill="url(#earth)"/>
+</svg>

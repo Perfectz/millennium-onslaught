@@ -76,7 +76,7 @@ func _apply_knockback(force: Vector3) -> void:
 | Signals | `snake_case` with domain prefix | `combat_hit_landed`, `rpg_level_up` |
 | Enums | `PascalCase` type, `UPPER_SNAKE_CASE` values | `enum Mode { FOLLOW, DIRECTOR }` |
 | Resource files (.tres) | `snake_case` | `alys.tres`, `light_attack_1.tres` |
-| Scene files (.tscn) | `snake_case` | `player.tscn`, `room_01.tscn` |
+| Scene files (.tscn) | `snake_case` | `player.tscn`, `academy_b1_entry.tscn` |
 
 ---
 

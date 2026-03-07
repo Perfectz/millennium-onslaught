@@ -71,7 +71,7 @@ scales_with_magic = false
 
 - `player_state_technique.gd` reads the active TechniqueDef from `PlayerController.get_active_technique()`.
 - Builds an `AttackDef` from technique fields (base_damage, knockback_force, element_type, status_effect_chance).
-- `PlayerController.cycle_technique()` rotates through learned techniques (Tab/Y input).
+- `PlayerController.cycle_technique()` rotates through learned techniques (`O` on keyboard, D-pad left on controller by default).
 - `DamageCalculator.calculate_full()` uses magic or strength scaling based on `scales_with_magic`.
 - `CombatSystem.apply_status_if_applicable()` rolls status effect chance on hit.
 

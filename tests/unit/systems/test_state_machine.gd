@@ -74,13 +74,14 @@ func test_transition_calls_enter_on_new_state() -> void:
 	assert_str(String(_run_state.last_previous_state)).is_equal("idle")
 
 
-func test_transition_to_same_state_does_nothing() -> void:
+func test_transition_to_same_state_reenters_state() -> void:
 	_machine.set_initial_state(&"idle")
 	_idle_state.exit_called = false
 	_idle_state.enter_called = false
 	_machine.transition_to(&"idle")
-	assert_bool(_idle_state.exit_called).is_false()
-	assert_bool(_idle_state.enter_called).is_false()
+	assert_bool(_idle_state.exit_called).is_true()
+	assert_bool(_idle_state.enter_called).is_true()
+	assert_str(String(_idle_state.last_previous_state)).is_equal("idle")
 
 
 func test_previous_state_name_tracks_history() -> void:

@@ -524,3 +524,26 @@
 **Alternatives Considered:**
 - Fix all 115 issues at once: Would take weeks and risk regressions. Instead, fixed critical P0s and infrastructure, deferred P1/P2 to appropriate months.
 - Separate CI system (Jenkins, GitLab CI): GitHub Actions is simpler for a single-repo project already on GitHub.
+
+---
+
+## 2026-03-05 — Canonical Combat Event Contracts and Catalog Validation
+
+**Decision:** Introduce canonical typed combat event contracts (`CombatHitEvent`, `CombatKillEvent`), emit them from `EventBus`, and enforce the event catalog through shared validation tooling.
+
+**Why:** Combat reactions were still coupled through positional signals and anonymous payload conventions spread across multiple listeners. That made AI edits brittle: adding or changing combat event data required rediscovering each listener and hoping the docs matched the code. Typed contracts provide a stable schema boundary, and catalog validation turns the docs into an enforced source of truth instead of a stale note.
+
+**What Changed:**
+1. Added `scripts/contracts/combat_hit_event.gd` and `scripts/contracts/combat_kill_event.gd` as canonical schema-v1 payloads.
+2. Added `combat_hit_event` and `combat_kill_event` typed signals to `autoloads/event_bus.gd`.
+3. Updated `scripts/systems/combat_system.gd` to build typed event objects and emit canonical signals while retaining legacy positional signals for compatibility.
+4. Migrated core listeners in audio, juice, HUD, camera, hitstop, VFX, and dungeon progression to consume the typed payloads.
+5. Added `docs/events/combat_event_contracts.md` and updated `docs/events/event_catalog.md` to document the canonical contracts and legacy compatibility path.
+6. Added `tools/validate_event_catalog.py`, wired it into `tools/smoke_test.sh`, `tools/sanity_check.ps1`, and `.github/workflows/ci.yml`.
+
+**Alternatives Considered:**
+- Hard-switch every existing signal immediately: Cleaner end state, but too risky for one pass across current combat consumers.
+- Documentation only: Improves discoverability but does not prevent contract drift.
+- Keep anonymous dictionaries for payloads: Flexible short term, but weakens validation and makes AI-driven edits harder to reason about.
+
+**Key Files:** `autoloads/event_bus.gd`, `scripts/contracts/combat_hit_event.gd`, `scripts/contracts/combat_kill_event.gd`, `scripts/systems/combat_system.gd`, `docs/events/event_catalog.md`, `docs/events/combat_event_contracts.md`, `tools/validate_event_catalog.py`, `tools/smoke_test.sh`, `tools/sanity_check.ps1`, `.github/workflows/ci.yml`

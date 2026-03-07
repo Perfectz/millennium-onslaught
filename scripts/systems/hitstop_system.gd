@@ -11,8 +11,8 @@ var _prev_ticks: int = 0
 func _ready() -> void:
 	process_mode = PROCESS_MODE_ALWAYS
 	_prev_ticks = Time.get_ticks_usec()
-	EventBus.combat_hit_landed.connect(_on_hit_landed)
-	EventBus.combat_kill.connect(_on_kill)
+	EventBus.combat_hit_event.connect(_on_hit_event)
+	EventBus.combat_kill_event.connect(_on_kill_event)
 
 
 func _process(_delta: float) -> void:
@@ -32,15 +32,16 @@ func start_hitstop(duration: float) -> void:
 	Engine.time_scale = 0.0
 
 
-func _on_hit_landed(_attacker: Node, _target: Node, damage: float, _pos: Vector3, attack_data: AttackDef) -> void:
+func _on_hit_event(event: CombatHitEvent) -> void:
+	var attack_data := event.attack_data
 	if attack_data != null and attack_data.hitstop_duration > 0.0:
 		start_hitstop(attack_data.hitstop_duration)
 		return
-	if damage >= Constants.HEAVY_ATTACK_DAMAGE:
+	if event.damage >= Constants.HEAVY_ATTACK_DAMAGE:
 		start_hitstop(Constants.HITSTOP_HEAVY_DURATION)
 	else:
 		start_hitstop(Constants.HITSTOP_LIGHT_DURATION)
 
 
-func _on_kill(_attacker: Node, _target: Node, _pos: Vector3) -> void:
+func _on_kill_event(_event: CombatKillEvent) -> void:
 	start_hitstop(Constants.HITSTOP_KILL_DURATION)

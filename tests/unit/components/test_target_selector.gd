@@ -70,3 +70,21 @@ func test_zero_origin_works() -> void:
 		{"position": Vector3(1, 0, 0), "alive": true},   # dist 1
 	]
 	assert_int(_selector.select_closest(Vector3.ZERO, candidates)).is_equal(1)
+
+
+func test_max_distance_filters_out_far_candidates() -> void:
+	var candidates: Array[Dictionary] = [
+		{"position": Vector3(10, 0, 0), "alive": true},
+		{"position": Vector3(3, 0, 0), "alive": true},
+	]
+	assert_int(_selector.select_closest(Vector3.ZERO, candidates, 16.0)).is_equal(1)
+	assert_int(_selector.select_closest(Vector3.ZERO, candidates, 4.0)).is_equal(-1)
+
+
+func test_excluded_index_skips_current_target() -> void:
+	var candidates: Array[Dictionary] = [
+		{"position": Vector3(2, 0, 0), "alive": true},
+		{"position": Vector3(4, 0, 0), "alive": true},
+		{"position": Vector3(6, 0, 0), "alive": true},
+	]
+	assert_int(_selector.select_closest(Vector3.ZERO, candidates, INF, 0)).is_equal(1)

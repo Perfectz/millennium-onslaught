@@ -19,7 +19,7 @@ var _is_transitioning: bool = false
 var _current_style: WipeStyle = WipeStyle.FADE
 
 
-## Shader source — supports all wipe modes via a uniform int.
+## Shader source - supports all wipe modes via a uniform int.
 const WIPE_SHADER: String = """
 shader_type canvas_item;
 uniform float progress : hint_range(0.0, 1.0) = 0.0;
@@ -85,10 +85,12 @@ func transition_to_styled(scene_path: String, style: WipeStyle = WipeStyle.FADE,
 	_current_style = style
 	_wipe_material.set_shader_parameter("wipe_mode", int(style))
 
-	EventBus.scene_transition_started.emit(scene_path)
-	EventBus.log_event(&"scene_transition_started", {"target": scene_path, "style": style})
+	EventBus.emit_checked(&"scene_transition_started", [scene_path], {
+		"target_scene": scene_path,
+		"style": style,
+	}, true)
 
-	# Wipe out (progress 0 → 1).
+	# Wipe out (progress 0 -> 1).
 	await _animate_progress(1.0, duration * 0.5)
 
 	# Change scene.
@@ -102,12 +104,13 @@ func transition_to_styled(scene_path: String, style: WipeStyle = WipeStyle.FADE,
 	# Wait one frame for the new scene to initialize.
 	await get_tree().process_frame
 
-	# Wipe in (progress 1 → 0).
+	# Wipe in (progress 1 -> 0).
 	await _animate_progress(0.0, duration * 0.5)
 
 	_is_transitioning = false
-	EventBus.scene_transition_completed.emit(scene_path)
-	EventBus.log_event(&"scene_transition_completed", {"target": scene_path})
+	EventBus.emit_checked(&"scene_transition_completed", [scene_path], {
+		"target_scene": scene_path,
+	}, true)
 
 
 ## Check if a transition is in progress.
@@ -128,3 +131,13 @@ func _animate_progress(target: float, duration: float) -> void:
 		_wipe_material.set_shader_parameter("progress", v)
 	, float(_wipe_material.get_shader_parameter("progress")), target, duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 	await tween.finished
+
+
+func _exit_tree() -> void:
+	if _wipe_rect != null and is_instance_valid(_wipe_rect):
+		_wipe_rect.material = null
+		_wipe_rect.free()
+	_wipe_rect = null
+	if _wipe_material != null:
+		_wipe_material.shader = null
+	_wipe_material = null

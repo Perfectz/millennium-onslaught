@@ -7,6 +7,7 @@ const PauseMenuScript := preload("res://scripts/ui/pause_menu.gd")
 const RusherDef := preload("res://resources/enemies/rusher_def.tres")
 const RangedDef := preload("res://resources/enemies/ranged_def.tres")
 const ShieldDef := preload("res://resources/enemies/shield_def.tres")
+const RuntimeBoundsPolicyScript := preload("res://scripts/components/runtime_bounds_policy.gd")
 
 ## Maps spawn point names to enemy definitions for variety.
 const SPAWN_DEFS: Dictionary = {
@@ -23,6 +24,7 @@ var _pause_menu: CanvasLayer = null
 
 
 func _ready() -> void:
+	InputManager.set_context(InputManager.InputContext.COMBAT)
 	print("[TestArena] _ready — scene loaded, player TP=%.0f" % player.tp_tracker.get_current_tp())
 	_setup_juice_systems()
 	_setup_hud()
@@ -87,6 +89,7 @@ func _resume_from_pause() -> void:
 		_pause_menu.queue_free()
 		_pause_menu = null
 	get_tree().paused = false
+	InputManager.set_context(InputManager.InputContext.COMBAT)
 
 
 func _spawn_enemies() -> void:
@@ -105,6 +108,7 @@ func _spawn_enemies() -> void:
 
 func _restart_arena() -> void:
 	Engine.time_scale = 1.0
+	InputManager.set_context(InputManager.InputContext.COMBAT)
 
 	# Remove old enemies.
 	for enemy in _enemies:
@@ -114,8 +118,7 @@ func _restart_arena() -> void:
 
 	# Reset player.
 	player.position = Vector3(0, 0.1, 0)
-	if GameState.room_bounds_active:
-		player.position.x = clampf(player.position.x, GameState.room_bounds_min_x, GameState.room_bounds_max_x)
+	player.position = RuntimeBoundsPolicyScript.clamp_position(player.position, RuntimeState.get_active_bounds())
 	player.velocity = Vector3.ZERO
 	player.health.reset()
 	player.tp_tracker.set_current_tp(Constants.TP_MAX)
@@ -131,11 +134,15 @@ func _restart_arena() -> void:
 	_spawn_enemies()
 
 
+func _exit_tree() -> void:
+	if not Engine.is_editor_hint():
+		InputManager.set_context(InputManager.InputContext.MENU)
+
+
 func _check_kill_plane() -> void:
 	if player.position.y < -10.0:
 		player.position = Vector3(0, 0.1, 0)
-		if GameState.room_bounds_active:
-			player.position.x = clampf(player.position.x, GameState.room_bounds_min_x, GameState.room_bounds_max_x)
+		player.position = RuntimeBoundsPolicyScript.clamp_position(player.position, RuntimeState.get_active_bounds())
 		player.velocity = Vector3.ZERO
 		player.collision_layer = Constants.LAYER_PLAYER
 		player.collision_mask = Constants.LAYER_ENVIRONMENT | Constants.LAYER_ENEMY | Constants.LAYER_PLATFORM
@@ -144,9 +151,9 @@ func _check_kill_plane() -> void:
 func _update_room_bounds() -> void:
 	var bounds := _extract_room_bounds()
 	if bounds.x >= bounds.y:
-		GameState.clear_room_bounds()
+		RuntimeState.clear_room_bounds()
 		return
-	GameState.set_room_bounds(bounds.x, bounds.y)
+	RuntimeState.set_room_bounds(bounds.x, bounds.y)
 
 
 func _extract_room_bounds() -> Vector2:

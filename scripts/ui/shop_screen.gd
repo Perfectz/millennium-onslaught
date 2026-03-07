@@ -172,8 +172,9 @@ func _populate_item_list() -> void:
 		var item := _shop_items[i]
 		var btn := Button.new()
 		var label_text := "%s  [%s]  %dG" % [item.display_name, str(item.slot).capitalize(), item.cost]
-		if _is_item_owned(item.equipment_id):
-			label_text += "  (OWNED)"
+		var quantity := GameState.get_inventory_quantity(item.equipment_id)
+		if quantity > 0:
+			label_text += "  (x%d)" % quantity
 		btn.text = label_text
 		btn.custom_minimum_size = Vector2(0, 40)
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -279,13 +280,7 @@ func _on_buy_pressed() -> void:
 	var result := _transaction.buy(GameState.gold, item.cost, item.equipment_id)
 	if result["success"]:
 		GameState.gold = result["new_gold"]
-		GameState.inventory.append({
-			"item_id": item.equipment_id,
-			"display_name": item.display_name,
-			"slot": item.slot,
-			"stat_bonuses": item.stat_bonuses.duplicate(),
-			"passive_effects": item.passive_effects.duplicate(),
-		})
+		GameState.add_inventory_item(InventoryManager.from_equipment_def(item))
 		EventBus.town_shop_purchase.emit(item.equipment_id, item.cost)
 		EventBus.rpg_gold_changed.emit(GameState.gold)
 		AudioManager.play_sfx_variant(&"ui_confirm", Constants.SFX_VOL_UI_CONFIRM)
@@ -312,14 +307,10 @@ func _on_equip_pressed() -> void:
 	if GameState.active_party.is_empty():
 		return
 	var char_id: StringName = GameState.active_party[0]
-	var data: Dictionary = GameState.character_data.get(char_id, {})
-	if data.is_empty():
+	if not GameState.equip_inventory_item(char_id, item.equipment_id):
+		AudioManager.play_sfx_variant(&"ui_deny", Constants.SFX_VOL_UI_DENY)
+		ToastSystem.show_toast("No free copy available to equip.", Color(1.0, 0.55, 0.45))
 		return
-
-	var equipped: Dictionary = data.get("equipped", {})
-	equipped[str(item.slot)] = item.equipment_id
-	data["equipped"] = equipped
-	EventBus.rpg_equipment_changed.emit(0, item.slot, item.equipment_id)
 	AudioManager.play_sfx_variant(&"ui_confirm", Constants.SFX_VOL_UI_CONFIRM)
 	var char_name: String = Constants.CHARACTER_DISPLAY_NAMES.get(char_id, str(char_id))
 	ToastSystem.show_toast("%s equipped %s!" % [char_name, item.display_name], Color(0.55, 0.7, 1.0))
@@ -328,14 +319,11 @@ func _on_equip_pressed() -> void:
 
 
 func _is_item_owned(item_id: StringName) -> bool:
-	for entry: Dictionary in GameState.inventory:
-		if StringName(entry.get("item_id", "")) == item_id:
-			return true
-	return false
+	return GameState.has_inventory_item(item_id)
 
 
 func _get_equipped_by(item_id: StringName) -> String:
-	for char_id: StringName in GameState.active_party:
+	for char_id: StringName in GameState.party_roster:
 		var data: Dictionary = GameState.character_data.get(char_id, {})
 		var equipped: Dictionary = data.get("equipped", {})
 		for slot: String in equipped:

@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/models/characters/alys_cc/base/alys Rigged with texture.fbx" id="1"]
+
+[node name="alys_cc_base" type="Node3D"]
+
+[node name="Rig" parent="." instance=ExtResource("1")]

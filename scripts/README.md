@@ -4,6 +4,7 @@
 Contains gameplay/runtime logic scripts used by scenes, systems, and UI.
 
 ## Subfolders
+- `contracts/`: typed runtime payload contracts shared across EventBus listeners.
 - `core/`: controllers, state machine base, combat collision primitives, player states.
 - `ai/`: enemy controller and enemy states.
 - `components/`: mostly pure logic components intended for unit testing.

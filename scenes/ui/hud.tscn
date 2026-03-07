@@ -1,6 +1,12 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/icon_objective.svg" id="2"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/icon_music.svg" id="3"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/icon_hp.svg" id="4"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/icon_tp.svg" id="5"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/icon_gold.svg" id="6"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/icon_combo.svg" id="7"]
 
 [sub_resource type="StyleBoxFlat" id="1"]
 bg_color = Color(0.03, 0.08, 0.14, 0.9)
@@ -154,10 +160,13 @@ theme_override_styles/panel = SubResource("4")
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="ObjectiveIcon" type="ColorRect" parent="Panel/TopFrame/Margin/HBox/ObjectivePanel/HBox"]
-custom_minimum_size = Vector2(14, 14)
+[node name="ObjectiveIcon" type="TextureRect" parent="Panel/TopFrame/Margin/HBox/ObjectivePanel/HBox"]
+custom_minimum_size = Vector2(18, 18)
 layout_mode = 2
-color = Color(0.42, 0.87, 1, 1)
+texture = ExtResource("2")
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(0.6, 0.94, 1, 1)
 
 [node name="ObjectiveLabel" type="Label" parent="Panel/TopFrame/Margin/HBox/ObjectivePanel/HBox"]
 layout_mode = 2
@@ -192,10 +201,13 @@ theme_override_constants/margin_bottom = 8
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="Icon" type="ColorRect" parent="Panel/NowPlayingStrip/Margin/HBox"]
-custom_minimum_size = Vector2(12, 12)
+[node name="Icon" type="TextureRect" parent="Panel/NowPlayingStrip/Margin/HBox"]
+custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
-color = Color(0.97, 0.84, 0.45, 1)
+texture = ExtResource("3")
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(1, 0.9, 0.55, 1)
 
 [node name="NowPlayingLabel" type="Label" parent="Panel/NowPlayingStrip/Margin/HBox"]
 layout_mode = 2
@@ -241,10 +253,13 @@ theme_override_constants/separation = 4
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="HPIcon" type="ColorRect" parent="Panel/StatsCard/Margin/VBox/HPBlock/HPHeader"]
-custom_minimum_size = Vector2(14, 14)
+[node name="HPIcon" type="TextureRect" parent="Panel/StatsCard/Margin/VBox/HPBlock/HPHeader"]
+custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
-color = Color(0.95, 0.52, 0.52, 1)
+texture = ExtResource("4")
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(1, 0.63, 0.63, 1)
 
 [node name="HPTag" type="Label" parent="Panel/StatsCard/Margin/VBox/HPBlock/HPHeader"]
 layout_mode = 2
@@ -293,10 +308,13 @@ theme_override_constants/separation = 4
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="TPIcon" type="ColorRect" parent="Panel/StatsCard/Margin/VBox/TPBlock/TPHeader"]
-custom_minimum_size = Vector2(14, 14)
+[node name="TPIcon" type="TextureRect" parent="Panel/StatsCard/Margin/VBox/TPBlock/TPHeader"]
+custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
-color = Color(0.45, 0.75, 1, 1)
+texture = ExtResource("5")
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(0.62, 0.86, 1, 1)
 
 [node name="TPTag" type="Label" parent="Panel/StatsCard/Margin/VBox/TPBlock/TPHeader"]
 layout_mode = 2
@@ -341,10 +359,13 @@ color = Color(0.22, 0.66, 1, 1)
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="GoldIcon" type="ColorRect" parent="Panel/StatsCard/Margin/VBox/GoldBlock"]
-custom_minimum_size = Vector2(14, 14)
+[node name="GoldIcon" type="TextureRect" parent="Panel/StatsCard/Margin/VBox/GoldBlock"]
+custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
-color = Color(1, 0.88, 0.4, 1)
+texture = ExtResource("6")
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(1, 0.92, 0.5, 1)
 
 [node name="GoldTag" type="Label" parent="Panel/StatsCard/Margin/VBox/GoldBlock"]
 layout_mode = 2
@@ -397,10 +418,13 @@ theme_override_constants/separation = 2
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="ComboIcon" type="ColorRect" parent="Panel/ComboBadge/Margin/VBox/TitleRow"]
-custom_minimum_size = Vector2(12, 12)
+[node name="ComboIcon" type="TextureRect" parent="Panel/ComboBadge/Margin/VBox/TitleRow"]
+custom_minimum_size = Vector2(15, 15)
 layout_mode = 2
-color = Color(0.97, 0.81, 0.43, 1)
+texture = ExtResource("7")
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(1, 0.88, 0.5, 1)
 
 [node name="ComboTitle" type="Label" parent="Panel/ComboBadge/Margin/VBox/TitleRow"]
 layout_mode = 2

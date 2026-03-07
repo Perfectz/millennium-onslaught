@@ -9,11 +9,12 @@ var _trigger: EncounterTrigger
 func before_test() -> void:
 	_trigger = EncounterTrigger.new()
 	_trigger.trigger_index = 2
+	add_child(_trigger)
 
 
 func after_test() -> void:
-	if is_instance_valid(_trigger) and _trigger.is_inside_tree():
-		_trigger.queue_free()
+	if is_instance_valid(_trigger):
+		_trigger.free()
 	_trigger = null
 
 
@@ -25,6 +26,13 @@ func test_initial_not_activated() -> void:
 
 func test_trigger_index_set() -> void:
 	assert_int(_trigger.trigger_index).is_equal(2)
+
+
+func test_setup_shape_uses_requested_depth() -> void:
+	_trigger.setup_shape(12.0, 14.0)
+	var collision := _trigger.get_child(0) as CollisionShape3D
+	var shape := collision.shape as BoxShape3D
+	assert_float(shape.size.z).is_equal(14.0)
 
 
 # --- Reset ---

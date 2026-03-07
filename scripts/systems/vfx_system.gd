@@ -19,11 +19,16 @@ func _ready() -> void:
 	ObjectPool.warm_pool(DeathParticlesScene, 4, POOL_DEATH)
 	ObjectPool.warm_pool(HitSparkScene, Constants.HIT_SPARK_POOL_SIZE, POOL_SPARK)
 	ObjectPool.warm_pool(ImpactDecalScene, 6, POOL_DECAL)
-	EventBus.combat_hit_landed.connect(_on_hit_landed)
-	EventBus.combat_kill.connect(_on_kill)
+	EventBus.combat_hit_event.connect(_on_hit_event)
+	EventBus.combat_kill_event.connect(_on_kill_event)
 
 
-func _on_hit_landed(attacker: Node, target: Node, damage: float, pos: Vector3, attack_data: AttackDef) -> void:
+func _on_hit_event(event: CombatHitEvent) -> void:
+	var attacker := event.attacker
+	var target := event.target
+	var damage := event.damage
+	var pos := event.hit_position
+	var attack_data := event.attack_data
 	var element: StringName = &""
 	if attack_data:
 		element = attack_data.element_type
@@ -78,9 +83,9 @@ func _on_hit_landed(attacker: Node, target: Node, damage: float, pos: Vector3, a
 		_spawn_impact_decal(pos, color)
 
 
-func _on_kill(_attacker: Node, _target: Node, pos: Vector3) -> void:
-	_spawn_particles(POOL_DEATH, DeathParticlesScene, pos)
-	_spawn_impact_decal(pos, Color(0.3, 0.1, 0.05))
+func _on_kill_event(event: CombatKillEvent) -> void:
+	_spawn_particles(POOL_DEATH, DeathParticlesScene, event.kill_position)
+	_spawn_impact_decal(event.kill_position, Color(0.3, 0.1, 0.05))
 
 
 ## Spawn a billboard hit spark at the impact point with scale-up + fade-out.

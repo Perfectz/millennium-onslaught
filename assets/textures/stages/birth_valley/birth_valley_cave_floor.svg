@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="cave" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4b3328"/>
+      <stop offset="1" stop-color="#2c1c18"/>
+    </linearGradient>
+    <pattern id="rock" width="128" height="128" patternUnits="userSpaceOnUse">
+      <rect width="128" height="128" fill="url(#cave)"/>
+      <path d="M8 22 36 10l26 16-8 22-34 8z" fill="#6a4c3d" opacity="0.48"/>
+      <path d="M72 18 112 8l10 30-24 20-34-10z" fill="#573c31" opacity="0.46"/>
+      <path d="M16 78 44 62l24 8-6 34-30 14-20-18z" fill="#7a5947" opacity="0.42"/>
+      <path d="M74 76 116 64l4 30-20 24-36-10-6-20z" fill="#3c2620" opacity="0.5"/>
+      <path d="M0 64h128" stroke="#1a110f" stroke-width="3" opacity="0.28"/>
+    </pattern>
+  </defs>
+  <rect width="512" height="512" fill="url(#rock)"/>
+</svg>

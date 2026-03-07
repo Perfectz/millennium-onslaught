@@ -1,15 +1,9 @@
-[gd_scene load_steps=23 format=3]
+[gd_scene load_steps=14 format=3]
 
-[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_basecolor.png" id="1"]
-[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_normal.png" id="tex_floor_normal"]
-[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_roughness.png" id="tex_floor_roughness"]
-[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_ambientOcclusion.png" id="tex_floor_ao"]
-[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/piata_foundation.jpeg" id="tex_foundation"]
-[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/wall_pbr/Cracked_Mud_001_COLOR.jpg" id="tex_wall_trim"]
-[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/wall_pbr/Cracked_Mud_001_NORM.jpg" id="tex_wall_normal"]
-[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/wall_pbr/Cracked_Mud_001_ROUGH.jpg" id="tex_wall_rough"]
-[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/wall_pbr/Cracked_Mud_001_OCC.jpg" id="tex_wall_ao"]
-[ext_resource type="PackedScene" path="res://assets/models/dungeon_props/wall_modular.fbx" id="wall"]
+[ext_resource type="Material" path="res://assets/materials/stages/piata/piata_floor.tres" id="mat_floor"]
+[ext_resource type="Material" path="res://assets/materials/stages/piata/piata_foundation.tres" id="mat_foundation"]
+[ext_resource type="Material" path="res://assets/materials/stages/piata/piata_wall_trim.tres" id="mat_wall_trim"]
+[ext_resource type="PackedScene" path="res://scenes/dungeon/props/piata_wall_modular.tscn" id="wall"]
 [ext_resource type="PackedScene" path="res://assets/models/dungeon_props/torch.fbx" id="torch"]
 [ext_resource type="PackedScene" path="res://assets/models/dungeon_props/column.fbx" id="column"]
 [ext_resource type="PackedScene" path="res://assets/models/dungeon_props/barrel.fbx" id="barrel"]
@@ -23,38 +17,11 @@ size = Vector3(24, 1, 32)
 [sub_resource type="BoxMesh" id="floor_mesh"]
 size = Vector3(24, 1, 32)
 
-[sub_resource type="StandardMaterial3D" id="floor_mat"]
-albedo_texture = ExtResource("1")
-normal_enabled = true
-normal_texture = ExtResource("tex_floor_normal")
-roughness_texture = ExtResource("tex_floor_roughness")
-ao_enabled = true
-ao_light_affect = 1.0
-ao_texture = ExtResource("tex_floor_ao")
-uv1_scale = Vector3(8, 10, 1)
-texture_filter = 3
-
 [sub_resource type="BoxMesh" id="foundation_mesh"]
 size = Vector3(24, 10, 32)
 
-[sub_resource type="StandardMaterial3D" id="foundation_mat"]
-albedo_texture = ExtResource("tex_foundation")
-uv1_scale = Vector3(4, 4, 1)
-texture_filter = 3
-
 [sub_resource type="BoxMesh" id="wall_trim_mesh"]
 size = Vector3(24, 1.5, 0.15)
-
-[sub_resource type="StandardMaterial3D" id="wall_trim_mat"]
-albedo_texture = ExtResource("tex_wall_trim")
-normal_enabled = true
-normal_texture = ExtResource("tex_wall_normal")
-roughness_texture = ExtResource("tex_wall_rough")
-ao_enabled = true
-ao_light_affect = 1.0
-ao_texture = ExtResource("tex_wall_ao")
-uv1_scale = Vector3(4, 1, 1)
-texture_filter = 3
 
 [node name="ChunkPlazaB" type="Node3D"]
 
@@ -68,17 +35,17 @@ shape = SubResource("floor_shape")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
 mesh = SubResource("floor_mesh")
-surface_material_override/0 = SubResource("floor_mat")
+surface_material_override/0 = ExtResource("mat_floor")
 
 [node name="Foundation" type="MeshInstance3D" parent="Floor"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -5.5, 0)
 mesh = SubResource("foundation_mesh")
-surface_material_override/0 = SubResource("foundation_mat")
+surface_material_override/0 = ExtResource("mat_foundation")
 
 [node name="WallTrim" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 4.5, -7.45)
 mesh = SubResource("wall_trim_mesh")
-surface_material_override/0 = SubResource("wall_trim_mat")
+surface_material_override/0 = ExtResource("mat_wall_trim")
 
 [node name="Props" type="Node3D" parent="."]
 
@@ -135,3 +102,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 2.5, -7.3)
 
 [node name="Cobweb3" parent="Props" instance=ExtResource("cobweb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 3.0, -7.3)
+

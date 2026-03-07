@@ -7,6 +7,7 @@ extends RefCounted
 static func get_scenes() -> Array:
 	return [
 		{
+			"eyebrow": "PROLOGUE",
 			"title": "THE MORNING",
 			"video": "res://assets/textures/cutscene_scene1.ogv",
 			"lines": [
@@ -20,6 +21,7 @@ static func get_scenes() -> Array:
 			],
 		},
 		{
+			"eyebrow": "PROLOGUE",
 			"title": "THE CITY",
 			"video": "res://assets/textures/cutscene_scene2.ogv",
 			"lines": [
@@ -34,6 +36,7 @@ static func get_scenes() -> Array:
 			],
 		},
 		{
+			"eyebrow": "PROLOGUE",
 			"title": "THE DESERT",
 			"video": "res://assets/textures/cutscene_scene3.ogv",
 			"lines": [
@@ -45,6 +48,7 @@ static func get_scenes() -> Array:
 			],
 		},
 		{
+			"eyebrow": "PROLOGUE",
 			"title": "THE OATH",
 			"video": "res://assets/textures/cutscene_scene4.ogv",
 			"lines": [

@@ -35,9 +35,25 @@ static func process_hit(
 		)
 	target_health.take_damage(damage)
 
+	var hit_event := CombatHitEvent.from_values(
+		attacker,
+		target,
+		damage,
+		target.global_position,
+		attack_data
+	)
+	EventBus.combat_hit_event.emit(hit_event)
 	EventBus.combat_hit_landed.emit(attacker, target, damage, target.global_position, attack_data)
 
 	if target_health.is_dead():
+		var kill_event := CombatKillEvent.from_values(
+			attacker,
+			target,
+			target.global_position,
+			damage,
+			attack_data
+		)
+		EventBus.combat_kill_event.emit(kill_event)
 		EventBus.combat_kill.emit(attacker, target, target.global_position)
 
 	return damage

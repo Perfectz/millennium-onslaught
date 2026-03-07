@@ -22,8 +22,8 @@ func _connect_events() -> void:
 	_pools_verified = true
 
 	# Tier A — must cut through
-	EventBus.combat_hit_landed.connect(_on_hit_landed)
-	EventBus.combat_kill.connect(_on_kill)
+	EventBus.combat_hit_event.connect(_on_hit_event)
+	EventBus.combat_kill_event.connect(_on_kill_event)
 	EventBus.combat_block.connect(_on_block)
 	EventBus.combat_parry.connect(_on_parry)
 
@@ -39,7 +39,11 @@ func _connect_events() -> void:
 # ── Tier A Handlers ──────────────────────────────────────────────────
 
 
-func _on_hit_landed(attacker: Node, _target: Node, damage: float, _hit_position: Vector3, attack_data: AttackDef) -> void:
+func _on_hit_event(event: CombatHitEvent) -> void:
+	var attacker := event.attacker
+	var target := event.target
+	var damage := event.damage
+	var attack_data := event.attack_data
 	var is_player_attacking := attacker is PlayerController
 	var attack_name := attack_data.attack_name if attack_data else &""
 	if damage >= Constants.HEAVY_ATTACK_DAMAGE or attack_name == &"heavy":
@@ -58,7 +62,7 @@ func _on_hit_landed(attacker: Node, _target: Node, damage: float, _hit_position:
 		AudioManager.play_sfx_variant(&"hit_light", Constants.SFX_VOL_HIT_LIGHT - 3.0)
 
 	# Player hurt vocal (Tier B — below hit transient).
-	if _target is PlayerController:
+	if target is PlayerController:
 		AudioManager.play_sfx_variant(&"player_hurt", Constants.SFX_VOL_PLAYER_HURT)
 
 	# Combo milestone audio — escalating pitch ding every 5 hits.
@@ -69,7 +73,7 @@ func _on_hit_landed(attacker: Node, _target: Node, damage: float, _hit_position:
 			AudioManager.play_sfx_variant_pitched(&"ui_confirm", Constants.SFX_VOL_UI_CONFIRM, clampf(pitch, 1.0, 1.5))
 
 
-func _on_kill(_attacker: Node, _target: Node, _kill_position: Vector3) -> void:
+func _on_kill_event(_event: CombatKillEvent) -> void:
 	# Kill: signature transient + louder body layer
 	AudioManager.play_sfx_variant_pitched(&"kill", Constants.SFX_VOL_KILL + 1.0, 0.82)
 	AudioManager.play_sfx_variant(&"hit_body", Constants.SFX_VOL_HIT_BODY + 2.0)

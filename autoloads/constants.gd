@@ -97,10 +97,16 @@ const CAMERA_THREAT_BIAS_SMOOTHING: float = 2.0
 const CAMERA_VELOCITY_CAP: float = 30.0
 const CAMERA_FOV_ZOOM_SPEED: float = 2.0
 const CAMERA_DIRECTOR_EASE_TIME: float = 0.6
+const CAMERA_OCCLUSION_PADDING: float = 0.35
+const CAMERA_OCCLUSION_MIN_DISTANCE: float = 2.2
 
 # --- Camera Manual Zoom ---
 const CAMERA_ZOOM_STICK_SPEED: float = 1.5
 const CAMERA_ZOOM_DEFAULT: float = 1.0
+const CAMERA_ORBIT_YAW_SPEED: float = 2.6
+const CAMERA_ORBIT_PITCH_SPEED: float = 1.9
+const CAMERA_ORBIT_PITCH_MIN: float = -0.35
+const CAMERA_ORBIT_PITCH_MAX: float = 0.45
 
 # --- Enemy AI ---
 const ENEMY_HIT_STUN_DURATION: float = 0.7

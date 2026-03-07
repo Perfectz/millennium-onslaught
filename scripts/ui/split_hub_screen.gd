@@ -16,6 +16,12 @@ var _entries: Array[Dictionary] = []
 var _buttons: Array[Button] = []
 var _selected_index: int = -1
 var _pause_menu: CanvasLayer = null
+var _content_frame: Control = null
+var _split_layout: HBoxContainer = null
+var _left_column: VBoxContainer = null
+var _right_column: Control = null
+var _map_panel: PanelContainer = null
+var _hint_label: Label = null
 
 var _context_placeholder = null
 var _context_video: VideoStreamPlayer = null
@@ -55,8 +61,11 @@ func _ready() -> void:
 		return
 
 	HighTechThemeRef.apply_theme(self)
+	InputManager.set_context(InputManager.InputContext.MENU)
 	_entries = _extract_entries(_config)
 	_build_ui()
+	_refresh_layout()
+	get_viewport().size_changed.connect(_refresh_layout)
 	_select_index(clampi(int(_config.get("initial_index", 0)), 0, maxi(_entries.size() - 1, 0)))
 	_restore_focus.call_deferred()
 
@@ -149,44 +158,44 @@ func _build_ui() -> void:
 
 	# === Layer 3: Floating particles ===
 	var particle_color := Color(_default_accent().r, _default_accent().g, _default_accent().b, 0.12)
-	add_child(UIStyleRef.create_particle_field(Vector2(1920, 1080), particle_color, 18))
+	add_child(UIStyleRef.create_particle_field(get_viewport_rect().size, particle_color, 14))
 
 	# === Layer 4: Content frame (inset from edges) ===
-	var content_frame := Control.new()
-	content_frame.set_anchors_preset(Control.PRESET_FULL_RECT)
-	content_frame.offset_left = 32
-	content_frame.offset_top = 28
-	content_frame.offset_right = -32
-	content_frame.offset_bottom = -24
-	add_child(content_frame)
+	_content_frame = Control.new()
+	_content_frame.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_content_frame.offset_left = 32
+	_content_frame.offset_top = 28
+	_content_frame.offset_right = -32
+	_content_frame.offset_bottom = -24
+	add_child(_content_frame)
 
-	var split := HBoxContainer.new()
-	split.set_anchors_preset(Control.PRESET_FULL_RECT)
-	split.add_theme_constant_override("separation", 20)
-	content_frame.add_child(split)
+	_split_layout = HBoxContainer.new()
+	_split_layout.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_split_layout.add_theme_constant_override("separation", 20)
+	_content_frame.add_child(_split_layout)
 
 	# Left column: 38% (slightly narrower for tighter list)
-	var left_column := VBoxContainer.new()
-	left_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	left_column.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	left_column.size_flags_stretch_ratio = 3.8
-	left_column.add_theme_constant_override("separation", 14)
-	split.add_child(left_column)
+	_left_column = VBoxContainer.new()
+	_left_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_left_column.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_left_column.size_flags_stretch_ratio = 3.8
+	_left_column.add_theme_constant_override("separation", 14)
+	_split_layout.add_child(_left_column)
 
 	# Right column: 62%
-	var right_column := Control.new()
-	right_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	right_column.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	right_column.size_flags_stretch_ratio = 6.2
-	split.add_child(right_column)
+	_right_column = Control.new()
+	_right_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_right_column.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_right_column.size_flags_stretch_ratio = 6.2
+	_split_layout.add_child(_right_column)
 
-	_build_left_column(left_column)
-	_build_right_column(right_column)
+	_build_left_column(_left_column)
+	_build_right_column(_right_column)
 
 	# === Layer 5: Post-processing overlays ===
-	add_child(UIStyleRef.create_vignette(0.35))
+	add_child(UIStyleRef.create_vignette(0.28))
 	if GameState.scanlines_enabled:
-		add_child(UIStyleRef.create_scanlines(0.018))
+		add_child(UIStyleRef.create_scanlines(0.014))
 
 
 func _build_left_column(left_column: VBoxContainer) -> void:
@@ -291,21 +300,21 @@ func _build_left_column(left_column: VBoxContainer) -> void:
 	UIStyleRef.stagger_entrance(_buttons as Array, 0.05, Vector2(-24, 0))
 
 	# --- Map video panel (lower-left, own bounding box) ---
-	var map_panel := PanelContainer.new()
-	map_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	map_panel.size_flags_stretch_ratio = 4.5
-	map_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	map_panel.clip_contents = true
-	map_panel.add_theme_stylebox_override("panel",
+	_map_panel = PanelContainer.new()
+	_map_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_map_panel.size_flags_stretch_ratio = 4.5
+	_map_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_map_panel.clip_contents = true
+	_map_panel.add_theme_stylebox_override("panel",
 		HighTechThemeRef.create_glass_panel_style(_default_accent(), 0.32, 0.8))
-	left_column.add_child(map_panel)
+	left_column.add_child(_map_panel)
 
 	var map_margin := MarginContainer.new()
 	map_margin.add_theme_constant_override("margin_left", 12)
 	map_margin.add_theme_constant_override("margin_top", 10)
 	map_margin.add_theme_constant_override("margin_right", 12)
 	map_margin.add_theme_constant_override("margin_bottom", 10)
-	map_panel.add_child(map_margin)
+	_map_panel.add_child(map_margin)
 
 	var map_vbox := VBoxContainer.new()
 	map_vbox.add_theme_constant_override("separation", 8)
@@ -540,18 +549,50 @@ func _build_right_column(right_column: Control) -> void:
 	text_col.add_child(_dialogue_text_label)
 
 	# Hint text at very bottom of screen
-	var hint := Label.new()
-	hint.anchor_left = 0.0
-	hint.anchor_top = 1.0
-	hint.anchor_right = 1.0
-	hint.anchor_bottom = 1.0
-	hint.offset_top = -16
-	hint.offset_bottom = -2
-	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.text = str(_config.get("hint_text", "UP/DOWN: SELECT  |  ENTER: CONFIRM  |  START: PAUSE"))
-	hint.add_theme_font_size_override("font_size", 12)
-	hint.add_theme_color_override("font_color", Color(0.42, 0.56, 0.68))
-	add_child(hint)
+	_hint_label = Label.new()
+	_hint_label.anchor_left = 0.0
+	_hint_label.anchor_top = 1.0
+	_hint_label.anchor_right = 1.0
+	_hint_label.anchor_bottom = 1.0
+	_hint_label.offset_top = -16
+	_hint_label.offset_bottom = -2
+	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_hint_label.text = str(_config.get("hint_text", "UP/DOWN: SELECT  |  ENTER: CONFIRM  |  START: PAUSE"))
+	_hint_label.add_theme_font_size_override("font_size", 12)
+	_hint_label.add_theme_color_override("font_color", Color(0.42, 0.56, 0.68))
+	add_child(_hint_label)
+
+
+func _refresh_layout() -> void:
+	var size := get_viewport_rect().size
+	if size.x <= 0.0 or size.y <= 0.0:
+		return
+	var compact := size.x < 1360.0 or size.y < 820.0
+	if _content_frame:
+		_content_frame.offset_left = clampf(size.x * 0.018, 18.0, 34.0)
+		_content_frame.offset_top = clampf(size.y * 0.024, 18.0, 30.0)
+		_content_frame.offset_right = -clampf(size.x * 0.018, 18.0, 34.0)
+		_content_frame.offset_bottom = -clampf(size.y * 0.02, 16.0, 26.0)
+	if _split_layout:
+		_split_layout.add_theme_constant_override("separation", 14 if compact else 20)
+	if _left_column:
+		_left_column.size_flags_stretch_ratio = 4.1 if compact else 3.8
+	if _right_column:
+		_right_column.size_flags_stretch_ratio = 5.9 if compact else 6.2
+	if _map_panel:
+		_map_panel.visible = size.y >= 760.0
+	if _dialogue_panel:
+		_dialogue_panel.custom_minimum_size.y = 132 if compact else 150
+	if _info_title_label:
+		_info_title_label.add_theme_font_size_override("font_size", 22 if compact else 26)
+	if _info_description_label:
+		_info_description_label.add_theme_font_size_override("font_size", 15 if compact else 16)
+	if _dialogue_name_label:
+		_dialogue_name_label.add_theme_font_size_override("font_size", 17 if compact else 19)
+	if _dialogue_text_label:
+		_dialogue_text_label.add_theme_font_size_override("font_size", 15 if compact else 16)
+	if _hint_label:
+		_hint_label.visible = not compact
 
 
 # ─── Data & Selection ─────────────────────────────────────────────

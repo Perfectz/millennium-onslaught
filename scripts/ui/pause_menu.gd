@@ -15,6 +15,7 @@ var _title_btn: Button
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 100
+	InputManager.set_context(InputManager.InputContext.MENU)
 
 	var bg := ColorRect.new()
 	bg.color = Color(0.02, 0.05, 0.09, 0.82)
@@ -79,6 +80,7 @@ func _build_menu(parent: MarginContainer) -> VBoxContainer:
 
 	_resume_btn = _build_button("Resume", Color(0.18, 0.52, 0.9), Color(0.77, 0.93, 1.0))
 	_save_btn = _build_button("Save Game", Color(0.16, 0.55, 0.38), Color(0.65, 1.0, 0.82))
+	var inventory_btn := _build_button("Inventory", Color(0.48, 0.38, 0.18), Color(0.98, 0.84, 0.48))
 	var party_btn := _build_button("Party", Color(0.42, 0.32, 0.58), Color(0.78, 0.68, 1.0))
 	var settings_btn := _build_button("Settings", Color(0.2, 0.48, 0.58), Color(0.55, 0.9, 0.95))
 	var god_btn := _build_button("God Mode: OFF", Color(0.24, 0.44, 0.7), Color(0.72, 0.9, 1.0))
@@ -87,6 +89,7 @@ func _build_menu(parent: MarginContainer) -> VBoxContainer:
 
 	_resume_btn.pressed.connect(_on_resume)
 	_save_btn.pressed.connect(_on_save_game)
+	inventory_btn.pressed.connect(_on_open_inventory)
 	party_btn.pressed.connect(_on_open_party)
 	settings_btn.pressed.connect(_on_open_settings)
 	god_btn.pressed.connect(func() -> void:
@@ -97,7 +100,7 @@ func _build_menu(parent: MarginContainer) -> VBoxContainer:
 	_title_btn.pressed.connect(_on_return_to_title)
 	quit_btn.pressed.connect(func() -> void: get_tree().quit())
 
-	for btn in [_resume_btn, _save_btn, party_btn, settings_btn, god_btn, _title_btn, quit_btn]:
+	for btn in [_resume_btn, _save_btn, inventory_btn, party_btn, settings_btn, god_btn, _title_btn, quit_btn]:
 		UIStyleRef.wire_button_sounds(btn)
 
 	vbox.add_child(title)
@@ -106,6 +109,7 @@ func _build_menu(parent: MarginContainer) -> VBoxContainer:
 	vbox.add_child(spacer)
 	vbox.add_child(_resume_btn)
 	vbox.add_child(_save_btn)
+	vbox.add_child(inventory_btn)
 	vbox.add_child(party_btn)
 	vbox.add_child(settings_btn)
 	vbox.add_child(god_btn)
@@ -191,6 +195,17 @@ func _on_open_party() -> void:
 	add_child(party_screen)
 
 
+func _on_open_inventory() -> void:
+	visible = false
+	var inventory_screen := InventoryScreen.new()
+	inventory_screen.closed.connect(func() -> void:
+		inventory_screen.queue_free()
+		visible = true
+		_resume_btn.grab_focus()
+	)
+	add_child(inventory_screen)
+
+
 func _on_open_settings() -> void:
 	visible = false
 	var settings_screen := SettingsMenu.new()
@@ -203,6 +218,9 @@ func _on_open_settings() -> void:
 
 
 func _on_return_to_title() -> void:
-	get_tree().paused = false
 	Engine.time_scale = 1.0
-	get_tree().change_scene_to_file(Constants.SCENE_TITLE)
+	if GameManager.is_paused():
+		GameManager.resume_game()
+	else:
+		get_tree().paused = false
+	GameManager.go_to_main_menu()

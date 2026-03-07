@@ -6,16 +6,24 @@ extends Node
 
 const SCENE_PATH: String = "res://scenes/vfx/damage_number.tscn"
 const POOL_NAME: StringName = &"damage_number"
+const WORLD_EFFECTS_ANCHOR_NAME: StringName = &"WorldEffects"
 
 ## Pre-built scene (generated at runtime if .tscn missing).
 var _label_scene: PackedScene = null
 var _pool_warmed: bool = false
+var _active_labels: Array[Label3D] = []
+var _label_tweens: Dictionary = {}
 
 
 func _ready() -> void:
 	# Defer pool warming until the tree is fully ready.
 	call_deferred("_warm_pool")
-	EventBus.combat_hit_landed.connect(_on_hit_landed)
+	EventBus.combat_hit_event.connect(_on_hit_event)
+	EventBus.scene_transition_started.connect(_on_scene_transition_started)
+
+
+func _exit_tree() -> void:
+	_reclaim_active_labels()
 
 
 func _warm_pool() -> void:
@@ -31,18 +39,12 @@ func spawn(world_pos: Vector3, amount: float, is_critical: bool = false) -> void
 	if not _pool_warmed:
 		_warm_pool()
 
-	var instance: Node = ObjectPool.get_instance(POOL_NAME)
-	if instance == null:
-		return
-
-	# Configure the label.
-	var label: Label3D = instance as Label3D
+	var label := _checkout_label()
 	if label == null:
-		ObjectPool.return_instance(instance)
 		return
 
 	label.text = str(int(amount))
-	label.position = world_pos + Vector3(randf_range(-0.3, 0.3), 1.5, randf_range(-0.1, 0.1))
+	label.global_position = world_pos + Vector3(randf_range(-0.3, 0.3), 1.5, randf_range(-0.1, 0.1))
 	label.modulate.a = 1.0
 	label.scale = Vector3.ONE * (1.3 if is_critical else 1.0)
 
@@ -58,17 +60,10 @@ func spawn(world_pos: Vector3, amount: float, is_critical: bool = false) -> void
 	label.visible = true
 	label.process_mode = Node.PROCESS_MODE_INHERIT
 
-	# Add to scene tree if not already.
-	if label.get_parent() == null:
-		get_tree().current_scene.add_child(label)
-	elif not label.is_inside_tree():
-		# Re-parent orphaned pooled nodes.
-		label.reparent(get_tree().current_scene)
-
 	# Animate: rise + fade.
 	var rise := Constants.HUD_DAMAGE_NUMBER_RISE_SPEED * 0.02
 	var lifetime := Constants.HUD_DAMAGE_NUMBER_LIFETIME
-	var tween := create_tween()
+	var tween := _start_label_tween(label)
 	tween.set_parallel(true)
 	tween.tween_property(label, "position:y", label.position.y + rise, lifetime).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tween.tween_property(label, "modulate:a", 0.0, lifetime * 0.6).set_delay(lifetime * 0.4)
@@ -76,8 +71,8 @@ func spawn(world_pos: Vector3, amount: float, is_critical: bool = false) -> void
 		# Scale punch for crits.
 		tween.tween_property(label, "scale", Vector3.ONE * 0.6, lifetime).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tween.chain().tween_callback(func() -> void:
-		label.visible = false
-		ObjectPool.return_instance(label)
+		_label_tweens.erase(label)
+		_release_label(label)
 	)
 
 
@@ -88,16 +83,12 @@ func spawn_xp(world_pos: Vector3, amount: int) -> void:
 	if not _pool_warmed:
 		_warm_pool()
 
-	var instance: Node = ObjectPool.get_instance(POOL_NAME)
-	if instance == null:
-		return
-	var label: Label3D = instance as Label3D
+	var label := _checkout_label()
 	if label == null:
-		ObjectPool.return_instance(instance)
 		return
 
 	label.text = "+%d XP" % amount
-	label.position = world_pos + Vector3(randf_range(-0.2, 0.2), 1.8, randf_range(-0.2, 0.2))
+	label.global_position = world_pos + Vector3(randf_range(-0.2, 0.2), 1.8, randf_range(-0.2, 0.2))
 	label.font_size = 44
 	label.modulate = Color(0.65, 1.0, 0.65, 1.0)
 	label.outline_modulate = Color(0.05, 0.25, 0.05)
@@ -105,25 +96,92 @@ func spawn_xp(world_pos: Vector3, amount: int) -> void:
 	label.visible = true
 	label.process_mode = Node.PROCESS_MODE_INHERIT
 
-	if label.get_parent() == null:
-		get_tree().current_scene.add_child(label)
-	elif not label.is_inside_tree():
-		label.reparent(get_tree().current_scene)
-
 	var lifetime := Constants.HUD_DAMAGE_NUMBER_LIFETIME * 1.1
-	var tween := create_tween()
+	var tween := _start_label_tween(label)
 	tween.set_parallel(true)
 	tween.tween_property(label, "position:y", label.position.y + 1.0, lifetime).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tween.tween_property(label, "modulate:a", 0.0, lifetime * 0.6).set_delay(lifetime * 0.4)
 	tween.chain().tween_callback(func() -> void:
-		label.visible = false
-		ObjectPool.return_instance(label)
+		_label_tweens.erase(label)
+		_release_label(label)
 	)
 
 
-func _on_hit_landed(_attacker: Node, _target: Node, damage: float, hit_position: Vector3, _attack_data: AttackDef) -> void:
-	var is_crit := damage >= Constants.HEAVY_ATTACK_DAMAGE
-	spawn(hit_position, damage, is_crit)
+func _on_hit_event(event: CombatHitEvent) -> void:
+	var is_crit := event.damage >= Constants.HEAVY_ATTACK_DAMAGE
+	spawn(event.hit_position, event.damage, is_crit)
+
+
+func _checkout_label() -> Label3D:
+	var instance := ObjectPool.get_instance(POOL_NAME)
+	if instance == null:
+		return null
+	var label := instance as Label3D
+	if label == null:
+		ObjectPool.return_instance(instance)
+		return null
+	if not _mount_world_effect(label):
+		_release_label(label)
+		return null
+	if label not in _active_labels:
+		_active_labels.append(label)
+	label.visible = false
+	label.modulate.a = 1.0
+	label.scale = Vector3.ONE
+	return label
+
+
+func _start_label_tween(label: Label3D) -> Tween:
+	_stop_label_tween(label)
+	var tween := create_tween()
+	_label_tweens[label] = tween
+	return tween
+
+
+func _stop_label_tween(label: Label3D) -> void:
+	var tween := _label_tweens.get(label) as Tween
+	if tween != null and is_instance_valid(tween):
+		tween.kill()
+	_label_tweens.erase(label)
+
+
+func _mount_world_effect(label: Label3D) -> bool:
+	var scene_root := get_tree().current_scene
+	if scene_root == null:
+		return false
+	var anchor := scene_root.get_node_or_null(String(WORLD_EFFECTS_ANCHOR_NAME)) as Node3D
+	if anchor == null:
+		anchor = Node3D.new()
+		anchor.name = String(WORLD_EFFECTS_ANCHOR_NAME)
+		scene_root.add_child(anchor)
+	if label.get_parent() == null:
+		anchor.add_child(label)
+	elif label.get_parent() != anchor:
+		label.reparent(anchor)
+	return true
+
+
+func _release_label(label: Label3D) -> void:
+	_active_labels.erase(label)
+	if not is_instance_valid(label):
+		return
+	_stop_label_tween(label)
+	label.visible = false
+	label.modulate.a = 1.0
+	label.scale = Vector3.ONE
+	if label.get_parent() != ObjectPool:
+		label.reparent(ObjectPool)
+	ObjectPool.return_instance(label)
+
+
+func _reclaim_active_labels() -> void:
+	for label in _active_labels.duplicate():
+		_release_label(label)
+	_active_labels.clear()
+
+
+func _on_scene_transition_started(_target_scene: String) -> void:
+	_reclaim_active_labels()
 
 
 ## Creates a Label3D PackedScene at runtime for pooling.

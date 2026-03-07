@@ -104,7 +104,14 @@ func test_set_max_hp_clamps_current_hp() -> void:
 
 
 func test_set_max_hp_rejects_non_positive() -> void:
+	var warnings: Array[String] = []
+	_health.set_validation_warning_handler(func(message: String) -> void:
+		warnings.append(message)
+	)
 	_health.set_max_hp(0.0)
 	assert_float(_health.get_max_hp()).is_equal(100.0)
 	_health.set_max_hp(-10.0)
 	assert_float(_health.get_max_hp()).is_equal(100.0)
+	assert_int(warnings.size()).is_equal(2)
+	assert_str(warnings[0]).is_equal("HealthComponent: set_max_hp called with non-positive value.")
+	assert_str(warnings[1]).is_equal("HealthComponent: set_max_hp called with non-positive value.")

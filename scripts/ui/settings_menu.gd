@@ -10,6 +10,8 @@ const UIStyleRef = preload("res://scripts/ui/ui_style.gd")
 
 var _overlay: ColorRect
 var _card: PanelContainer
+var _sidebar: VBoxContainer
+var _title_label: Label
 ## Tab buttons.
 var _audio_tab_btn: Button
 var _display_tab_btn: Button
@@ -31,8 +33,10 @@ var _track_ids: Array[StringName] = []
 ## Display controls.
 var _fullscreen_check: CheckBox
 var _scanlines_check: CheckBox
+var _remap_btn: Button
 ## Back button.
 var _back_btn: Button
+var _active_tab: StringName = &"audio"
 
 
 func _ready() -> void:
@@ -70,44 +74,45 @@ func _ready() -> void:
 	_card.add_child(margin)
 
 	var root_hbox := HBoxContainer.new()
-	root_hbox.add_theme_constant_override("separation", 16)
+	root_hbox.add_theme_constant_override("separation", 20)
 	margin.add_child(root_hbox)
 
 	# Left sidebar with tab buttons.
-	var sidebar := VBoxContainer.new()
-	sidebar.custom_minimum_size = Vector2(140, 0)
-	sidebar.add_theme_constant_override("separation", 8)
-	sidebar.alignment = BoxContainer.ALIGNMENT_BEGIN
-	root_hbox.add_child(sidebar)
+	_sidebar = VBoxContainer.new()
+	_sidebar.custom_minimum_size = Vector2(160, 0)
+	_sidebar.add_theme_constant_override("separation", 8)
+	_sidebar.alignment = BoxContainer.ALIGNMENT_BEGIN
+	root_hbox.add_child(_sidebar)
 
-	var title := Label.new()
-	title.text = "SETTINGS"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 28)
-	title.add_theme_color_override("font_color", Color(0.92, 0.96, 1.0))
-	title.add_theme_color_override("font_outline_color", Color(0, 0, 0))
-	title.add_theme_constant_override("outline_size", 2)
-	sidebar.add_child(title)
-	sidebar.add_child(UIStyleRef.create_separator(Color(0.3, 0.5, 0.8, 0.25)))
+	_title_label = Label.new()
+	_title_label.text = "SETTINGS"
+	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_title_label.add_theme_font_size_override("font_size", 28)
+	_title_label.add_theme_color_override("font_color", Color(0.92, 0.96, 1.0))
+	_title_label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
+	_title_label.add_theme_constant_override("outline_size", 2)
+	_sidebar.add_child(_title_label)
+	_sidebar.add_child(UIStyleRef.create_separator(Color(0.3, 0.5, 0.8, 0.25)))
 
 	_audio_tab_btn = _make_tab_button("Audio")
 	_audio_tab_btn.pressed.connect(func() -> void: _switch_tab(&"audio"))
-	sidebar.add_child(_audio_tab_btn)
+	_sidebar.add_child(_audio_tab_btn)
 
 	_display_tab_btn = _make_tab_button("Display")
 	_display_tab_btn.pressed.connect(func() -> void: _switch_tab(&"display"))
-	sidebar.add_child(_display_tab_btn)
+	_sidebar.add_child(_display_tab_btn)
 
 	_controls_tab_btn = _make_tab_button("Controls")
 	_controls_tab_btn.pressed.connect(func() -> void: _switch_tab(&"controls"))
-	sidebar.add_child(_controls_tab_btn)
+	_sidebar.add_child(_controls_tab_btn)
 
-	sidebar.add_child(Control.new())  # Spacer.
+	_sidebar.add_child(Control.new())  # Spacer.
 
 	_back_btn = _make_tab_button("Back")
 	UIStyleRef.style_button(_back_btn, Color(0.45, 0.2, 0.25), Color(1.0, 0.7, 0.72), 18)
+	UIStyleRef.add_press_feedback(_back_btn, 0.975)
 	_back_btn.pressed.connect(_on_back)
-	sidebar.add_child(_back_btn)
+	_sidebar.add_child(_back_btn)
 
 	for btn in [_audio_tab_btn, _display_tab_btn, _controls_tab_btn, _back_btn]:
 		UIStyleRef.wire_button_sounds(btn)
@@ -140,14 +145,10 @@ func _ready() -> void:
 	_initialize_audio_controls()
 	_initialize_display_controls()
 
-	# Focus chain.
-	var focusables: Array[Control] = [
-		_audio_tab_btn, _display_tab_btn, _controls_tab_btn, _back_btn,
-	]
-	_configure_focus_chain(focusables)
-
 	_switch_tab(&"audio")
 	_audio_tab_btn.grab_focus()
+	call_deferred("_refresh_layout")
+	get_viewport().size_changed.connect(_refresh_layout)
 
 	UIStyleRef.play_modal_intro(_overlay, _card)
 
@@ -155,17 +156,28 @@ func _ready() -> void:
 # --- Tab Switching ---
 
 func _switch_tab(tab: StringName) -> void:
+	_active_tab = tab
 	_audio_panel.visible = (tab == &"audio")
 	_display_panel.visible = (tab == &"display")
 	_controls_panel.visible = (tab == &"controls")
-	# Highlight active tab.
-	_set_tab_active(_audio_tab_btn, tab == &"audio")
-	_set_tab_active(_display_tab_btn, tab == &"display")
-	_set_tab_active(_controls_tab_btn, tab == &"controls")
+	_set_tab_active(_audio_tab_btn, tab == &"audio", _tab_accent(&"audio"))
+	_set_tab_active(_display_tab_btn, tab == &"display", _tab_accent(&"display"))
+	_set_tab_active(_controls_tab_btn, tab == &"controls", _tab_accent(&"controls"))
+	_configure_focus_chain(_focusables_for_tab(tab))
 
 
-func _set_tab_active(btn: Button, active: bool) -> void:
-	btn.modulate = Color(1.0, 1.0, 1.0) if active else Color(0.6, 0.6, 0.6)
+func _set_tab_active(btn: Button, active: bool, accent: Color) -> void:
+	UIStyleRef.style_tab_button(btn, accent, active)
+
+
+func _tab_accent(tab: StringName) -> Color:
+	match tab:
+		&"display":
+			return Color(0.98, 0.78, 0.42)
+		&"controls":
+			return Color(0.5, 0.9, 0.82)
+		_:
+			return Color(0.55, 0.84, 1.0)
 
 
 # --- Audio Tab ---
@@ -176,11 +188,18 @@ func _build_audio_tab() -> VBoxContainer:
 
 	var header := Label.new()
 	header.text = "Audio"
-	header.add_theme_font_size_override("font_size", 24)
+	header.add_theme_font_size_override("font_size", 26)
 	header.add_theme_color_override("font_color", Color(0.88, 0.96, 1.0))
 	vbox.add_child(header)
 
 	vbox.add_child(UIStyleRef.create_separator(Color(0.3, 0.5, 0.8, 0.2)))
+
+	var intro := Label.new()
+	intro.text = "Adjust the live mix, preview the soundtrack, and mute audio globally without leaving the menu."
+	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	intro.add_theme_font_size_override("font_size", 15)
+	intro.add_theme_color_override("font_color", Color(0.66, 0.8, 0.96))
+	vbox.add_child(intro)
 
 	# Track selector.
 	var track_row := HBoxContainer.new()
@@ -194,6 +213,7 @@ func _build_audio_tab() -> VBoxContainer:
 	_track_selector.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_track_selector.custom_minimum_size = Vector2(0, 40)
 	_track_selector.focus_mode = Control.FOCUS_ALL
+	UIStyleRef.style_option_button(_track_selector, _tab_accent(&"audio"), 17)
 	track_row.add_child(track_label)
 	track_row.add_child(_track_selector)
 	vbox.add_child(track_row)
@@ -216,9 +236,7 @@ func _build_audio_tab() -> VBoxContainer:
 
 	_mute_check = CheckBox.new()
 	_mute_check.text = "Mute All Audio"
-	_mute_check.focus_mode = Control.FOCUS_ALL
-	_mute_check.add_theme_font_size_override("font_size", 17)
-	_mute_check.add_theme_color_override("font_color", Color(0.92, 0.97, 1.0))
+	UIStyleRef.style_check_box(_mute_check, _tab_accent(&"audio"), 17)
 	vbox.add_child(_mute_check)
 
 	return vbox
@@ -232,7 +250,7 @@ func _build_display_tab() -> VBoxContainer:
 
 	var header := Label.new()
 	header.text = "Display"
-	header.add_theme_font_size_override("font_size", 24)
+	header.add_theme_font_size_override("font_size", 26)
 	header.add_theme_color_override("font_color", Color(0.88, 0.96, 1.0))
 	vbox.add_child(header)
 
@@ -240,16 +258,12 @@ func _build_display_tab() -> VBoxContainer:
 
 	_fullscreen_check = CheckBox.new()
 	_fullscreen_check.text = "Fullscreen"
-	_fullscreen_check.focus_mode = Control.FOCUS_ALL
-	_fullscreen_check.add_theme_font_size_override("font_size", 20)
-	_fullscreen_check.add_theme_color_override("font_color", Color(0.92, 0.97, 1.0))
+	UIStyleRef.style_check_box(_fullscreen_check, _tab_accent(&"display"), 19)
 	vbox.add_child(_fullscreen_check)
 
 	_scanlines_check = CheckBox.new()
 	_scanlines_check.text = "Scanline Overlay"
-	_scanlines_check.focus_mode = Control.FOCUS_ALL
-	_scanlines_check.add_theme_font_size_override("font_size", 20)
-	_scanlines_check.add_theme_color_override("font_color", Color(0.92, 0.97, 1.0))
+	UIStyleRef.style_check_box(_scanlines_check, _tab_accent(&"display"), 19)
 	vbox.add_child(_scanlines_check)
 
 	var hint := Label.new()
@@ -269,7 +283,7 @@ func _build_controls_tab() -> VBoxContainer:
 
 	var header := Label.new()
 	header.text = "Controls"
-	header.add_theme_font_size_override("font_size", 24)
+	header.add_theme_font_size_override("font_size", 26)
 	header.add_theme_color_override("font_color", Color(0.88, 0.96, 1.0))
 	vbox.add_child(header)
 
@@ -286,13 +300,14 @@ func _build_controls_tab() -> VBoxContainer:
 	spacer.custom_minimum_size = Vector2(0, 8)
 	vbox.add_child(spacer)
 
-	var remap_btn := Button.new()
-	remap_btn.text = "Remap Controls"
-	remap_btn.custom_minimum_size = Vector2(280, 52)
-	UIStyleRef.style_button(remap_btn, Color(0.2, 0.48, 0.58), Color(0.55, 0.9, 0.95), 20)
-	UIStyleRef.wire_button_sounds(remap_btn)
-	remap_btn.pressed.connect(_on_open_remap)
-	vbox.add_child(remap_btn)
+	_remap_btn = Button.new()
+	_remap_btn.text = "Remap Controls"
+	_remap_btn.custom_minimum_size = Vector2(280, 52)
+	UIStyleRef.style_button(_remap_btn, Color(0.2, 0.48, 0.58), Color(0.55, 0.9, 0.95), 20)
+	UIStyleRef.add_press_feedback(_remap_btn, 0.975)
+	UIStyleRef.wire_button_sounds(_remap_btn)
+	_remap_btn.pressed.connect(_on_open_remap)
+	vbox.add_child(_remap_btn)
 
 	var hint := Label.new()
 	hint.text = "Rebind keyboard keys and controller buttons."
@@ -447,11 +462,11 @@ func _build_slider_row(slider_name: String) -> Dictionary:
 	label.add_theme_font_size_override("font_size", 17)
 	label.add_theme_color_override("font_color", Color(0.82, 0.92, 1.0))
 	var slider := HSlider.new()
-	slider.focus_mode = Control.FOCUS_ALL
 	slider.min_value = 0.0
 	slider.max_value = 1.0
 	slider.step = 0.01
 	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	UIStyleRef.style_slider(slider, _tab_accent(&"audio"))
 	var value := Label.new()
 	value.custom_minimum_size = Vector2(64, 0)
 	value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -469,7 +484,7 @@ func _make_tab_button(text: String) -> Button:
 	btn.text = text
 	btn.custom_minimum_size = Vector2(130, 44)
 	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	UIStyleRef.style_button(btn, Color(0.15, 0.35, 0.55), Color(0.5, 0.78, 1.0), 18)
+	UIStyleRef.style_tab_button(btn, Color(0.55, 0.84, 1.0), false)
 	return btn
 
 
@@ -484,3 +499,37 @@ func _configure_focus_chain(controls: Array[Control]) -> void:
 		var prev := controls[(i - 1 + controls.size()) % controls.size()]
 		current.focus_neighbor_bottom = current.get_path_to(next)
 		current.focus_neighbor_top = current.get_path_to(prev)
+
+
+func _focusables_for_tab(tab: StringName) -> Array[Control]:
+	var base: Array[Control] = [_audio_tab_btn, _display_tab_btn, _controls_tab_btn]
+	match tab:
+		&"display":
+			base.append_array([_fullscreen_check, _scanlines_check, _back_btn])
+		&"controls":
+			base.append_array([_remap_btn, _back_btn])
+		_:
+			base.append_array([_track_selector, _master_slider, _music_slider, _sfx_slider, _mute_check, _back_btn])
+	return base
+
+
+func _refresh_layout() -> void:
+	var vp := get_viewport()
+	if vp == null:
+		return
+	var viewport_size := vp.get_visible_rect().size
+	var width := clampf(viewport_size.x * 0.76, 760.0, 1080.0)
+	var height := clampf(viewport_size.y * 0.74, 520.0, 700.0)
+	_card.offset_left = -width * 0.5
+	_card.offset_top = -height * 0.5
+	_card.offset_right = width * 0.5
+	_card.offset_bottom = height * 0.5
+	_sidebar.custom_minimum_size.x = clampf(width * 0.18, 150.0, 220.0)
+	var compact := viewport_size.x < 1280.0 or viewport_size.y < 820.0
+	_title_label.add_theme_font_size_override("font_size", 25 if compact else 28)
+	_card.add_theme_stylebox_override("panel", UIStyleRef.create_panel_style(
+		Color(0.06, 0.09, 0.14, 0.96),
+		Color(0.3, 0.55, 0.85, 0.96),
+		10 if compact else 14
+	))
+	_configure_focus_chain(_focusables_for_tab(_active_tab))

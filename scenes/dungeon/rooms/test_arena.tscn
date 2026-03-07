@@ -1,10 +1,13 @@
-[gd_scene load_steps=22 format=3]
+[gd_scene load_steps=25 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/characters/player.tscn" id="1"]
 [ext_resource type="Script" path="res://scripts/systems/camera_follow.gd" id="2"]
 [ext_resource type="Script" path="res://scenes/dungeon/rooms/test_arena.gd" id="3"]
-[ext_resource type="Texture2D" path="res://assets/textures/piata_floor.jpeg" id="4"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_basecolor.png" id="4"]
 [ext_resource type="VideoStream" path="res://assets/textures/dreamy_background.ogv" id="5"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_normal.png" id="6"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_roughness.png" id="7"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_ambientOcclusion.png" id="8"]
 
 [sub_resource type="BoxShape3D" id="1"]
 size = Vector3(52, 1, 16)
@@ -14,6 +17,12 @@ size = Vector3(52, 1, 16)
 
 [sub_resource type="StandardMaterial3D" id="3"]
 albedo_texture = ExtResource("4")
+normal_enabled = true
+normal_texture = ExtResource("6")
+roughness_texture = ExtResource("7")
+ao_enabled = true
+ao_light_affect = 1.0
+ao_texture = ExtResource("8")
 uv1_scale = Vector3(17, 5, 1)
 texture_filter = 3
 
@@ -37,6 +46,12 @@ size = Vector3(2.5, 0.3, 3)
 
 [sub_resource type="StandardMaterial3D" id="10"]
 albedo_texture = ExtResource("4")
+normal_enabled = true
+normal_texture = ExtResource("6")
+roughness_texture = ExtResource("7")
+ao_enabled = true
+ao_light_affect = 1.0
+ao_texture = ExtResource("8")
 uv1_scale = Vector3(1, 1, 1)
 texture_filter = 3
 
@@ -202,4 +217,3 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 1)
 
 [node name="EnemySpawn3" type="Marker3D" parent="SpawnPoints"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, -1)
-

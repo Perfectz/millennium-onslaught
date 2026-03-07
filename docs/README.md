@@ -4,7 +4,11 @@
 Project documentation for architecture, schemas, and events.
 
 ## Current Contents Snapshot
-Status: 0 files, 2 subfolders.
+Status: 2 files, 4 subfolders.
+- [file] `MONTH_END_REVIEW_TEMPLATE.md`
+- [file] `README.md`
+- [dir] `audits/`
+- [dir] `change_scope/`
 - [dir] `events/`
 - [dir] `schemas/`
 

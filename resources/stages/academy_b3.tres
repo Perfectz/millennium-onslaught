@@ -1,34 +1,44 @@
-[gd_resource type="Resource" load_steps=5 format=3]
+[gd_resource type="Resource" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://resources/stages/stage_def.gd" id="1"]
 [ext_resource type="Script" path="res://resources/stages/stage_encounter_entry.gd" id="2"]
-[ext_resource type="Resource" path="res://resources/encounters/academy_b3_gauntlet.tres" id="3"]
-[ext_resource type="Resource" path="res://resources/encounters/academy_boss.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/encounters/academy_b2_library.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/encounters/academy_b3_gauntlet.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/encounters/academy_boss.tres" id="5"]
 
 [sub_resource type="Resource" id="enc_entry_1"]
 script = ExtResource("2")
 encounter_def = ExtResource("3")
 trigger_x = 14.0
-arena_half_width = 8.0
+arena_half_width = 9.0
 arena_min_z = -8.0
 arena_max_z = 8.0
 is_boss = false
 
-[sub_resource type="Resource" id="enc_entry_boss"]
+[sub_resource type="Resource" id="enc_entry_2"]
 script = ExtResource("2")
 encounter_def = ExtResource("4")
-trigger_x = 42.0
+trigger_x = 50.0
+arena_half_width = 9.0
+arena_min_z = -10.0
+arena_max_z = 10.0
+is_boss = false
+
+[sub_resource type="Resource" id="enc_entry_boss"]
+script = ExtResource("2")
+encounter_def = ExtResource("5")
+trigger_x = 86.0
 arena_half_width = 11.0
-arena_min_z = -8.0
-arena_max_z = 8.0
+arena_min_z = -10.0
+arena_max_z = 10.0
 is_boss = true
 
 [resource]
 script = ExtResource("1")
 stage_id = &"academy_b3"
-stage_name = "Academy B3 — Specimen Hall"
-chunk_scenes = Array[String](["res://scenes/dungeon/rooms/academy_b3_gauntlet.tscn", "res://scenes/dungeon/rooms/academy_b3_boss.tscn"])
-chunk_width = 28.0
-encounters = [SubResource("enc_entry_1"), SubResource("enc_entry_boss")]
+stage_name = "Floor 3 - Antidote Annex"
+chunk_scenes = Array[String](["res://scenes/dungeon/rooms/academy_b2_library.tscn", "res://scenes/dungeon/rooms/academy_b3_gauntlet.tscn", "res://scenes/dungeon/rooms/academy_b3_boss.tscn"])
+chunk_width = 36.0
+encounters = [SubResource("enc_entry_1"), SubResource("enc_entry_2"), SubResource("enc_entry_boss")]
 music_track = &"stage_1"
 belt_depth = 12.0

@@ -2,9 +2,9 @@
 
 > Purpose: authoritative implementation snapshot for systems, files, and test coverage.
 
-Current Snapshot Date: 2026-03-04
-Current MVP: MVP 6 "Together" (in progress — save hardening, settings, remapping, Android)
-Roadmap Phase: Month 1 "Foundation Hardening" — COMPLETE
+Current Snapshot Date: 2026-03-06
+Current MVP: MVP 6 "Together" (in progress â€” save hardening, settings, remapping, Android)
+Roadmap Phase: Month 2 "API Contracts and Typed Event-First Communication" â€” IN PROGRESS
 Runtime Main Scene: `res://scenes/ui/main_menu.tscn`
 Dev Test Scene: `res://scenes/dungeon/rooms/test_arena.tscn`
 
@@ -16,10 +16,7 @@ Dev Test Scene: `res://scenes/dungeon/rooms/test_arena.tscn`
 
 | ID | Severity | Description | File(s) | Target |
 |----|----------|-------------|---------|--------|
-| KI-01 | P0 | Dust particles not pooled — unbounded node leak on Android | player_controller.gd:300 | Month 2 |
-| KI-02 | P0 | HealthComponent replacement leaks old signal closures (kill-heal lost after char switch) | player_controller.gd:547 | Month 2 |
 | KI-03 | P0 | Spell state `await physics_frame` can desync state machine | player_state_spell.gd:165 | Month 2 |
-| KI-04 | P0 | DamageNumberSpawner parents pooled Label3D under current_scene (freed on transition) | damage_number_spawner.gd:63 | Month 2 |
 | KI-05 | P1 | VFX finished signal leak on pooled particles returned early | vfx_system.gd:67 | Month 2 |
 | KI-06 | P1 | Zoom punch FOV drift from overlapping calls | juice_manager.gd:159 | Month 2 |
 | KI-07 | P1 | EnemyController.configure() calls set_initial_state without exiting old state | enemy_controller.gd:418 | Month 2 |
@@ -28,7 +25,6 @@ Dev Test Scene: `res://scenes/dungeon/rooms/test_arena.tscn`
 | KI-10 | P1 | Missing bounds clamping in retreat, hurt, stagger, attack, shoot, boss_phase_check states | multiple enemy states | Month 2 |
 | KI-11 | P2 | 30+ hardcoded gameplay values across states | various | Month 4 |
 | KI-12 | P2 | Resource definitions have no validate() methods | various resource defs | Month 4 |
-| KI-13 | P1 | Pause menu bypasses GameManager for scene transition | pause_menu.gd:208 | Month 2 |
 | KI-14 | P2 | Legacy emit_signal("pressed") pattern across 9 UI files | various UI scripts | Month 3 |
 
 ---
@@ -38,13 +34,14 @@ Dev Test Scene: `res://scenes/dungeon/rooms/test_arena.tscn`
 | System | File | Purpose |
 |---|---|---|
 | Constants | `autoloads/constants.gd` | Centralized gameplay tuning values |
-| EventBus | `autoloads/event_bus.gd` | Global signal hub + event ring buffer |
-| GameState | `autoloads/game_state.gd` | Runtime and persistent game data |
+| EventBus | `autoloads/event_bus.gd` | Global signal hub, canonical typed combat contracts, and event ring buffer |
+| GameState | `autoloads/game_state.gd` | Persistent profile/save data |
+| RuntimeState | `autoloads/runtime_state.gd` | Transient session/dungeon state and active bounds |
 | GameManager | `autoloads/game_manager.gd` | Phase changes, pause/resume, scene transitions |
 | ObjectPool | `autoloads/object_pool.gd` | Reusable instance pooling |
 | AudioManager | `autoloads/audio_manager.gd` | SFX/music routing and mute state |
 | SaveManager | `autoloads/save_manager.gd` | Save/load using `GameState` serialization |
-| InputManager | `autoloads/input_manager.gd` | Input context, device mapping, keyboard/joypad remapping, mobile helpers |
+| InputManager | `autoloads/input_manager.gd` | Input context, device mapping, keyboard/joypad remapping, mobile helpers, and debug/photo shortcut registration |
 | JuiceManager | `autoloads/juice_manager.gd` | Screen shake, flash, slow-mo, vignette effects |
 | ToastSystem | `autoloads/toast_system.gd` | Queued notification popups (gold, level up, etc.) |
 | DamageNumberSpawner | `autoloads/damage_number_spawner.gd` | Pooled floating damage numbers |
@@ -98,7 +95,7 @@ Dev Test Scene: `res://scenes/dungeon/rooms/test_arena.tscn`
 | System | File | Purpose |
 |---|---|---|
 | CombatSystem | `scripts/systems/combat_system.gd` | Applies hit results and combat events |
-| CameraFollow | `scripts/systems/camera_follow.gd` | Spring-damped follow camera: dead zones (X+Y), velocity look-ahead, enemy centroid threat bias, dynamic FOV zoom, arena lock (X+Z), trauma shake (real-time), breathing, director cue system, photo mode |
+| CameraFollow | `scripts/systems/camera_follow.gd` | Spring-damped follow camera: dead zones (X+Y), velocity look-ahead, enemy centroid threat bias, dynamic FOV zoom, arena lock (X+Z), trauma shake (real-time), breathing, director cue system, action-driven photo mode |
 | HitstopSystem | `scripts/systems/hitstop_system.gd` | Temporary time-scale freeze |
 | VFXSystem | `scripts/systems/vfx_system.gd` | Hit/kill VFX spawning |
 | EnemyProjectile | `scripts/systems/enemy_projectile.gd` | Enemy projectile behavior |
@@ -147,6 +144,11 @@ Dev Test Scene: `res://scenes/dungeon/rooms/test_arena.tscn`
 | ElementCalculator | `scripts/components/element_calculator.gd` | 11 |
 | StatusEffectTracker | `scripts/components/status_effect_tracker.gd` | 13 |
 | DropRoller | `scripts/components/drop_roller.gd` | 6 |
+| RuntimeBoundsPolicy | `scripts/components/runtime_bounds_policy.gd` | 4 |
+| PlayerLockOnPolicy | `scripts/components/player_lock_on_policy.gd` | 4 |
+| PlayerProfilePolicy | `scripts/components/player_profile_policy.gd` | 4 |
+| PlayerStatsPolicy | `scripts/components/player_stats_policy.gd` | 4 |
+| PlayerHitPolicy | `scripts/components/player_hit_policy.gd` | 4 |
 
 ## Resources
 
@@ -167,6 +169,23 @@ Dev Test Scene: `res://scenes/dungeon/rooms/test_arena.tscn`
 | SkillTreeDef | `resources/skills/skill_tree_def.gd` |
 | StageDef | `resources/stages/stage_def.gd` |
 | StageEncounterEntry | `resources/stages/stage_encounter_entry.gd` |
+
+## Contracts
+
+| Contract | File | Purpose |
+|---|---|---|
+| CombatHitEvent | `scripts/contracts/combat_hit_event.gd` | Canonical typed combat hit payload (schema v1) |
+| CombatKillEvent | `scripts/contracts/combat_kill_event.gd` | Canonical typed combat kill payload (schema v1) |
+
+## Tooling & Validation
+
+| Tool | File | Purpose |
+|---|---|---|
+| SmokeTest | `tools/smoke_test.sh` | Parse check, EventBus catalog validation, and headless unit tests |
+| SanityCheck | `tools/sanity_check.ps1` | Windows entrypoint for the same sanity workflow |
+| EventCatalogValidator | `tools/validate_event_catalog.py` | Ensures `docs/events/event_catalog.md` matches `autoloads/event_bus.gd` |
+| StageLayoutValidator | `tools/validate_stage_layouts.gd` | Audits `StageDef` resources and chunk layout invariants before test runs |
+| DebugBundleCapture | `scripts/tools/debug_bundle_capture.gd` | Captures JSON-safe runtime repro bundles for bug triage and AI debugging |
 
 ### Current Data Assets
 
@@ -223,8 +242,8 @@ Dev Test Scene: `res://scenes/dungeon/rooms/test_arena.tscn`
 
 ### Model Assets
 
-- `assets/models/characters/alys/` — Alys character model (Mixamo FBX animations)
-- `assets/models/characters/kenney/` — Kenney Animated Characters 2 (legacy reference)
+- `assets/models/characters/alys/` â€” Alys character model (Mixamo FBX animations)
+- `assets/models/characters/kenney/` â€” Kenney Animated Characters 2 (legacy reference)
 
 ## Scenes
 
@@ -236,10 +255,12 @@ Dev Test Scene: `res://scenes/dungeon/rooms/test_arena.tscn`
 | Town | `scenes/town/town.tscn` | Town hub: Shop, Inn, NPCs, Leave |
 | DungeonRun | `scenes/dungeon/dungeon_run.tscn` | Main dungeon orchestrator |
 | TestArena | `scenes/dungeon/rooms/test_arena.tscn` | Dev test arena |
-| Room01 | `scenes/dungeon/rooms/room_01.tscn` | Dungeon room 1 |
-| Room02 | `scenes/dungeon/rooms/room_02.tscn` | Dungeon room 2 |
-| Room03 | `scenes/dungeon/rooms/room_03.tscn` | Dungeon room 3 |
-| RoomBoss | `scenes/dungeon/rooms/room_boss.tscn` | Boss room |
+| AcademyB1Entry | `scenes/dungeon/rooms/academy_b1_entry.tscn` | Piata basement floor 1 entry room |
+| AcademyB1Corridors | `scenes/dungeon/rooms/academy_b1_corridors.tscn` | Piata basement floor 2 corridor room |
+| AcademyB2Library | `scenes/dungeon/rooms/academy_b2_library.tscn` | Piata basement floor 3 library room |
+| AcademyB2Storage | `scenes/dungeon/rooms/academy_b2_storage.tscn` | Piata basement storage room variant |
+| AcademyB3Gauntlet | `scenes/dungeon/rooms/academy_b3_gauntlet.tscn` | Piata basement gauntlet room variant |
+| AcademyB3Boss | `scenes/dungeon/rooms/academy_b3_boss.tscn` | Piata basement boss room variant |
 | Player | `scenes/characters/player.tscn` | Player character scene |
 | EnemyRusher | `scenes/enemies/enemy_rusher.tscn` | Enemy scene |
 | HitParticles | `scenes/vfx/hit_particles.tscn` | Hit effect |
@@ -263,11 +284,16 @@ Dev Test Scene: `res://scenes/dungeon/rooms/test_arena.tscn`
 |---|---|---|
 | TestStateMachine | `tests/unit/systems/test_state_machine.gd` | 11 |
 | TestEncounterRoller | `tests/unit/systems/test_encounter_roller.gd` | 7 |
+| TestEncounterTrigger | `tests/unit/systems/test_encounter_trigger.gd` | 6 |
+| TestHazardZone | `tests/unit/systems/test_hazard_zone.gd` | 9 |
 | TestSaveSerialization | `tests/unit/systems/test_save_serialization.gd` | 7 |
+| TestInventoryGameState | `tests/unit/systems/test_inventory_game_state.gd` | 4 |
 | TestHealthComponent | `tests/unit/components/test_health_component.gd` | 17 |
 | TestComboTracker | `tests/unit/components/test_combo_tracker.gd` | 11 |
 | TestDamageCalculator | `tests/unit/components/test_damage_calculator.gd` | 11 |
+| TestDeviceInputTracker | `tests/unit/components/test_device_input_tracker.gd` | 20 |
 | TestComboCancelChecker | `tests/unit/components/test_combo_cancel_checker.gd` | 10 |
+| TestInventoryManager | `tests/unit/components/test_inventory_manager.gd` | 8 |
 | TestJuggleTracker | `tests/unit/components/test_juggle_tracker.gd` | 15 |
 | TestScoreTracker | `tests/unit/components/test_score_tracker.gd` | 14 |
 | TestTPTracker | `tests/unit/components/test_tp_tracker.gd` | 14 |
@@ -275,17 +301,35 @@ Dev Test Scene: `res://scenes/dungeon/rooms/test_arena.tscn`
 | TestShopTransaction | `tests/unit/components/test_shop_transaction.gd` | 12 |
 | TestGoldTracker | `tests/unit/components/test_gold_tracker.gd` | 13 |
 | TestInputIntentBuffer | `tests/unit/components/test_input_intent_buffer.gd` | 21 |
-| TestXPTracker | `tests/unit/components/test_xp_tracker.gd` | 13 |
+| TestSpellSystem | `tests/unit/components/test_spell_system.gd` | 29 |
+| TestXPTracker | `tests/unit/components/test_xp_tracker.gd` | 14 |
 | TestStatCalculator | `tests/unit/components/test_stat_calculator.gd` | 10 |
-| TestEquipmentManager | `tests/unit/components/test_equipment_manager.gd` | 15 |
+| TestEquipmentManager | `tests/unit/components/test_equipment_manager.gd` | 14 |
 | TestSkillTreeManager | `tests/unit/components/test_skill_tree_manager.gd` | 12 |
 | TestElementCalculator | `tests/unit/components/test_element_calculator.gd` | 11 |
 | TestStatusEffectTracker | `tests/unit/components/test_status_effect_tracker.gd` | 13 |
+| TestTargetSelector | `tests/unit/components/test_target_selector.gd` | 10 |
 | TestDropRoller | `tests/unit/components/test_drop_roller.gd` | 6 |
-| TestSaveHardening | `tests/unit/systems/test_save_hardening.gd` | 19 |
-| TestInputRemapping | `tests/unit/systems/test_input_remapping.gd` | 8 |
+| TestRuntimeBoundsPolicy | `tests/unit/components/test_runtime_bounds_policy.gd` | 4 |
+| TestPlayerLockOnPolicy | `tests/unit/components/test_player_lock_on_policy.gd` | 4 |
+| TestPlayerProfilePolicy | `tests/unit/components/test_player_profile_policy.gd` | 4 |
+| TestPlayerStatsPolicy | `tests/unit/components/test_player_stats_policy.gd` | 4 |
+| TestPlayerHitPolicy | `tests/unit/components/test_player_hit_policy.gd` | 4 |
+| TestSaveHardening | `tests/unit/systems/test_save_hardening.gd` | 20 |
+| TestCameraFollow | `tests/unit/systems/test_camera_follow.gd` | 3 |
+| TestInputRemapping | `tests/unit/systems/test_input_remapping.gd` | 12 |
+| TestDebugBundleCapture | `tests/unit/systems/test_debug_bundle_capture.gd` | 2 |
+| TestPlayerControllerRuntime | `tests/unit/systems/test_player_controller_runtime.gd` | 3 |
+| TestRuntimeState | `tests/unit/systems/test_runtime_state.gd` | 2 |
+| TestSpawnPositionResolver | `tests/unit/systems/test_spawn_position_resolver.gd` | 2 |
+| TestThrowableObject | `tests/unit/systems/test_throwable_object.gd` | 7 |
+| TestWaveSystem | `tests/unit/systems/test_wave_system.gd` | 2 |
+| TestCombatEventContracts | `tests/unit/data/test_combat_event_contracts.gd` | 4 |
+| TestAcademyStageContent | `tests/unit/dungeon/test_academy_stage_content.gd` | 11 |
+| TestStageValidator | `tests/unit/dungeon/test_stage_validator.gd` | 2 |
+| TestStageDef | `tests/unit/dungeon/test_stage_def.gd` | 17 |
 
-Total test functions: 283
+Total test functions: 449
 
 ## Controls
 
@@ -299,10 +343,23 @@ Total test functions: 283
 | K | Heavy attack |
 | L | Dodge |
 | I | Block |
-| U | Technique |
+| U / D-Pad Right | Technique |
 | Q | Switch character (prev) |
 | E | Switch character (next) |
-| Tab | Cycle technique |
+| O / D-Pad Left | Cycle technique |
+| Tab / L3 | Lock-on |
+
+### Debug / Demo
+| Input | Action |
+|---|---|
+| F3 | Toggle enemy AI labels |
+| F4 | Toggle performance overlay |
+| F5 | Toggle input diagnostics |
+| F6 | Toggle recent event log |
+| F7 | Restart current dungeon |
+| F8 | Toggle photo mode |
+| F9 | Capture debug bundle |
+| F10 | Validate current stage layout |
 
 ### Menus / Overworld / Town
 | Input | Action |
@@ -316,9 +373,9 @@ Total test functions: 283
 ## Game Flow
 
 ```
-Main Menu → [New Game] → Overworld Map → Town (shop/inn/NPCs) or Dungeon
-                                            ↑                        ↓
-                                            ← ← ← ← ← ← ← ← ← ← ←
+Main Menu â†’ [New Game] â†’ Overworld Map â†’ Town (shop/inn/NPCs) or Dungeon
+                                            â†‘                        â†“
+                                            â† â† â† â† â† â† â† â† â† â† â†
                                        (victory/defeat return to overworld)
 ```
 

@@ -17,7 +17,8 @@ func _ready() -> void:
 	configure(_build_town_config())
 	super._ready()
 	GameManager.change_phase(GameManager.Phase.TOWN)
-	EventBus.town_entered.emit(_town_id)
+	InputManager.set_context(InputManager.InputContext.MENU)
+	EventBus.emit_checked(&"town_entered", [_town_id], {"town_id": _town_id})
 
 
 func _on_entry_activated(entry: Dictionary) -> void:
@@ -67,14 +68,14 @@ func _use_inn() -> void:
 		var data: Dictionary = GameState.character_data.get(char_id, {})
 		data["hp"] = data.get("max_hp", Constants.PLAYER_MAX_HP)
 		data["tp"] = Constants.TP_MAX
-	EventBus.town_inn_used.emit(cost)
-	EventBus.rpg_gold_changed.emit(GameState.gold)
+	EventBus.emit_checked(&"town_inn_used", [cost], {"cost": cost})
+	EventBus.emit_checked(&"rpg_gold_changed", [GameState.gold], {"new_total": GameState.gold})
 	AudioManager.play_sfx_variant(&"ui_confirm", Constants.SFX_VOL_UI_CONFIRM)
 	ToastSystem.show_toast("Rested at the inn! HP & TP fully restored. (-%dG)" % cost, Color(0.55, 0.9, 0.75))
 
 
 func _leave_town() -> void:
-	EventBus.town_exited.emit()
+	EventBus.emit_checked(&"town_exited")
 	SaveManager.save_game(GameState.active_save_slot)
 	GameManager.go_to_overworld()
 

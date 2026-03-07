@@ -3,6 +3,8 @@
 class_name EnemyController
 extends CharacterBody3D
 
+const RuntimeBoundsPolicyScript := preload("res://scripts/components/runtime_bounds_policy.gd")
+
 
 @onready var state_machine: StateMachine = $StateMachine
 @onready var model_pivot: Node3D = $ModelPivot
@@ -106,12 +108,7 @@ func _physics_process(delta: float) -> void:
 
 ## Clamp enemy position to active arena/room bounds (X + Z).
 func clamp_to_bounds() -> void:
-	if GameState.room_bounds_active:
-		position.x = clampf(position.x, GameState.room_bounds_min_x, GameState.room_bounds_max_x)
-		position.z = clampf(position.z, GameState.room_bounds_min_z, GameState.room_bounds_max_z)
-	elif GameState.encounter_active:
-		position.x = clampf(position.x, GameState.arena_lock_min_x, GameState.arena_lock_max_x)
-		position.z = clampf(position.z, GameState.arena_lock_min_z, GameState.arena_lock_max_z)
+	position = RuntimeBoundsPolicyScript.clamp_position(position, RuntimeState.get_active_bounds())
 
 
 func set_target(new_target: Node3D) -> void:
@@ -416,6 +413,16 @@ func configure(def: EnemyDef, player_target: Node3D, start_dormant: bool = false
 	collision_layer = Constants.LAYER_ENEMY
 	collision_mask = Constants.LAYER_ENVIRONMENT | Constants.LAYER_PLAYER | Constants.LAYER_ENEMY | Constants.LAYER_PLATFORM
 	state_machine.set_initial_state(&"dormant" if start_dormant else &"idle")
+
+
+## Activate a pre-spawned encounter enemy so it starts participating immediately.
+func activate_for_encounter() -> void:
+	if health == null or health.is_dead():
+		return
+	if state_machine == null:
+		return
+	if state_machine.current_state_name == &"dormant":
+		state_machine.transition_to(&"idle")
 
 
 ## Apply a stagger override used by parries/guard breaks.

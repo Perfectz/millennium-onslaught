@@ -57,7 +57,7 @@ theme_override_constants/separation = 10
 
 [node name="TitleLabel" type="Label" parent="Content/HBox/LeftColumn/BrandBlock"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 62
+theme_override_font_sizes/font_size = 68
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_shadow_color = Color(0, 0.15, 0.4, 0.35)
 theme_override_constants/shadow_offset_x = 3
@@ -74,7 +74,7 @@ color = Color(0.25, 0.65, 1, 0.6)
 layout_mode = 2
 theme_override_font_sizes/font_size = 17
 theme_override_colors/font_color = Color(0.5, 0.78, 0.95, 0.85)
-text = "A Belt-Scroller RPG  ·  Tactical Combat  ·  Relentless Momentum"
+text = "A Belt-Scroller RPG  |  Tactical Combat  |  Relentless Momentum"
 
 [node name="NebulaFrame" type="AspectRatioContainer" parent="Content/HBox/LeftColumn"]
 layout_mode = 2
@@ -93,65 +93,71 @@ loop = true
 
 [node name="ButtonRows" type="VBoxContainer" parent="Content/HBox/LeftColumn"]
 layout_mode = 2
-custom_minimum_size = Vector2(360, 0)
-theme_override_constants/separation = 4
+custom_minimum_size = Vector2(388, 0)
+theme_override_constants/separation = 8
 
 [node name="NewGameButton" type="Button" parent="Content/HBox/LeftColumn/ButtonRows"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 50)
+custom_minimum_size = Vector2(0, 56)
 text = "NEW GAME"
 alignment = 0
 
 [node name="ContinueButton" type="Button" parent="Content/HBox/LeftColumn/ButtonRows"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 50)
+custom_minimum_size = Vector2(0, 56)
 text = "CONTINUE"
 alignment = 0
 
 [node name="OptionsButton" type="Button" parent="Content/HBox/LeftColumn/ButtonRows"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 50)
+custom_minimum_size = Vector2(0, 56)
 text = "OPTIONS"
 alignment = 0
 
 [node name="QuitButton" type="Button" parent="Content/HBox/LeftColumn/ButtonRows"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 50)
+custom_minimum_size = Vector2(0, 56)
 text = "QUIT"
 alignment = 0
 
-[node name="OptionsPanel" type="PanelContainer" parent="Content/HBox/LeftColumn"]
+[node name="StatusPanel" type="PanelContainer" parent="Content/HBox/LeftColumn"]
 layout_mode = 2
 
-[node name="OptionsMargin" type="MarginContainer" parent="Content/HBox/LeftColumn/OptionsPanel"]
+[node name="StatusMargin" type="MarginContainer" parent="Content/HBox/LeftColumn/StatusPanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 12
 
-[node name="OptionsVBox" type="VBoxContainer" parent="Content/HBox/LeftColumn/OptionsPanel/OptionsMargin"]
+[node name="StatusVBox" type="VBoxContainer" parent="Content/HBox/LeftColumn/StatusPanel/StatusMargin"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
-[node name="OptionsTitle" type="Label" parent="Content/HBox/LeftColumn/OptionsPanel/OptionsMargin/OptionsVBox"]
+[node name="StatusEyebrow" type="Label" parent="Content/HBox/LeftColumn/StatusPanel/StatusMargin/StatusVBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(0.5, 0.78, 0.95, 0.9)
-text = "DISPLAY"
+text = "OPERATIONS STATUS"
 
-[node name="ScanlineCheck" type="CheckBox" parent="Content/HBox/LeftColumn/OptionsPanel/OptionsMargin/OptionsVBox"]
+[node name="SaveSummaryLabel" type="Label" parent="Content/HBox/LeftColumn/StatusPanel/StatusMargin/StatusVBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 15
-theme_override_colors/font_color = Color(0.6, 0.8, 0.95, 0.85)
-text = "Scanlines"
-button_pressed = true
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.9, 0.96, 1, 1)
+text = "NO CAMPAIGN DATA DETECTED"
+
+[node name="BuildSummaryLabel" type="Label" parent="Content/HBox/LeftColumn/StatusPanel/StatusMargin/StatusVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.62, 0.78, 0.92, 0.9)
+autowrap_mode = 2
+text = "Open Options for graphics, audio, and control remapping."
 
 [node name="StatusLabel" type="Label" parent="Content/HBox/LeftColumn"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 theme_override_colors/font_color = Color(0.5, 0.7, 0.85, 0.65)
-text = "No save data found."
+text = "Keyboard and controller inputs are fully supported."
 
 [node name="BottomSpacer" type="Control" parent="Content/HBox/LeftColumn"]
 layout_mode = 2
@@ -193,5 +199,5 @@ grow_horizontal = 0
 grow_vertical = 0
 theme_override_font_sizes/font_size = 12
 theme_override_colors/font_color = Color(0.4, 0.6, 0.8, 0.45)
-text = "v0.0 — Prototype Build"
+text = "v0.0 - Prototype Build"
 horizontal_alignment = 2

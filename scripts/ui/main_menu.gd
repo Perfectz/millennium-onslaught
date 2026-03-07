@@ -9,6 +9,7 @@ func _ready() -> void:
 	UIStyleRef.apply_theme(self)
 	_build_ui()
 	GameManager.change_phase(GameManager.Phase.MAIN_MENU)
+	InputManager.set_context(InputManager.InputContext.MENU)
 
 
 func _build_ui() -> void:

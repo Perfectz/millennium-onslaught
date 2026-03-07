@@ -1,5 +1,5 @@
 ## Global signal hub. All cross-system communication flows through here.
-## No system directly references another system — they emit and listen via EventBus.
+## No system directly references another system - they emit and listen via EventBus.
 class_name EventBusSingleton
 extends Node
 
@@ -11,7 +11,9 @@ signal game_resumed()
 signal game_restarted()
 
 # --- Combat ---
+signal combat_hit_event(event: CombatHitEvent)
 signal combat_hit_landed(attacker: Node, target: Node, damage: float, hit_position: Vector3, attack_data: AttackDef)
+signal combat_kill_event(event: CombatKillEvent)
 signal combat_kill(attacker: Node, target: Node, kill_position: Vector3)
 signal combat_combo_step(player: Node, step: int)
 signal combat_combo_dropped(player: Node)
@@ -122,21 +124,45 @@ signal settings_display_changed(setting: StringName, value: Variant)
 signal settings_controls_remapped(action: StringName, input_type: StringName)
 
 
-## Ring buffer for debugging — stores last 100 events for crash investigation.
+## Ring buffers for runtime diagnostics and recent event review.
 var _event_ring_buffer: Array[Dictionary] = []
+var _unmatched_event_buffer: Array[Dictionary] = []
+var _warned_unmatched_signals: Dictionary = {}
 const _RING_BUFFER_SIZE: int = 100
+const _UNMATCHED_RING_BUFFER_SIZE: int = 50
+const _UNKNOWN_SIGNAL_EVENT: StringName = &"event_bus_unknown_signal"
 
 
-## Log an event to the ring buffer for debugging purposes.
-func log_event(event_name: StringName, payload: Dictionary = {}) -> void:
+## Emit a known EventBus signal, log it, and optionally warn when nobody is listening.
+func emit_checked(
+	signal_name: StringName,
+	args: Array = [],
+	payload: Dictionary = {},
+	warn_if_unmatched: bool = false
+) -> bool:
+	return _emit_checked_internal(signal_name, args, payload, warn_if_unmatched, true)
+
+
+## Emit a known EventBus signal without asserting on unknown signal names.
+func try_emit_checked(
+	signal_name: StringName,
+	args: Array = [],
+	payload: Dictionary = {},
+	warn_if_unmatched: bool = false
+) -> bool:
+	return _emit_checked_internal(signal_name, args, payload, warn_if_unmatched, false)
+
+
+## Log a diagnostic event to the ring buffer for debugging purposes.
+func log_event(event_name: StringName, payload: Dictionary = {}, metadata: Dictionary = {}) -> void:
 	var entry := {
 		"time": Time.get_ticks_msec(),
 		"event": event_name,
-		"payload": payload
+		"payload": payload.duplicate(true),
 	}
-	_event_ring_buffer.append(entry)
-	if _event_ring_buffer.size() > _RING_BUFFER_SIZE:
-		_event_ring_buffer.pop_front()
+	for key in metadata:
+		entry[key] = metadata[key]
+	_append_to_buffer(_event_ring_buffer, entry, _RING_BUFFER_SIZE)
 
 
 ## Get the last N events from the ring buffer.
@@ -145,6 +171,76 @@ func get_recent_events(count: int = 20) -> Array[Dictionary]:
 	return _event_ring_buffer.slice(start)
 
 
+## Get the last N known signals that were emitted with no listeners.
+func get_unmatched_events(count: int = 20) -> Array[Dictionary]:
+	var start := maxi(0, _unmatched_event_buffer.size() - count)
+	return _unmatched_event_buffer.slice(start)
+
+
+## Clear debug buffers. Intended for tests and debug tool reset flows.
+func clear_debug_buffers() -> void:
+	_event_ring_buffer.clear()
+	_unmatched_event_buffer.clear()
+	_warned_unmatched_signals.clear()
+
+
 ## Dump all buffered events as JSON string for debugging.
 func dump_events_json() -> String:
 	return JSON.stringify(_event_ring_buffer, "\t")
+
+
+func _emit_checked_internal(
+	signal_name: StringName,
+	args: Array,
+	payload: Dictionary,
+	warn_if_unmatched: bool,
+	assert_on_unknown: bool
+) -> bool:
+	if not has_signal(signal_name):
+		var message := "EventBus: attempted to emit unknown signal '%s'." % signal_name
+		log_event(_UNKNOWN_SIGNAL_EVENT, {
+			"signal": signal_name,
+			"payload": payload.duplicate(true),
+		})
+		if assert_on_unknown:
+			push_error(message)
+			if OS.is_debug_build():
+				assert(false, message)
+		return false
+
+	var listener_count := get_signal_connection_list(signal_name).size()
+	if listener_count == 0:
+		_record_unmatched_signal(signal_name, payload, warn_if_unmatched)
+
+	log_event(signal_name, payload, {
+		"listeners": listener_count,
+		"unmatched": listener_count == 0,
+	})
+
+	var emit_args: Array = [signal_name]
+	emit_args.append_array(args)
+	callv("emit_signal", emit_args)
+	return true
+
+
+func _record_unmatched_signal(signal_name: StringName, payload: Dictionary, warn_if_unmatched: bool) -> void:
+	var entry := {
+		"time": Time.get_ticks_msec(),
+		"event": signal_name,
+		"payload": payload.duplicate(true),
+		"listeners": 0,
+		"unmatched": true,
+	}
+	_append_to_buffer(_unmatched_event_buffer, entry, _UNMATCHED_RING_BUFFER_SIZE)
+	if not warn_if_unmatched:
+		return
+	if _warned_unmatched_signals.get(signal_name, false):
+		return
+	_warned_unmatched_signals[signal_name] = true
+	push_warning("EventBus: signal '%s' emitted with no listeners." % signal_name)
+
+
+func _append_to_buffer(buffer: Array[Dictionary], entry: Dictionary, max_size: int) -> void:
+	buffer.append(entry)
+	if buffer.size() > max_size:
+		buffer.pop_front()

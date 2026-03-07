@@ -21,7 +21,7 @@ func physics_process(delta: float) -> StringName:
 	var input_vec := player.get_movement_input_vector()
 	entity.velocity.x = input_vec.x * Constants.PLAYER_RUN_SPEED
 	entity.velocity.z = input_vec.y * Constants.PLAYER_RUN_SPEED
-	player.update_facing(input_vec.x)
+	player.update_facing_from_input(input_vec, delta)
 	player.apply_gravity(delta)
 	entity.move_and_slide()
 	player.clamp_to_bounds()

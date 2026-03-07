@@ -10,6 +10,7 @@ signal died()
 var _max_hp: float
 var _current_hp: float
 var _is_dead: bool = false
+var _validation_warning_handler: Callable = Callable()
 
 
 func _init(max_hp: float = 100.0) -> void:
@@ -55,10 +56,18 @@ func get_max_hp() -> float:
 	return _max_hp
 
 
+func set_validation_warning_handler(handler: Callable) -> void:
+	_validation_warning_handler = handler
+
+
+func clear_validation_warning_handler() -> void:
+	_validation_warning_handler = Callable()
+
+
 ## Set max HP (useful for leveling). Clamps current HP if it exceeds new max.
 func set_max_hp(new_max: float) -> void:
 	if new_max <= 0.0:
-		push_warning("HealthComponent: set_max_hp called with non-positive value.")
+		_report_validation_warning("HealthComponent: set_max_hp called with non-positive value.")
 		return
 	_max_hp = new_max
 	if _current_hp > _max_hp:
@@ -73,3 +82,10 @@ func reset(max_hp: float = -1.0) -> void:
 	_current_hp = _max_hp
 	_is_dead = false
 	health_changed.emit(_current_hp, _max_hp)
+
+
+func _report_validation_warning(message: String) -> void:
+	if _validation_warning_handler.is_valid():
+		_validation_warning_handler.call(message)
+		return
+	push_warning(message)

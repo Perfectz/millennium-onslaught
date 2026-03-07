@@ -57,6 +57,7 @@ var _music_volume: float = 0.8
 var _music_library: Dictionary = {}
 var _playlist: Array[StringName] = []
 var _current_track_index: int = -1
+var _music_enabled: bool = true
 
 ## Sound variation pools: sfx_name → Array[AudioStream].
 var _sfx_library: Dictionary = {}
@@ -68,18 +69,26 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	set_process_input(true)
 	_init_sfx_pool()
-	_init_music_players()
-	_load_music_library()
 	_load_sfx_library()
 	_connect_events()
 	_load_audio_settings()
 
 	_playlist = PLAYLIST_ORDER.duplicate()
-	if not _playlist.is_empty():
+	_music_enabled = DisplayServer.get_name() != "headless"
+	if _music_enabled:
+		_init_music_players()
+		_load_music_library()
+	if _music_enabled and not _playlist.is_empty():
 		_play_playlist_index(0, false, false)
 
 
+func _exit_tree() -> void:
+	_release_music_state()
+
+
 func _input(event: InputEvent) -> void:
+	if not _music_enabled:
+		return
 	if event.is_echo():
 		return
 	if event.is_action_pressed(ACTION_MUSIC_STOP):
@@ -276,8 +285,7 @@ func toggle_mute() -> void:
 func set_muted(muted: bool) -> void:
 	if _is_muted == muted:
 		return
-	EventBus.audio_mute_toggled.emit(muted)
-	EventBus.log_event(&"audio_mute_toggled", {"muted": muted})
+	EventBus.emit_checked(&"audio_mute_toggled", [muted], {"muted": muted}, true)
 
 
 ## Get mute state.
@@ -334,6 +342,8 @@ func get_current_track_id() -> StringName:
 
 ## Play a specific track id. Returns false if not found.
 func play_track(track_id: StringName, crossfade: bool = true) -> bool:
+	if not _music_enabled:
+		return false
 	var index := _playlist.find(track_id)
 	if index >= 0:
 		if index == _current_track_index and _active_music_player != null and _active_music_player.playing:
@@ -360,6 +370,8 @@ func get_track_display_name(track_id: StringName) -> String:
 
 
 func play_next_track(crossfade: bool = true) -> void:
+	if not _music_enabled:
+		return
 	if _playlist.is_empty():
 		return
 	var next_index := (_current_track_index + 1) % _playlist.size()
@@ -367,11 +379,15 @@ func play_next_track(crossfade: bool = true) -> void:
 
 
 func stop_music() -> void:
+	if not _music_enabled:
+		return
 	if _music_fade_tween != null:
 		_music_fade_tween.kill()
 		_music_fade_tween = null
 	_music_player_a.stop()
 	_music_player_b.stop()
+	_music_player_a.stream = null
+	_music_player_b.stream = null
 	EventBus.log_event(&"audio_music_stopped", {})
 
 
@@ -389,6 +405,8 @@ func _on_sfx_requested(sfx_name: StringName) -> void:
 
 
 func _on_music_requested(music_name: StringName, crossfade: bool) -> void:
+	if not _music_enabled:
+		return
 	if music_name == &"":
 		play_next_track(crossfade)
 		return
@@ -403,6 +421,8 @@ func _on_mute_toggled(muted: bool) -> void:
 
 
 func _on_music_finished(player: AudioStreamPlayer) -> void:
+	if not _music_enabled:
+		return
 	if player != _active_music_player:
 		return
 	play_next_track(true)
@@ -426,6 +446,8 @@ func _play_playlist_index(index: int, crossfade: bool, emit_signal: bool = true)
 
 
 func _play_track_by_id(track_id: StringName, crossfade: bool) -> bool:
+	if not _music_enabled:
+		return false
 	var stream := _music_library.get(track_id) as AudioStream
 	if stream == null:
 		return false
@@ -434,6 +456,8 @@ func _play_track_by_id(track_id: StringName, crossfade: bool) -> bool:
 
 
 func _play_music_stream(stream: AudioStream, crossfade: bool) -> void:
+	if not _music_enabled:
+		return
 	if _music_fade_tween != null:
 		_music_fade_tween.kill()
 		_music_fade_tween = null
@@ -471,7 +495,24 @@ func _get_inactive_music_player() -> AudioStreamPlayer:
 	return _music_player_a
 
 
+func _release_music_state() -> void:
+	if _music_fade_tween != null:
+		_music_fade_tween.kill()
+		_music_fade_tween = null
+	if _music_player_a != null:
+		_music_player_a.stop()
+		_music_player_a.stream = null
+	if _music_player_b != null:
+		_music_player_b.stop()
+		_music_player_b.stream = null
+	_active_music_player = _music_player_a
+	_current_track_index = -1
+	_music_library.clear()
+
+
 func _refresh_active_music_volume() -> void:
+	if not _music_enabled:
+		return
 	if _active_music_player != null and _active_music_player.playing:
 		_active_music_player.volume_db = _get_music_target_db()
 
@@ -499,7 +540,14 @@ func _pick_variant_index(sfx_name: StringName, variant_count: int) -> int:
 
 
 func _emit_track_changed(track_id: StringName) -> void:
-	EventBus.audio_track_changed.emit(track_id, get_track_display_name(track_id))
+	var display_name := get_track_display_name(track_id)
+	EventBus.emit_checked(&"audio_track_changed", [
+		track_id,
+		display_name,
+	], {
+		"track_id": track_id,
+		"display_name": display_name,
+	})
 
 
 func _load_mp3_stream(path: String) -> AudioStream:

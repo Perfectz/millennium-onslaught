@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3b3241"/>
+      <stop offset="1" stop-color="#241c2b"/>
+    </linearGradient>
+    <pattern id="panels" width="128" height="128" patternUnits="userSpaceOnUse">
+      <rect width="128" height="128" fill="url(#wall)"/>
+      <rect x="10" y="10" width="108" height="108" rx="8" fill="#463a4d"/>
+      <rect x="18" y="18" width="92" height="92" rx="6" fill="#2c2333"/>
+      <path d="M18 46h92M18 82h92" stroke="#7ce4ff" stroke-width="2" opacity="0.12"/>
+      <path d="M46 18v92M82 18v92" stroke="#7ce4ff" stroke-width="2" opacity="0.08"/>
+      <rect x="40" y="40" width="48" height="48" rx="24" fill="none" stroke="#bfefff" stroke-width="2" opacity="0.14"/>
+    </pattern>
+  </defs>
+  <rect width="512" height="512" fill="url(#panels)"/>
+</svg>

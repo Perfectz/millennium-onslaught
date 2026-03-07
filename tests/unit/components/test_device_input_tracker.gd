@@ -87,6 +87,15 @@ func test_players_have_independent_just_pressed() -> void:
 	assert_bool(_tracker.consume_just_pressed(1, &"attack_light")).is_false()
 
 
+func test_releasing_one_source_preserves_other_source_press() -> void:
+	_tracker.register_action_pressed(0, &"jump", -1)
+	_tracker.register_action_pressed(0, &"jump", 1)
+	_tracker.register_action_released(0, &"jump", 1)
+	assert_bool(_tracker.is_pressed(0, &"jump")).is_true()
+	_tracker.register_action_released(0, &"jump", -1)
+	assert_bool(_tracker.is_pressed(0, &"jump")).is_false()
+
+
 # --- Axis values ---
 
 func test_axis_value_tracks_per_player() -> void:
@@ -106,6 +115,62 @@ func test_get_axis_with_digital_fallback() -> void:
 	# No axis values set, but button pressed — should fall back to 1.0
 	_tracker.register_action_pressed(0, &"move_right")
 	assert_float(_tracker.get_axis(0, &"move_left", &"move_right")).is_equal_approx(1.0, 0.01)
+
+
+func test_axis_switching_clears_stale_opposite_direction() -> void:
+	_tracker.register_axis_value(0, &"move_left", 0.9)
+	_tracker.register_axis_value(0, &"move_right", 0.0)
+	assert_float(_tracker.get_axis(0, &"move_left", &"move_right")).is_equal_approx(-0.9, 0.01)
+	_tracker.register_axis_value(0, &"move_left", 0.0)
+	_tracker.register_axis_value(0, &"move_right", 0.8)
+	assert_float(_tracker.get_axis(0, &"move_left", &"move_right")).is_equal_approx(0.8, 0.01)
+
+
+func test_axis_recentering_returns_zero() -> void:
+	_tracker.register_axis_value(0, &"move_left", 0.75)
+	_tracker.register_axis_value(0, &"move_right", 0.0)
+	assert_float(_tracker.get_axis(0, &"move_left", &"move_right")).is_equal_approx(-0.75, 0.01)
+	_tracker.register_axis_value(0, &"move_left", 0.0)
+	assert_float(_tracker.get_axis(0, &"move_left", &"move_right")).is_equal_approx(0.0, 0.01)
+
+
+func test_axis_uses_strongest_source_value() -> void:
+	_tracker.register_axis_value(0, &"move_right", 0.35, 1)
+	_tracker.register_axis_value(0, &"move_right", 0.8, 2)
+	assert_float(_tracker.get_raw_axis(0, &"move_right")).is_equal_approx(0.8, 0.01)
+
+
+func test_clear_player_state_resets_pressed_and_axis_values() -> void:
+	_tracker.register_action_pressed(0, &"jump")
+	_tracker.register_axis_value(0, &"move_right", 0.6)
+	assert_bool(_tracker.consume_just_pressed(0, &"jump")).is_true()
+	_tracker.clear_player_state(0)
+	assert_bool(_tracker.is_pressed(0, &"jump")).is_false()
+	assert_bool(_tracker.consume_just_pressed(0, &"jump")).is_false()
+	assert_float(_tracker.get_axis(0, &"move_left", &"move_right")).is_equal_approx(0.0, 0.01)
+
+
+func test_clear_device_state_removes_only_that_source() -> void:
+	_tracker.register_action_pressed(0, &"jump", -1)
+	_tracker.register_action_pressed(0, &"jump", 2)
+	_tracker.register_axis_value(0, &"move_right", 0.7, -1)
+	_tracker.register_axis_value(0, &"move_right", 0.45, 2)
+	_tracker.clear_device_state(0, 2)
+	assert_bool(_tracker.is_pressed(0, &"jump")).is_true()
+	assert_float(_tracker.get_raw_axis(0, &"move_right")).is_equal_approx(0.7, 0.01)
+	_tracker.clear_device_state(0, -1)
+	assert_bool(_tracker.is_pressed(0, &"jump")).is_false()
+	assert_float(_tracker.get_raw_axis(0, &"move_right")).is_equal_approx(0.0, 0.01)
+
+
+func test_clear_all_state_resets_every_player() -> void:
+	_tracker.register_action_pressed(0, &"jump", -1)
+	_tracker.register_action_pressed(1, &"attack_light", 1)
+	_tracker.register_axis_value(1, &"move_right", 0.6, 1)
+	_tracker.clear_all_state()
+	assert_bool(_tracker.is_pressed(0, &"jump")).is_false()
+	assert_bool(_tracker.is_pressed(1, &"attack_light")).is_false()
+	assert_float(_tracker.get_raw_axis(1, &"move_right")).is_equal_approx(0.0, 0.01)
 
 
 # --- Boundary checks ---

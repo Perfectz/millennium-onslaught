@@ -7,6 +7,8 @@ extends CanvasLayer
 signal closed
 
 const UIStyleRef = preload("res://scripts/ui/ui_style.gd")
+const MENU_CONFIRM_ACTIONS: Array[StringName] = [&"attack_light", &"jump", &"ui_accept"]
+const MENU_BACK_ACTIONS: Array[StringName] = [&"pause", &"dodge", &"ui_cancel"]
 
 var _overlay: ColorRect
 var _card: PanelContainer
@@ -227,6 +229,8 @@ func _start_listening(action: StringName, label: Label, mode: StringName) -> voi
 func _input(event: InputEvent) -> void:
 	if _listening_mode == &"":
 		return
+	if event.is_echo():
+		return
 
 	if _listening_mode == &"keyboard":
 		if event is InputEventKey and event.is_pressed():
@@ -243,9 +247,7 @@ func _input(event: InputEvent) -> void:
 			InputManager.save_keyboard_bindings()
 			_update_key_label(_listening_label, _listening_action)
 			_refresh_all_labels()
-			_listening_mode = &""
-			_listening_action = &""
-			_listening_label = null
+			_finish_listening()
 			get_viewport().set_input_as_handled()
 
 	elif _listening_mode == &"joypad":
@@ -255,9 +257,7 @@ func _input(event: InputEvent) -> void:
 			InputManager.save_controller_bindings()
 			_update_joy_label(_listening_label, _listening_action)
 			_refresh_all_labels()
-			_listening_mode = &""
-			_listening_action = &""
-			_listening_label = null
+			_finish_listening()
 			get_viewport().set_input_as_handled()
 		elif event is InputEventKey and event.is_pressed():
 			# Cancel joypad listening on keyboard press.
@@ -270,6 +270,10 @@ func _cancel_listening() -> void:
 			_update_key_label(_listening_label, _listening_action)
 		else:
 			_update_joy_label(_listening_label, _listening_action)
+	_finish_listening()
+
+
+func _finish_listening() -> void:
 	_listening_mode = &""
 	_listening_action = &""
 	_listening_label = null
@@ -310,12 +314,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	var vp := get_viewport()
 	if vp == null:
 		return
-	if event.is_action_pressed("pause") or event.is_action_pressed("dodge"):
+	if _event_matches_any_action(event, MENU_BACK_ACTIONS):
 		vp.set_input_as_handled()
 		_on_back()
-	elif event.is_action_pressed("attack_light") \
-		or event.is_action_pressed("jump") \
-		or event.is_action_pressed("ui_accept"):
+	elif _event_matches_any_action(event, MENU_CONFIRM_ACTIONS):
 		var focused := vp.gui_get_focus_owner()
 		if focused is Button and not (focused as Button).disabled:
 			vp.set_input_as_handled()
@@ -346,3 +348,10 @@ func _configure_focus_chain(controls: Array[Control]) -> void:
 		var prev := controls[(i - 1 + controls.size()) % controls.size()]
 		current.focus_neighbor_bottom = current.get_path_to(next)
 		current.focus_neighbor_top = current.get_path_to(prev)
+
+
+func _event_matches_any_action(event: InputEvent, actions: Array[StringName]) -> bool:
+	for action: StringName in actions:
+		if event.is_action_pressed(action):
+			return true
+	return false

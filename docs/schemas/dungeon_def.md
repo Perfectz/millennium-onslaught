@@ -1,6 +1,6 @@
 # DungeonDef Schema
 
-> Defines a complete dungeon — its room sequence, encounters per room, and boss fight.
+> Defines a dungeon entry point. The project supports both legacy room-based dungeons and the current continuous-stage formats.
 
 **Class:** `DungeonDef` (extends `Resource`)  
 **Source:** `resources/dungeons/dungeon_def.gd`  
@@ -14,55 +14,55 @@
 |-------|------|---------|-------------|-------------|
 | `dungeon_id` | `StringName` | `&""` | Required, unique | Identifier for save/story systems |
 | `dungeon_name` | `String` | `""` | Required | Display name |
-| `room_scenes` | `Array[String]` | `[]` | >= 1 path, last is boss room | Ordered scene paths (`res://scenes/dungeon/rooms/*.tscn`) |
-| `room_encounters` | `Array[EncounterDef]` | `[]` | Length = `room_scenes.size() - 1` | One encounter per non-boss room |
-| `boss_encounter` | `EncounterDef` | `null` | Required | Encounter for the final (boss) room |
-| `requires_story_flag` | `StringName` | `&""` | Empty = always unlocked | Story flag that must be set to enter (MVP 3) |
+| `room_scenes` | `Array[String]` | `[]` | Legacy mode only | Ordered room scene paths |
+| `room_encounters` | `Array[EncounterDef]` | `[]` | Legacy mode only | One encounter per non-boss room |
+| `boss_encounter` | `EncounterDef` | `null` | Legacy mode only | Encounter for the final legacy room |
+| `requires_story_flag` | `StringName` | `&""` | Empty = always unlocked | Story gate checked before entry |
+| `stage_def` | `StageDef` | `null` | Optional | Single continuous stage override |
+| `stage_defs` | `Array[StageDef]` | `[]` | Optional | Sequential continuous stages |
 
 ---
 
-## Room Flow
+## Supported Modes
 
-```
-room_scenes[0] → room_encounters[0]
-room_scenes[1] → room_encounters[1]
-room_scenes[2] → room_encounters[2]
-room_scenes[3] → boss_encounter     (final room)
-```
+### Legacy room mode
 
-`DungeonManager` advances through rooms linearly. Each room loads its scene and starts its encounter. After all enemies in all waves are cleared, the player transitions to the next room. The final room uses `boss_encounter`.
+Uses `room_scenes`, `room_encounters`, and `boss_encounter`. This mode is still supported by `DungeonRun` and `DungeonManager`, but it is no longer the primary content path.
+
+### Single-stage mode
+
+Uses `stage_def` and runs one continuous `StageDef`.
+
+### Multi-stage mode
+
+Uses `stage_defs` and plays multiple `StageDef` resources in order. This is the current format for `dungeon_1.tres`.
 
 ---
 
-## Example: dungeon_1.tres ("Piata Basement")
+## Example: dungeon_1.tres
 
 ```tres
 dungeon_id = &"dungeon_1"
-dungeon_name = "Piata Basement"
-room_scenes = [
-    "res://scenes/dungeon/rooms/room_01.tscn",
-    "res://scenes/dungeon/rooms/room_02.tscn",
-    "res://scenes/dungeon/rooms/room_03.tscn",
-    "res://scenes/dungeon/rooms/room_boss.tscn"
-]
-room_encounters = [encounter_room1, encounter_room2, encounter_room3]
-boss_encounter = encounter_boss
+dungeon_name = "Piata Academy Basement - Three Floors"
 requires_story_flag = &""
+stage_defs = [academy_b1, academy_b2, academy_b3]
 ```
 
 ---
 
 ## Usage
 
-- `DungeonRun` loads a `DungeonDef` and passes it to `DungeonManager`.
-- `DungeonManager` uses `room_scenes` to load room geometry and `room_encounters`/`boss_encounter` to start encounters.
-- On dungeon completion, `GameState.bank_dungeon_rewards()` is called and `dungeon_completed` signal is emitted.
-- On dungeon failure, `GameState.reset_dungeon()` clears transient state.
+- `DungeonRun` prefers `stage_defs` when present.
+- If `stage_defs` is empty, `DungeonRun` falls back to `stage_def`.
+- If no stage definitions are present, `DungeonRun` uses legacy `room_scenes` loading.
+- `StageRunner` handles chunk loading, encounter triggers, and stage completion for stage-based dungeons.
+- `DungeonManager` handles encounter progression for legacy room mode.
 
 ## Adding a New Dungeon
 
-1. Create room scenes in `scenes/dungeon/rooms/`
-2. Create encounter .tres files in `resources/encounters/`
-3. Create a new `DungeonDef` .tres in `resources/dungeons/`
-4. Reference all room scenes and encounters
-5. Set `requires_story_flag` if gated by progression
+1. Prefer creating one or more `StageDef` resources in `resources/stages/`.
+2. Create or reuse encounter resources in `resources/encounters/`.
+3. Create a `DungeonDef` in `resources/dungeons/`.
+4. Populate `stage_defs` for multi-stage content or `stage_def` for a single continuous stage.
+5. Only use `room_scenes` / `room_encounters` / `boss_encounter` for explicit legacy content.
+6. Set `requires_story_flag` if the dungeon is progression-gated.

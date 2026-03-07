@@ -11,6 +11,7 @@ func _ready() -> void:
 	configure(_build_overworld_config())
 	super._ready()
 	GameManager.change_phase(GameManager.Phase.OVERWORLD)
+	InputManager.set_context(InputManager.InputContext.OVERWORLD)
 
 
 func _on_entry_activated(entry: Dictionary) -> void:
@@ -28,7 +29,7 @@ func _on_entry_activated(entry: Dictionary) -> void:
 		return
 
 	GameState.current_overworld_node = node_id
-	EventBus.overworld_node_entered.emit(node_id)
+	EventBus.emit_checked(&"overworld_node_entered", [node_id], {"node_id": node_id})
 
 	var action := str(entry.get("action", ""))
 	var target_id := StringName(entry.get("action_target", String(node_id)))
@@ -54,7 +55,7 @@ func _on_selection_changed(_index: int, entry: Dictionary) -> void:
 	if node_id == &"" or node_id not in _node_defs:
 		return
 	GameState.current_overworld_node = node_id
-	EventBus.overworld_node_selected.emit(node_id)
+	EventBus.emit_checked(&"overworld_node_selected", [node_id], {"node_id": node_id})
 
 
 func _build_overworld_config() -> Dictionary:

@@ -20,3 +20,5 @@ Contains automated tests, primarily GdUnit4 suites.
 ## Run
 - Editor: GdUnit4 panel -> Run All Tests.
 - CLI: `godot --headless -s addons/gdUnit4/runtest.sh --add tests/`
+- Sanity: `pwsh tools/sanity_check.ps1`
+- Sanity (bash/CI): `bash tools/smoke_test.sh`

@@ -1,4 +1,7 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/stages/birth_valley/birth_valley_boss_floor.svg" id="1"]
+[ext_resource type="Texture2D" path="res://assets/textures/stages/birth_valley/birth_valley_foundation.svg" id="2"]
 
 [sub_resource type="BoxShape3D" id="floor_shape"]
 size = Vector3(24, 1, 32)
@@ -7,11 +10,19 @@ size = Vector3(24, 1, 32)
 size = Vector3(24, 1, 32)
 
 [sub_resource type="StandardMaterial3D" id="floor_mat"]
-albedo_color = Color(0.6, 0.2, 0.15, 1)
+albedo_texture = ExtResource("1")
 roughness = 0.88
+uv1_scale = Vector3(6, 8, 1)
+texture_filter = 3
 
 [sub_resource type="BoxMesh" id="foundation_mesh"]
 size = Vector3(24, 10, 32)
+
+[sub_resource type="StandardMaterial3D" id="foundation_mat"]
+albedo_texture = ExtResource("2")
+roughness = 1.0
+uv1_scale = Vector3(4, 4, 1)
+texture_filter = 3
 
 [node name="ChunkValleyBoss" type="Node3D"]
 
@@ -30,3 +41,4 @@ surface_material_override/0 = SubResource("floor_mat")
 [node name="Foundation" type="MeshInstance3D" parent="Floor"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -5.5, 0)
 mesh = SubResource("foundation_mesh")
+surface_material_override/0 = SubResource("foundation_mat")

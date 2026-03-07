@@ -12,7 +12,7 @@ env:
 jobs:
   smoke-test:
     runs-on: ubuntu-latest
-    name: Parse Check + Unit Tests
+    name: Sanity Check
 
     steps:
       - name: Checkout
@@ -25,15 +25,7 @@ jobs:
           mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 godot
           chmod +x godot
 
-      - name: Parse check (headless editor load)
+      - name: Run sanity check
         run: |
-          ./godot --path . --editor --headless --quit 2>&1 || true
-          echo "Parse check completed."
-
-      - name: Run GdUnit4 headless tests
-        run: |
-          ./godot --path . --headless \
-            -s res://addons/gdUnit4/bin/GdUnitCmdTool.gd \
-            --ignoreHeadlessMode \
-            --add tests/unit/
+          bash tools/smoke_test.sh ./godot python3
         timeout-minutes: 10

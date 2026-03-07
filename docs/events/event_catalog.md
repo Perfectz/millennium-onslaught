@@ -2,7 +2,8 @@
 
 > **Purpose:** Complete listing of EventBus signals, payloads, typical emitters, and typical listeners.
 
-**Last Verified Against:** `autoloads/event_bus.gd` on 2026-03-03 (MVP 6 Together)
+**Last Verified Against:** `autoloads/event_bus.gd` on 2026-03-05
+**Validation:** `python tools/validate_event_catalog.py`
 
 ---
 
@@ -17,10 +18,14 @@
 
 ## Combat Events
 
+> `combat_hit_event` and `combat_kill_event` are the canonical typed contracts for new work. Legacy positional signals remain for compatibility during migration.
+
 | Signal | Payload | Emitter | Listeners |
 |--------|---------|---------|-----------|
-| `combat_hit_landed` | `attacker: Node, target: Node, damage: float, hit_position: Vector3` | Combat system | VFX, Audio, Camera, HUD, JuiceManager, DamageNumberSpawner |
-| `combat_kill` | `attacker: Node, target: Node, kill_position: Vector3` | Combat system | VFX, Audio, Score, Drops, JuiceManager |
+| `combat_hit_event` | `event: CombatHitEvent` | CombatSystem | CombatAudio, DamageNumberSpawner, DungeonManager, HUD, CameraShakeSystem, HitstopSystem, VFXSystem, JuiceManager |
+| `combat_hit_landed` | `attacker: Node, target: Node, damage: float, hit_position: Vector3, attack_data: AttackDef` | CombatSystem | Legacy compatibility listeners only |
+| `combat_kill_event` | `event: CombatKillEvent` | CombatSystem | CombatAudio, CameraShakeSystem, HitstopSystem, VFXSystem, JuiceManager |
+| `combat_kill` | `attacker: Node, target: Node, kill_position: Vector3` | CombatSystem | Legacy compatibility listeners only |
 | `combat_combo_step` | `player: Node, step: int` | PlayerController (bridged from ComboTracker) | HUD, Audio |
 | `combat_combo_dropped` | `player: Node` | PlayerController (bridged from ComboTracker) | HUD |
 | `combat_dodge` | `player: Node` | Player controller | Audio, VFX |
@@ -28,6 +33,10 @@
 | `combat_parry` | `player: Node, attacker: Node` | Combat system | Audio, VFX, Camera |
 | `combat_technique_used` | `player: Node, technique_name: StringName, cost: float` | Technique system | HUD, Audio, VFX |
 | `combat_attack_started` | `attacker: Node, attack_type: StringName` | Player attack states | CombatAudio (whiff SFX) |
+| `combat_spell_cast` | `player: Node, spell_id: StringName, tp_cost: float` | PlayerStateSpell | No current listeners |
+| `combat_spell_heal` | `player: Node, amount: float` | PlayerStateSpell | No current listeners |
+| `combat_spell_buff` | `player: Node, stat: StringName, amount: float, duration: float` | PlayerStateSpell | No current listeners |
+| `combat_lock_on_changed` | `player: Node, target: Node` | PlayerController | No current listeners |
 
 ## Juggle Events
 
@@ -122,7 +131,7 @@
 | `stage_encounter_triggered` | `encounter_index: int` | EncounterTrigger | StageRunner, WaveSystem |
 | `stage_encounter_cleared` | `encounter_index: int` | WaveSystem | StageRunner |
 | `stage_completed` | `stage_id: StringName` | StageRunner | GameManager, GameState |
-| `stage_bounds_updated` | `min_x: float, max_x: float` | StageRunner | CameraFollow, PlayerController |
+| `stage_bounds_updated` | `min_x: float, max_x: float, min_z: float, max_z: float` | StageRunner | CameraFollow, PlayerController |
 
 ## Save/Load Events
 
@@ -172,4 +181,3 @@
 |--------|---------|---------|-----------|
 | `settings_display_changed` | `setting: StringName, value: Variant` | SettingsMenu | GameState, HUD |
 | `settings_controls_remapped` | `action: StringName, input_type: StringName` | ControllerSettings | UI |
-

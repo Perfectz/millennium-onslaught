@@ -6,39 +6,48 @@ const UIStyleRef = preload("res://scripts/ui/ui_style.gd")
 
 @onready var _bg: ColorRect = $Background
 @onready var _bg_glow: ColorRect = $BackgroundGlow
+@onready var _content_margin: MarginContainer = $Content
+@onready var _content_split: HBoxContainer = $Content/HBox
+@onready var _title_label: Label = $Content/HBox/LeftColumn/BrandBlock/TitleLabel
+@onready var _subtitle_label: Label = $Content/HBox/LeftColumn/BrandBlock/SubTitleLabel
+@onready var _button_rows: VBoxContainer = $Content/HBox/LeftColumn/ButtonRows
 @onready var _video_player: VideoStreamPlayer = $Content/HBox/RightColumn/VideoFrame/KeyArt
-@onready var _options_panel: PanelContainer = $Content/HBox/LeftColumn/OptionsPanel
+@onready var _status_panel: PanelContainer = $Content/HBox/LeftColumn/StatusPanel
+@onready var _save_summary_label: Label = $Content/HBox/LeftColumn/StatusPanel/StatusMargin/StatusVBox/SaveSummaryLabel
+@onready var _build_summary_label: Label = $Content/HBox/LeftColumn/StatusPanel/StatusMargin/StatusVBox/BuildSummaryLabel
 @onready var _status_label: Label = $Content/HBox/LeftColumn/StatusLabel
 @onready var _new_game_btn: Button = $Content/HBox/LeftColumn/ButtonRows/NewGameButton
 @onready var _continue_btn: Button = $Content/HBox/LeftColumn/ButtonRows/ContinueButton
 @onready var _options_btn: Button = $Content/HBox/LeftColumn/ButtonRows/OptionsButton
 @onready var _quit_btn: Button = $Content/HBox/LeftColumn/ButtonRows/QuitButton
+@onready var _nebula_frame: AspectRatioContainer = $Content/HBox/LeftColumn/NebulaFrame
 @onready var _nebula_video: VideoStreamPlayer = $Content/HBox/LeftColumn/NebulaFrame/NebulaVideo
-@onready var _scanline_check: CheckBox = $Content/HBox/LeftColumn/OptionsPanel/OptionsMargin/OptionsVBox/ScanlineCheck
+@onready var _right_column: VBoxContainer = $Content/HBox/RightColumn
+@onready var _version_label: Label = $VersionLabel
 
 var _video_streams: Array = []
 var _current_video_index: int = 0
-var _bg_time: float = 0.0
-var _options_open: bool = false
-var _options_tween: Tween = null
 var _video_crossfade_tween: Tween = null
 var _menu_buttons: Array[Button] = []
+var _default_status_text: String = ""
 
 
 func _ready() -> void:
 	UIStyleRef.apply_theme(self)
 	GameManager.change_phase(GameManager.Phase.MAIN_MENU)
+	InputManager.set_context(InputManager.InputContext.MENU)
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_apply_background_effects()
 	_style_buttons()
-	_style_options_panel()
+	_style_status_panel()
 	_bind_buttons()
 	_setup_video_reel()
 	_setup_nebula_video()
 	_refresh_continue_state()
-	_prepare_options_panel()
 	_setup_controller_navigation()
 	_build_screen_fx()
+	_refresh_layout()
+	get_viewport().size_changed.connect(_refresh_layout)
 	_play_intro()
 	EventBus.audio_music_requested.emit(&"title", true)
 
@@ -76,18 +85,17 @@ func _style_buttons() -> void:
 	UIStyleRef.style_button(_continue_btn, Color.BLACK, accent, 20)
 	UIStyleRef.style_button(_options_btn, Color.BLACK, accent, 20)
 	UIStyleRef.style_button(_quit_btn, Color.BLACK, quit_accent, 20)
+	for btn in [_new_game_btn, _continue_btn, _options_btn, _quit_btn]:
+		UIStyleRef.add_press_feedback(btn, 0.975)
 
 
-func _style_options_panel() -> void:
+func _style_status_panel() -> void:
 	var s := UIStyleRef.create_panel_style(
-		Color(0.04, 0.07, 0.12, 0.55),
-		Color(0.3, 0.6, 0.9, 0.35),
-		4
+		Color(0.04, 0.07, 0.12, 0.78),
+		Color(0.38, 0.74, 0.98, 0.48),
+		8
 	)
-	s.content_margin_left = 8
-	s.content_margin_top = 4
-	s.content_margin_bottom = 4
-	_options_panel.add_theme_stylebox_override("panel", s)
+	_status_panel.add_theme_stylebox_override("panel", s)
 
 
 func _build_screen_fx() -> void:
@@ -96,10 +104,10 @@ func _build_screen_fx() -> void:
 	fx.set_anchors_preset(Control.PRESET_FULL_RECT)
 	fx.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(fx)
-	fx.add_child(UIStyleRef.create_particle_field(Vector2(1920, 1080), Color(0.3, 0.6, 1.0, 0.08), 20))
+	fx.add_child(UIStyleRef.create_particle_field(get_viewport_rect().size, Color(0.3, 0.6, 1.0, 0.06), 12))
 	if GameState.scanlines_enabled:
-		fx.add_child(UIStyleRef.create_scanlines(0.035))
-	fx.add_child(UIStyleRef.create_vignette(0.55))
+		fx.add_child(UIStyleRef.create_scanlines(0.02))
+	fx.add_child(UIStyleRef.create_vignette(0.42))
 
 
 # ── Buttons & Navigation ────────────────────────────────────────────
@@ -113,6 +121,8 @@ func _bind_buttons() -> void:
 	# Wire UI sounds to all menu buttons.
 	for btn in [_new_game_btn, _continue_btn, _options_btn, _quit_btn]:
 		UIStyleRef.wire_button_sounds(btn)
+		btn.focus_entered.connect(_preview_button.bind(btn))
+		btn.mouse_entered.connect(_preview_button.bind(btn))
 
 
 func _setup_controller_navigation() -> void:
@@ -131,6 +141,7 @@ func _focus_first_available() -> void:
 	for button in _menu_buttons:
 		if button.visible and not button.disabled:
 			button.grab_focus()
+			_preview_button(button)
 			return
 
 
@@ -228,45 +239,36 @@ func _refresh_continue_state() -> void:
 			save_count += 1
 	if save_count > 0:
 		_continue_btn.disabled = false
-		_continue_btn.text = "Load Game"
-		_status_label.text = "%d save%s found" % [save_count, "" if save_count == 1 else "s"]
+		_continue_btn.text = "CONTINUE"
+		_save_summary_label.text = "%d ACTIVE CAMPAIGN%s" % [save_count, "" if save_count == 1 else "S"]
+		_build_summary_label.text = "Resume your latest deployment or open the load menu from Continue."
+		_default_status_text = "Options includes audio, display, and remapping controls."
+		_status_label.text = _default_status_text
 		return
 
 	_continue_btn.disabled = true
-	_continue_btn.text = "Load Game"
-	_status_label.text = "No save data found."
+	_continue_btn.text = "CONTINUE"
+	_save_summary_label.text = "NO CAMPAIGN DATA DETECTED"
+	_build_summary_label.text = "Start a new run or configure graphics, audio, and controls from Options."
+	_default_status_text = "Keyboard and controller inputs are fully supported."
+	_status_label.text = _default_status_text
 
 
-func _prepare_options_panel() -> void:
-	_options_panel.visible = false
-	_options_panel.modulate.a = 0.0
-	_scanline_check.button_pressed = GameState.scanlines_enabled
-	_scanline_check.toggled.connect(func(pressed: bool) -> void:
-		GameState.set_scanlines_enabled(pressed)
-	)
-
-
-func _toggle_options_panel(open: bool) -> void:
-	if _options_tween != null:
-		_options_tween.kill()
-		_options_tween = null
-
-	if open:
-		_options_panel.visible = true
-		_options_panel.modulate.a = 0.0
-		_options_tween = create_tween()
-		_options_tween.set_trans(Tween.TRANS_QUAD)
-		_options_tween.set_ease(Tween.EASE_OUT)
-		_options_tween.tween_property(_options_panel, "modulate:a", 1.0, 0.16)
-		return
-
-	_options_tween = create_tween()
-	_options_tween.set_trans(Tween.TRANS_QUAD)
-	_options_tween.set_ease(Tween.EASE_OUT)
-	_options_tween.tween_property(_options_panel, "modulate:a", 0.0, 0.14)
-	_options_tween.finished.connect(func() -> void:
-		_options_panel.visible = false
-	)
+func _refresh_layout() -> void:
+	var size := get_viewport_rect().size
+	var compact := size.x < 1360.0 or size.y < 860.0
+	_content_margin.add_theme_constant_override("margin_left", int(clampf(size.x * 0.055, 28.0, 88.0)))
+	_content_margin.add_theme_constant_override("margin_right", int(clampf(size.x * 0.045, 28.0, 72.0)))
+	_content_margin.add_theme_constant_override("margin_top", int(clampf(size.y * 0.06, 28.0, 72.0)))
+	_content_margin.add_theme_constant_override("margin_bottom", int(clampf(size.y * 0.05, 24.0, 56.0)))
+	_content_split.add_theme_constant_override("separation", 36 if compact else 60)
+	_title_label.add_theme_font_size_override("font_size", 56 if compact else 68)
+	_subtitle_label.add_theme_font_size_override("font_size", 15 if compact else 17)
+	_status_label.add_theme_font_size_override("font_size", 13 if compact else 14)
+	_button_rows.custom_minimum_size.x = clampf(size.x * 0.26, 320.0, 408.0)
+	_nebula_frame.visible = size.y >= 900.0
+	_right_column.visible = size.x >= 1180.0
+	_version_label.add_theme_color_override("font_color", Color(0.5, 0.68, 0.86, 0.58))
 
 
 # ── Transitions ──────────────────────────────────────────────────────
@@ -310,6 +312,23 @@ func _on_options_pressed() -> void:
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()
+
+
+func _preview_button(button: Button) -> void:
+	if button == null:
+		_status_label.text = _default_status_text
+		return
+	if button == _new_game_btn:
+		_status_label.text = "Start a fresh deployment and enter the campaign from the opening sequence."
+	elif button == _continue_btn:
+		_status_label.text = "Continue is unavailable until at least one save slot exists." \
+			if button.disabled else "Open the save list and resume the latest active campaign."
+	elif button == _options_btn:
+		_status_label.text = "Adjust audio, display, accessibility-adjacent visuals, and control mappings."
+	elif button == _quit_btn:
+		_status_label.text = "Exit the current session and close the application."
+	else:
+		_status_label.text = _default_status_text
 
 
 # ── Input ────────────────────────────────────────────────────────────

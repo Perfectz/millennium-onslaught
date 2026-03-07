@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="boss" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7b2a24"/>
+      <stop offset="1" stop-color="#421414"/>
+    </linearGradient>
+    <pattern id="scar" width="128" height="128" patternUnits="userSpaceOnUse">
+      <rect width="128" height="128" fill="url(#boss)"/>
+      <path d="M10 24c18 20 34 10 52 0s34-14 56 6" fill="none" stroke="#b74b39" stroke-width="12" opacity="0.4"/>
+      <path d="M4 94c18-8 34-26 52-22s28 24 68 8" fill="none" stroke="#2d0d0d" stroke-width="14" opacity="0.38"/>
+      <path d="M26 62h76" stroke="#f08a6c" stroke-width="4" opacity="0.2"/>
+      <circle cx="26" cy="62" r="4" fill="#ffb08c" opacity="0.26"/>
+      <circle cx="102" cy="62" r="4" fill="#ffb08c" opacity="0.26"/>
+    </pattern>
+  </defs>
+  <rect width="512" height="512" fill="url(#scar)"/>
+</svg>

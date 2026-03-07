@@ -1,24 +1,14 @@
-[gd_resource type="Resource" load_steps=5 format=3]
+[gd_resource type="Resource" load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://resources/stages/stage_def.gd" id="1"]
 [ext_resource type="Script" path="res://resources/stages/stage_encounter_entry.gd" id="2"]
 [ext_resource type="Resource" path="res://resources/encounters/academy_b1_entry.tres" id="3"]
-[ext_resource type="Resource" path="res://resources/encounters/academy_b1_corridors.tres" id="4"]
 
 [sub_resource type="Resource" id="enc_entry_1"]
 script = ExtResource("2")
 encounter_def = ExtResource("3")
-trigger_x = 15.0
+trigger_x = 14.0
 arena_half_width = 10.0
-arena_min_z = -3.0
-arena_max_z = 3.0
-is_boss = false
-
-[sub_resource type="Resource" id="enc_entry_2"]
-script = ExtResource("2")
-encounter_def = ExtResource("4")
-trigger_x = 48.0
-arena_half_width = 5.0
 arena_min_z = -3.0
 arena_max_z = 3.0
 is_boss = false
@@ -26,9 +16,9 @@ is_boss = false
 [resource]
 script = ExtResource("1")
 stage_id = &"academy_b1"
-stage_name = "Academy B1 — Entry Hall"
-chunk_scenes = Array[String](["res://scenes/dungeon/rooms/academy_b1_entry.tscn", "res://scenes/dungeon/rooms/academy_b1_corridors.tscn"])
+stage_name = "Floor 1 - Recovery Pods"
+chunk_scenes = Array[String](["res://scenes/dungeon/rooms/academy_b1_entry.tscn"])
 chunk_width = 30.0
-encounters = [SubResource("enc_entry_1"), SubResource("enc_entry_2")]
+encounters = [SubResource("enc_entry_1")]
 music_track = &"stage_1"
 belt_depth = 10.0

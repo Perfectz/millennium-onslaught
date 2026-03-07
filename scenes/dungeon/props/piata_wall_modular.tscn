@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/dungeon/props/piata_wall_modular.gd" id="1"]
+[ext_resource type="PackedScene" path="res://assets/models/dungeon_props/wall_modular.fbx" id="2"]
+
+[node name="PiataWallModular" type="Node3D"]
+script = ExtResource("1")
+
+[node name="Wall" parent="." instance=ExtResource("2")]

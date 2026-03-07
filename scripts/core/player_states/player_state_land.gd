@@ -41,8 +41,8 @@ func physics_process(delta: float) -> StringName:
 		if player.intent_buffer.consume(&"technique"):
 			return &"technique"
 
-		var x_input := player.get_movement_input()
-		if absf(x_input) > Constants.INPUT_DEADZONE:
+		var input_vec := player.get_movement_input_vector()
+		if input_vec.length() > Constants.INPUT_DEADZONE:
 			return &"run"
 		return &"idle"
 

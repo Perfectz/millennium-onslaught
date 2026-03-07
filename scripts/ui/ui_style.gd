@@ -39,37 +39,108 @@ static func play_modal_intro(overlay: ColorRect, card: Control) -> void:
 
 static func style_button(button: Button, _base_color: Color, border_color: Color, font_size: int = 22) -> void:
 	var accent := border_color
+	button.focus_mode = Control.FOCUS_ALL
 	button.add_theme_font_size_override("font_size", font_size)
-	button.add_theme_color_override("font_color", Color(0.75, 0.86, 0.95))
+	button.add_theme_color_override("font_color", Color(0.84, 0.92, 0.98))
 	button.add_theme_color_override("font_hover_color", Color(1, 1, 1))
 	button.add_theme_color_override("font_focus_color", Color(1, 1, 1))
 	button.add_theme_color_override("font_pressed_color", accent)
+	button.add_theme_color_override("font_disabled_color", Color(0.44, 0.52, 0.6))
 	button.add_theme_stylebox_override("normal",
-		_glass_btn_style(Color(0.06, 0.09, 0.14, 0.35), accent, 0.2, 0))
+		_glass_btn_style(Color(0.05, 0.08, 0.12, 0.42), accent, 0.28, 0))
 	button.add_theme_stylebox_override("hover",
-		_glass_btn_style(Color(0.08, 0.13, 0.2, 0.55), accent, 0.5, 6))
-	var focus_s := _glass_btn_style(Color(0.08, 0.14, 0.22, 0.6), accent, 0.8, 14)
+		_glass_btn_style(Color(0.07, 0.12, 0.18, 0.62), accent, 0.56, 6))
+	var focus_s := _glass_btn_style(Color(0.08, 0.14, 0.21, 0.68), accent, 0.82, 14)
 	focus_s.border_width_top = 1
 	focus_s.border_width_right = 1
 	focus_s.border_width_bottom = 1
 	button.add_theme_stylebox_override("focus", focus_s)
 	button.add_theme_stylebox_override("pressed",
-		_glass_btn_style(Color(0.04, 0.06, 0.1, 0.6), accent, 0.4, 0))
+		_glass_btn_style(Color(0.04, 0.06, 0.09, 0.72), accent, 0.48, 0))
+	button.add_theme_stylebox_override("disabled",
+		_glass_btn_style(Color(0.04, 0.05, 0.08, 0.28), accent, 0.08, 0))
+	add_focus_feedback(button, accent, 1.012)
+
+
+static func style_tab_button(button: Button, accent: Color, active: bool) -> void:
+	button.focus_mode = Control.FOCUS_ALL
+	button.add_theme_font_size_override("font_size", 18)
+	button.add_theme_color_override("font_color",
+		Color(0.94, 0.98, 1.0) if active else Color(0.62, 0.72, 0.82))
+	button.add_theme_color_override("font_hover_color", Color(0.98, 1.0, 1.0))
+	button.add_theme_color_override("font_focus_color", Color(1.0, 1.0, 1.0))
+	button.add_theme_color_override("font_pressed_color", accent)
+	button.add_theme_stylebox_override("normal", _tab_btn_style(accent, active, false))
+	button.add_theme_stylebox_override("hover", _tab_btn_style(accent, true, true))
+	button.add_theme_stylebox_override("focus", _tab_btn_style(accent, true, true))
+	button.add_theme_stylebox_override("pressed", _tab_btn_style(accent, active, false))
+	add_focus_feedback(button, accent, 1.01)
+
+
+static func style_option_button(button: OptionButton, accent: Color, font_size: int = 18) -> void:
+	button.focus_mode = Control.FOCUS_ALL
+	button.custom_minimum_size.y = maxf(button.custom_minimum_size.y, 42.0)
+	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	style_button(button, Color.BLACK, accent, font_size)
+
+
+static func style_check_box(button: BaseButton, accent: Color, font_size: int = 18) -> void:
+	button.focus_mode = Control.FOCUS_ALL
+	button.add_theme_font_size_override("font_size", font_size)
+	button.add_theme_color_override("font_color", Color(0.92, 0.97, 1.0))
+	button.add_theme_color_override("font_hover_color", Color(1.0, 1.0, 1.0))
+	button.add_theme_color_override("font_focus_color", Color(1.0, 1.0, 1.0))
+	button.add_theme_color_override("font_pressed_color", accent)
+	button.add_theme_stylebox_override("normal",
+		_glass_btn_style(Color(0.04, 0.07, 0.12, 0.32), accent, 0.18, 0))
+	button.add_theme_stylebox_override("hover",
+		_glass_btn_style(Color(0.06, 0.1, 0.16, 0.52), accent, 0.38, 6))
+	button.add_theme_stylebox_override("focus",
+		_glass_btn_style(Color(0.06, 0.11, 0.18, 0.62), accent, 0.56, 10))
+	button.add_theme_stylebox_override("pressed",
+		_glass_btn_style(Color(0.04, 0.08, 0.13, 0.56), accent, 0.32, 0))
+	add_focus_feedback(button, accent, 1.008)
+
+
+static func style_slider(slider: HSlider, accent: Color) -> void:
+	slider.focus_mode = Control.FOCUS_ALL
+	slider.custom_minimum_size.y = maxf(slider.custom_minimum_size.y, 28.0)
+	slider.modulate = Color(0.96, 0.98, 1.0)
+	var groove := StyleBoxFlat.new()
+	groove.bg_color = Color(0.08, 0.11, 0.16, 0.82)
+	groove.corner_radius_top_left = 3
+	groove.corner_radius_top_right = 3
+	groove.corner_radius_bottom_left = 3
+	groove.corner_radius_bottom_right = 3
+	groove.content_margin_top = 5
+	groove.content_margin_bottom = 5
+	groove.anti_aliasing = true
+	var fill := groove.duplicate() as StyleBoxFlat
+	fill.bg_color = Color(accent.r, accent.g, accent.b, 0.62)
+	fill.shadow_color = Color(accent.r, accent.g, accent.b, 0.18)
+	fill.shadow_size = 6
+	slider.add_theme_stylebox_override("slider", groove)
+	slider.add_theme_stylebox_override("grabber_area", fill)
+	slider.add_theme_stylebox_override("grabber_area_highlight", fill)
+	add_focus_feedback(slider, accent, 1.0, Color(1.0, 1.0, 1.0, 1.0), Color(0.86, 0.9, 0.96, 1.0))
 
 
 static func create_panel_style(bg_color: Color, border_color: Color, corner_radius: int) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(bg_color.r, bg_color.g, bg_color.b, minf(bg_color.a, 0.55))
-	style.border_color = Color(border_color.r, border_color.g, border_color.b, minf(border_color.a, 0.25))
+	style.bg_color = Color(bg_color.r, bg_color.g, bg_color.b, minf(bg_color.a, 0.74))
+	style.border_color = Color(border_color.r, border_color.g, border_color.b, minf(border_color.a, 0.42))
 	style.border_width_left = 1
 	style.border_width_top = 1
 	style.border_width_right = 1
 	style.border_width_bottom = 1
-	var r := mini(corner_radius, 6)
+	var r := mini(corner_radius, 10)
 	style.corner_radius_top_left = r
 	style.corner_radius_top_right = r
 	style.corner_radius_bottom_left = r
 	style.corner_radius_bottom_right = r
+	style.shadow_color = Color(border_color.r, border_color.g, border_color.b, 0.08)
+	style.shadow_size = 8
+	style.shadow_offset = Vector2(0, 2)
 	style.anti_aliasing = true
 	style.anti_aliasing_size = 1.0
 	return style
@@ -93,6 +164,31 @@ static func _glass_btn_style(bg: Color, accent: Color, border_a: float, shadow_s
 		s.shadow_size = shadow_sz
 	s.anti_aliasing = true
 	return s
+
+
+static func _tab_btn_style(accent: Color, emphasize: bool, lifted: bool) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.05, 0.08, 0.12, 0.66 if emphasize else 0.22)
+	style.border_color = Color(accent.r, accent.g, accent.b, 0.82 if emphasize else 0.2)
+	style.border_width_left = 4
+	style.border_width_top = 1
+	style.border_width_right = 1
+	style.border_width_bottom = 1
+	style.corner_radius_top_left = 5
+	style.corner_radius_top_right = 7
+	style.corner_radius_bottom_left = 5
+	style.corner_radius_bottom_right = 7
+	style.content_margin_left = 18
+	style.content_margin_right = 14
+	style.content_margin_top = 7
+	style.content_margin_bottom = 7
+	if lifted:
+		style.shadow_color = Color(accent.r, accent.g, accent.b, 0.14)
+		style.shadow_size = 10
+		style.shadow_offset = Vector2(0, 1)
+	style.anti_aliasing = true
+	style.anti_aliasing_size = 1.0
+	return style
 
 
 static func punch(control: Control, strength: float = 0.08) -> void:
@@ -287,12 +383,12 @@ static func create_glow_orb(color: Color = Color(0.12, 0.35, 0.8), intensity: fl
 
 ## Apply standard screen effects (glow orb, particles, vignette, scanlines) to a bg Control.
 static func apply_screen_effects(bg: Control, particle_color: Color = Color(0.5, 0.7, 1.0, 0.2), particle_count: int = 30, glow_color: Color = Color(0.12, 0.35, 0.8)) -> void:
-	var size := Vector2(1920, 1080)
+	var size := _resolve_effect_size(bg)
 	bg.add_child(create_glow_orb(glow_color))
 	bg.add_child(create_particle_field(size, particle_color, particle_count))
-	bg.add_child(create_vignette(0.35))
+	bg.add_child(create_vignette(0.28))
 	if GameState.scanlines_enabled:
-		bg.add_child(create_scanlines(0.025))
+		bg.add_child(create_scanlines(0.018))
 
 
 ## Start a looping glow pulse on a control's self_modulate.
@@ -302,6 +398,32 @@ static func start_glow_pulse(control: Control, bright: Color = Color(1.1, 1.08, 
 	tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	tween.tween_property(control, "self_modulate", bright, period * 0.5).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
 	tween.tween_property(control, "self_modulate", dim, period * 0.5).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+
+
+static func add_focus_feedback(
+	control: Control,
+	accent: Color,
+	scale_amount: float = 1.01,
+	focused_modulate: Color = Color(1.0, 1.0, 1.0, 1.0),
+	idle_modulate: Color = Color(0.92, 0.95, 0.99, 1.0)
+) -> void:
+	if control.has_meta("_ui_focus_feedback_wired"):
+		return
+	control.set_meta("_ui_focus_feedback_wired", true)
+	control.focus_entered.connect(func() -> void:
+		_tween_focus_state(control, accent, scale_amount, focused_modulate)
+	)
+	control.focus_exited.connect(func() -> void:
+		_tween_focus_state(control, accent, 1.0, idle_modulate)
+	)
+	control.mouse_entered.connect(func() -> void:
+		if not control.has_focus():
+			_tween_focus_state(control, accent, maxf(1.0, scale_amount - 0.004), Color(0.97, 0.99, 1.0, 1.0))
+	)
+	control.mouse_exited.connect(func() -> void:
+		if not control.has_focus():
+			_tween_focus_state(control, accent, 1.0, idle_modulate)
+	)
 
 
 static func _get_particle_texture() -> Texture2D:
@@ -318,6 +440,13 @@ static func _get_particle_texture() -> Texture2D:
 		tex.gradient = gradient
 		_particle_texture = tex
 	return _particle_texture
+
+
+static func _resolve_effect_size(control: Control) -> Vector2:
+	var size := control.get_viewport_rect().size
+	if size.x <= 0.0 or size.y <= 0.0:
+		return Vector2(1920, 1080)
+	return size
 
 
 static func _build_theme() -> Theme:
@@ -400,3 +529,12 @@ static func add_press_feedback(button: Button, scale_amount: float = 0.95) -> vo
 		tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 		tween.tween_property(button, "scale", Vector2.ONE, 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	)
+
+
+static func _tween_focus_state(control: Control, _accent: Color, scale_amount: float, modulate_color: Color) -> void:
+	control.pivot_offset = control.size * 0.5
+	var tween := control.create_tween()
+	tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.set_parallel(true)
+	tween.tween_property(control, "scale", Vector2.ONE * scale_amount, 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(control, "self_modulate", modulate_color, 0.14).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)

@@ -1,0 +1,18 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_basecolor.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_normal.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_roughness.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/textures/dungeon/piata/floor_pbr/Stylized_Stone_Floor_007_ambientOcclusion.png" id="4"]
+
+[resource]
+albedo_texture = ExtResource("1")
+normal_enabled = true
+normal_texture = ExtResource("2")
+roughness_texture = ExtResource("3")
+ao_enabled = true
+ao_light_affect = 1.0
+ao_texture = ExtResource("4")
+uv1_scale = Vector3(8, 10, 1)
+texture_filter = 3
+roughness = 1.0

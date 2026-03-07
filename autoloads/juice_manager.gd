@@ -4,10 +4,11 @@ class_name JuiceManagerSingleton
 extends Node
 
 
-# ── State ────────────────────────────────────────────────────────────
+# -- State ------------------------------------------------------------
 
 var _camera_follow: CameraFollow = null
 var _slowmo_tween: Tween = null
+var _canvas: CanvasLayer = null
 
 ## Overlay nodes (created once, reused).
 var _flash_rect: ColorRect = null
@@ -21,16 +22,16 @@ func _ready() -> void:
 	_connect_events()
 
 
-# ── Overlay Setup ────────────────────────────────────────────────────
+# -- Overlay Setup ----------------------------------------------------
 
 
 func _create_overlays() -> void:
 	# Screen flash overlay
-	var canvas := CanvasLayer.new()
-	canvas.name = "JuiceCanvas"
-	canvas.layer = 100
-	canvas.process_mode = Node.PROCESS_MODE_ALWAYS
-	add_child(canvas)
+	_canvas = CanvasLayer.new()
+	_canvas.name = "JuiceCanvas"
+	_canvas.layer = 100
+	_canvas.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(_canvas)
 
 	_flash_rect = ColorRect.new()
 	_flash_rect.name = "FlashRect"
@@ -38,7 +39,7 @@ func _create_overlays() -> void:
 	_flash_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_flash_rect.color = Color(1, 1, 1, 0)
 	_flash_rect.visible = false
-	canvas.add_child(_flash_rect)
+	_canvas.add_child(_flash_rect)
 
 	# Damage vignette overlay
 	_vignette_rect = ColorRect.new()
@@ -63,25 +64,29 @@ void fragment() {
 	_vignette_shader.shader = shader
 	_vignette_shader.set_shader_parameter("intensity", 0.0)
 	_vignette_rect.material = _vignette_shader
-	canvas.add_child(_vignette_rect)
+	_canvas.add_child(_vignette_rect)
 
 
-# ── Event Connections ────────────────────────────────────────────────
+# -- Event Connections ------------------------------------------------
 
 
 func _connect_events() -> void:
-	EventBus.combat_hit_landed.connect(_on_hit_landed)
-	EventBus.combat_kill.connect(_on_kill)
+	EventBus.combat_hit_event.connect(_on_hit_event)
+	EventBus.combat_kill_event.connect(_on_kill_event)
 	EventBus.player_health_changed.connect(_on_player_health_changed)
 	EventBus.enemy_wave_cleared.connect(_on_wave_cleared)
 
 
-func _on_hit_landed(_attacker: Node, _target: Node, damage: float, hit_position: Vector3, attack_data: AttackDef) -> void:
+func _on_hit_event(event: CombatHitEvent) -> void:
+	var attacker := event.attacker
+	var target := event.target
+	var damage := event.damage
+	var attack_data := event.attack_data
 	var is_heavy := damage >= Constants.HEAVY_ATTACK_DAMAGE
 	var shake_str := Constants.CAMERA_SHAKE_HEAVY if is_heavy else Constants.CAMERA_SHAKE_LIGHT
 	var direction := Vector3.RIGHT
-	if _attacker is Node3D and _target is Node3D:
-		direction = (_target.global_position - _attacker.global_position).normalized()
+	if attacker is Node3D and target is Node3D:
+		direction = (target.global_position - attacker.global_position).normalized()
 	directional_shake(shake_str, Constants.CAMERA_SHAKE_DURATION, direction)
 	if attack_data and (attack_data.attack_name == &"heavy" or attack_data.is_launcher):
 		zoom_punch(3.0, 0.16)
@@ -89,7 +94,7 @@ func _on_hit_landed(_attacker: Node, _target: Node, damage: float, hit_position:
 		screen_flash(Color(1, 1, 1, 0.15), 0.06)
 
 
-func _on_kill(_attacker: Node, _target: Node, kill_position: Vector3) -> void:
+func _on_kill_event(_event: CombatKillEvent) -> void:
 	directional_shake(Constants.CAMERA_SHAKE_KILL, Constants.CAMERA_SHAKE_DURATION * 1.3, Vector3.UP)
 	screen_flash(Color(1, 0.95, 0.8, 0.25), 0.08)
 	slow_motion(0.15, Constants.HITSTOP_KILL_DURATION)
@@ -109,7 +114,7 @@ func _on_player_health_changed(player_index: int, new_hp: float, max_hp: float) 
 		damage_vignette(0.25, 0.3)
 
 
-# ── Public API ───────────────────────────────────────────────────────
+# -- Public API -------------------------------------------------------
 
 
 ## Directional camera shake via CameraFollow's trauma system.
@@ -168,7 +173,7 @@ func zoom_punch(zoom_amount: float, duration: float) -> void:
 	tween.tween_property(_camera_follow, "fov", original_fov, duration * 0.7).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 
 
-# ── Internals ────────────────────────────────────────────────────────
+# -- Internals --------------------------------------------------------
 
 
 func _find_camera_follow() -> void:
@@ -177,3 +182,22 @@ func _find_camera_follow() -> void:
 	var cam := get_viewport().get_camera_3d()
 	if cam is CameraFollow:
 		_camera_follow = cam as CameraFollow
+
+
+func _exit_tree() -> void:
+	if _flash_rect != null and is_instance_valid(_flash_rect):
+		_flash_rect.free()
+	_flash_rect = null
+
+	if _vignette_rect != null and is_instance_valid(_vignette_rect):
+		_vignette_rect.material = null
+		_vignette_rect.free()
+	_vignette_rect = null
+
+	if _vignette_shader != null:
+		_vignette_shader.shader = null
+	_vignette_shader = null
+
+	if _canvas != null and is_instance_valid(_canvas):
+		_canvas.free()
+	_canvas = null

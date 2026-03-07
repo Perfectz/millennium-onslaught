@@ -60,15 +60,14 @@ func change_phase(new_phase: Phase) -> void:
 		return
 	_previous_phase = _current_phase
 	_current_phase = new_phase
-	GameState.current_phase = PHASE_NAMES[new_phase]
-	EventBus.game_phase_changed.emit(
+	RuntimeState.current_phase = PHASE_NAMES[new_phase]
+	EventBus.emit_checked(&"game_phase_changed", [
 		PHASE_NAMES[new_phase],
-		PHASE_NAMES[_previous_phase]
-	)
-	EventBus.log_event(&"game_phase_changed", {
-		"new": PHASE_NAMES[new_phase],
-		"old": PHASE_NAMES[_previous_phase],
-	})
+		PHASE_NAMES[_previous_phase],
+	], {
+		"new_phase": PHASE_NAMES[new_phase],
+		"old_phase": PHASE_NAMES[_previous_phase],
+	}, true)
 
 
 ## Get current phase as enum.
@@ -93,16 +92,14 @@ func toggle_pause() -> void:
 func pause_game() -> void:
 	_is_paused = true
 	get_tree().paused = true
-	EventBus.game_paused.emit()
-	EventBus.log_event(&"game_paused")
+	EventBus.emit_checked(&"game_paused", [], {}, true)
 
 
 ## Resume the game tree.
 func resume_game() -> void:
 	_is_paused = false
 	get_tree().paused = false
-	EventBus.game_resumed.emit()
-	EventBus.log_event(&"game_resumed")
+	EventBus.emit_checked(&"game_resumed", [], {}, true)
 
 
 ## Check if game is currently paused.
@@ -112,9 +109,8 @@ func is_paused() -> bool:
 
 ## Restart the current dungeon run.
 func restart_dungeon() -> void:
-	GameState.reset_dungeon()
-	EventBus.game_restarted.emit()
-	EventBus.log_event(&"game_restarted")
+	RuntimeState.reset_dungeon()
+	EventBus.emit_checked(&"game_restarted", [], {}, true)
 
 
 ## Request a scene transition with fade effect.

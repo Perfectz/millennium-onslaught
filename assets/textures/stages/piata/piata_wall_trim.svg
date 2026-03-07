@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="128" viewBox="0 0 512 128">
+  <defs>
+    <linearGradient id="trim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4b5d70"/>
+      <stop offset="0.5" stop-color="#314456"/>
+      <stop offset="1" stop-color="#1c2936"/>
+    </linearGradient>
+    <pattern id="band" width="128" height="128" patternUnits="userSpaceOnUse">
+      <rect width="128" height="128" fill="url(#trim)"/>
+      <path d="M0 20h128M0 108h128" stroke="#0f161d" stroke-width="4" opacity="0.6"/>
+      <path d="M0 36h128M0 92h128" stroke="#7ad8ff" stroke-width="2" opacity="0.22"/>
+      <path d="M16 64h28L64 44l20 20h28" fill="none" stroke="#d2efff" stroke-width="3" opacity="0.32"/>
+      <circle cx="16" cy="64" r="3" fill="#d2efff" opacity="0.4"/>
+      <circle cx="112" cy="64" r="3" fill="#d2efff" opacity="0.4"/>
+    </pattern>
+  </defs>
+  <rect width="512" height="128" fill="url(#band)"/>
+</svg>
