@@ -246,6 +246,9 @@ func _spawn_damage_number(damage: float, world_pos: Vector3) -> void:
 	var cam := get_viewport().get_camera_3d()
 	if cam == null:
 		return
+	# unproject_position mirrors points behind the camera onto the screen.
+	if not WorldLabelPlacement.is_placeable(cam.global_position, -cam.global_basis.z, world_pos, Constants.DAMAGE_NUMBER_MIN_CAMERA_DEPTH):
+		return
 	var screen_pos := cam.unproject_position(world_pos)
 
 	# Round-robin through the pool.

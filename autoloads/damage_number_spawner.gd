@@ -36,6 +36,8 @@ func _warm_pool() -> void:
 
 ## Spawn a floating damage number at a world position.
 func spawn(world_pos: Vector3, amount: float, is_critical: bool = false) -> void:
+	if not _is_on_screen_depth(world_pos):
+		return
 	if not _pool_warmed:
 		_warm_pool()
 
@@ -78,7 +80,7 @@ func spawn(world_pos: Vector3, amount: float, is_critical: bool = false) -> void
 
 ## Spawn a floating XP label at a world position.
 func spawn_xp(world_pos: Vector3, amount: int) -> void:
-	if amount <= 0:
+	if amount <= 0 or not _is_on_screen_depth(world_pos):
 		return
 	if not _pool_warmed:
 		_warm_pool()
@@ -105,6 +107,14 @@ func spawn_xp(world_pos: Vector3, amount: int) -> void:
 		_label_tweens.erase(label)
 		_release_label(label)
 	)
+
+
+func _is_on_screen_depth(world_pos: Vector3) -> bool:
+	var viewport := get_viewport()
+	var cam := viewport.get_camera_3d() if viewport else null
+	if cam == null:
+		return true
+	return WorldLabelPlacement.is_placeable(cam.global_position, -cam.global_basis.z, world_pos, Constants.DAMAGE_NUMBER_MIN_CAMERA_DEPTH)
 
 
 func _on_hit_event(event: CombatHitEvent) -> void:

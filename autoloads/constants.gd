@@ -512,6 +512,8 @@ const HORDE_LAUNCH_GRAVITY: float = 22.0
 const HORDE_KNOCKBACK_DECAY: float = 7.5
 const HORDE_CORPSE_TIME: float = 0.9
 const HORDE_FLASH_TIME: float = 0.08
+## Damage numbers closer than this to the camera plane are skipped (fixed-size labels explode near it).
+const DAMAGE_NUMBER_MIN_CAMERA_DEPTH: float = 2.5
 const HORDE_SPAWN_INTERVAL: float = 0.35
 ## Tally / rewards.
 const BATTLE_XP_PER_KO: int = 2
