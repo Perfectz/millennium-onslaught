@@ -1,6 +1,7 @@
-[gd_resource type="Resource" load_steps=9 format=3]
+[gd_resource type="Resource" script_class="CharacterDef" format=3]
 
 [ext_resource type="Script" path="res://resources/characters/character_def.gd" id="1"]
+[ext_resource type="Script" path="res://resources/attacks/attack_def.gd" id="1_hnafh"]
 [ext_resource type="Resource" path="res://resources/attacks/light_attack_1.tres" id="2"]
 [ext_resource type="Resource" path="res://resources/attacks/light_attack_2.tres" id="3"]
 [ext_resource type="Resource" path="res://resources/attacks/light_attack_3.tres" id="4"]
@@ -8,23 +9,64 @@
 [ext_resource type="Resource" path="res://resources/attacks/launcher_attack.tres" id="6"]
 [ext_resource type="Resource" path="res://resources/techniques/nafoi.tres" id="7"]
 [ext_resource type="Resource" path="res://resources/techniques/medice.tres" id="8"]
+[ext_resource type="Script" path="res://resources/techniques/technique_def.gd" id="8_hb3fb"]
+[ext_resource type="Resource" path="res://resources/techniques/res.tres" id="9_vfo4l"]
+[ext_resource type="Resource" path="res://resources/techniques/foi.tres" id="10_3iqjg"]
+[ext_resource type="Resource" path="res://resources/techniques/gires.tres" id="11_nmj2h"]
+[ext_resource type="Resource" path="res://resources/techniques/gifoi.tres" id="12_5pxyd"]
+[ext_resource type="Resource" path="res://resources/techniques/gra.tres" id="13_6mcbp"]
+[ext_resource type="Resource" path="res://resources/techniques/flaeli.tres" id="15_k63uu"]
+[ext_resource type="Resource" path="res://resources/techniques/hewn.tres" id="16_82y4b"]
+[ext_resource type="Resource" path="res://resources/techniques/gigra.tres" id="17_01nkr"]
+[ext_resource type="Resource" path="res://resources/techniques/nares.tres" id="19_lv3kr"]
+[ext_resource type="Resource" path="res://resources/techniques/tandle.tres" id="20_xsrju"]
+[ext_resource type="Resource" path="res://resources/techniques/nagra.tres" id="21_g80uu"]
 
 [resource]
 script = ExtResource("1")
 character_id = &"kyra"
 display_name = "Kyra Tierney"
 role = "Esper"
-base_stats = {"strength": 3, "magic": 8, "defense": 4, "agility": 7}
-combo_chain = [ExtResource("2"), ExtResource("3"), ExtResource("4")]
+base_stats = {
+"agility": 7,
+"defense": 4,
+"magic": 8,
+"strength": 3
+}
+combo_chain = Array[ExtResource("1_hnafh")]([ExtResource("2"), ExtResource("3"), ExtResource("4")])
 heavy_attack = ExtResource("5")
 launcher_attack = ExtResource("6")
-techniques = [ExtResource("7"), ExtResource("8")]
+techniques = Array[ExtResource("8_hb3fb")]([ExtResource("9_vfo4l"), ExtResource("10_3iqjg"), ExtResource("11_nmj2h"), ExtResource("12_5pxyd"), ExtResource("13_6mcbp"), ExtResource("8"), ExtResource("15_k63uu"), ExtResource("16_82y4b"), ExtResource("17_01nkr"), ExtResource("7"), ExtResource("19_lv3kr"), ExtResource("20_xsrju"), ExtResource("21_g80uu")])
+learnset = {
+&"flaeli": 1,
+&"foi": 1,
+&"gifoi": 1,
+&"gigra": 30,
+&"gires": 1,
+&"gra": 1,
+&"hewn": 1,
+&"medice": 1,
+&"nafoi": 33,
+&"nagra": 40,
+&"nares": 36,
+&"res": 1,
+&"tandle": 39
+}
 skill_tree_id = &"kyra_tree"
 model_base_path = "res://assets/models/characters/alys/idle.fbx"
 model_skin_path = "res://assets/models/characters/alys/alys_texture_0.png"
-model_scale = Vector3(1, 1, 1)
-model_offset = Vector3(0, 0, 0)
-model_rotation_y = 90.0
-model_animations = {"idle": "res://assets/models/characters/alys/idle.fbx", "run": "res://assets/models/characters/alys/run.fbx", "jump": "res://assets/models/characters/alys/jump.fbx", "attack_light_1": "res://assets/models/characters/alys/attack_light_1.fbx", "attack_light_2": "res://assets/models/characters/alys/attack_light_2.fbx", "attack_light_3": "res://assets/models/characters/alys/attack_light_3.fbx", "attack_heavy": "res://assets/models/characters/alys/attack_heavy.fbx", "attack_launcher": "res://assets/models/characters/alys/attack_light_3.fbx", "hurt": "res://assets/models/characters/alys/hurt.fbx", "dead": "res://assets/models/characters/alys/dead.fbx", "dodge": "res://assets/models/characters/alys/dodge.fbx"}
+model_animations = {
+"attack_heavy": "res://assets/models/characters/alys/attack_heavy.fbx",
+"attack_launcher": "res://assets/models/characters/alys/attack_light_3.fbx",
+"attack_light_1": "res://assets/models/characters/alys/attack_light_1.fbx",
+"attack_light_2": "res://assets/models/characters/alys/attack_light_2.fbx",
+"attack_light_3": "res://assets/models/characters/alys/attack_light_3.fbx",
+"dead": "res://assets/models/characters/alys/dead.fbx",
+"dodge": "res://assets/models/characters/alys/dodge.fbx",
+"hurt": "res://assets/models/characters/alys/hurt.fbx",
+"idle": "res://assets/models/characters/alys/idle.fbx",
+"jump": "res://assets/models/characters/alys/jump.fbx",
+"run": "res://assets/models/characters/alys/run.fbx"
+}
 attack_speed_scale = 1.1
 tint_color = Color(0.4, 0.6, 1, 1)

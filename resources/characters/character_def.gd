@@ -33,6 +33,11 @@ extends Resource
 ## Learnable techniques.
 @export var techniques: Array[TechniqueDef] = []
 
+## Level at which this character learns each technique/skill (technique_id -> level).
+## Overrides TechniqueDef.unlock_level, because PSIV characters learn the same technique at
+## different levels (e.g. Zan: Alys 8, Hahn 9, Chaz 12). Missing entries use unlock_level.
+@export var learnset: Dictionary = {}
+
 ## Skill tree resource path.
 @export var skill_tree_id: StringName = &""
 

@@ -115,7 +115,7 @@ func _ready() -> void:
 	_reinforce_timer = _def.reinforcement_interval * 0.5
 	EventBus.audio_music_requested.emit(_def.music_track, true)
 	EventBus.battlefield_started.emit(_def.battlefield_id)
-	_set_objective("Break the hive garrisons and capture every hive")
+	_set_objective("Break the nest garrisons and capture every Bio-monster nest")
 	_fade_in()
 
 
@@ -387,7 +387,7 @@ func _on_base_captured(base_id: StringName) -> void:
 	EventBus.battlefield_base_captured.emit(base_id, base_def.display_name)
 	var left := _control.get_enemy_base_count()
 	if left > 0:
-		_set_objective("Capture the remaining hives (%d left)" % left)
+		_set_objective("Capture the remaining nests (%d left)" % left)
 
 
 func _begin_commander_phase() -> void:

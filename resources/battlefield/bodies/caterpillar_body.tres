@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="HordeUnitDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/battlefield/horde_unit_def.gd" id="1_57bjx"]
+
+[resource]
+script = ExtResource("1_57bjx")
+unit_id = &"caterpillar"
+body_style = &"grub"
+body_color = Color(0.3, 0.45, 0.85, 1)
+accent_color = Color(0.95, 0.8, 0.3, 1)

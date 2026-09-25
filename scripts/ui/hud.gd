@@ -63,8 +63,6 @@ var _stage_map_floor_labels: Array[Label] = []
 var _stage_map_last_signature: String = ""
 
 ## Damage number pool — pre-allocated labels for zero-alloc spawning.
-var _damage_pool: Array[Label] = []
-var _damage_pool_index: int = 0
 
 
 func _ready() -> void:
@@ -98,7 +96,6 @@ func _ready() -> void:
 	gold_label.text = str(GameState.gold)
 	call_deferred("_refresh_bar_widths")
 	_update_pilot_label()
-	_init_damage_pool()
 	_create_rpg_hud()
 	_create_stage_map_panel()
 	_refresh_stage_map_if_needed(true)
@@ -169,8 +166,8 @@ func _on_hit_event(event: CombatHitEvent) -> void:
 	# Flash the combo label brighter on milestone hits.
 	if _combo_count % 5 == 0:
 		UIStyleRef.flash_label(combo_label, Color(1.0, 0.95, 0.5), 0.4)
-	# Spawn floating damage number.
-	_spawn_damage_number(event.damage, event.hit_position)
+	# Floating damage numbers come from DamageNumberSpawner (pooled Label3Ds); the HUD no
+	# longer draws a second 2D copy of every number.
 
 
 func _on_combo_step(_player: Node, _step: int) -> void:
@@ -225,48 +222,6 @@ func _update_tp_bar_visual() -> void:
 	elif _tp_ratio < 1.0 and _tp_full_glow_active:
 		_tp_full_glow_active = false
 		tp_bar_fill.self_modulate = Color.WHITE
-
-
-func _init_damage_pool() -> void:
-	for i in Constants.DAMAGE_NUMBER_POOL_SIZE:
-		var label := Label.new()
-		label.size = Vector2(72, 40)
-		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		label.add_theme_font_size_override("font_size", 28)
-		label.add_theme_color_override("font_color", Color(1.0, 0.95, 0.65))
-		label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
-		label.add_theme_constant_override("outline_size", 4)
-		label.visible = false
-		add_child(label)
-		_damage_pool.append(label)
-
-
-func _spawn_damage_number(damage: float, world_pos: Vector3) -> void:
-	var cam := get_viewport().get_camera_3d()
-	if cam == null:
-		return
-	# unproject_position mirrors points behind the camera onto the screen.
-	if not WorldLabelPlacement.is_placeable(cam.global_position, -cam.global_basis.z, world_pos, Constants.DAMAGE_NUMBER_MIN_CAMERA_DEPTH):
-		return
-	var screen_pos := cam.unproject_position(world_pos)
-
-	# Round-robin through the pool.
-	var label := _damage_pool[_damage_pool_index]
-	_damage_pool_index = (_damage_pool_index + 1) % _damage_pool.size()
-
-	label.text = str(int(damage))
-	label.position = screen_pos - (label.size * 0.5)
-	label.modulate.a = 1.0
-	label.scale = Vector2.ONE
-	label.visible = true
-
-	var tween := create_tween()
-	tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-	tween.tween_property(label, "position:y", label.position.y - Constants.HUD_DAMAGE_NUMBER_RISE_SPEED, Constants.HUD_DAMAGE_NUMBER_LIFETIME)
-	tween.parallel().tween_property(label, "modulate:a", 0.0, Constants.HUD_DAMAGE_NUMBER_LIFETIME)
-	tween.parallel().tween_property(label, "scale", Vector2(1.15, 1.15), Constants.HUD_DAMAGE_NUMBER_LIFETIME * 0.4)
-	tween.tween_callback(func() -> void: label.visible = false)
 
 
 ## Update debug state info (called from arena).

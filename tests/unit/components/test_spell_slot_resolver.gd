@@ -50,3 +50,23 @@ func test_newly_learned_between_levels() -> void:
 	var fresh := SpellSlotResolver.newly_learned(_kit(), 2, 12)
 	var ids := fresh.map(func(t: TechniqueDef) -> StringName: return t.technique_id)
 	assert_array(ids).contains_exactly_in_any_order([&"res", &"gifoi"])
+
+
+func test_per_character_learn_levels_override_defaults() -> void:
+	# Same technique, learned at different levels by different characters (Zan: Alys 8, Chaz 12).
+	var kit: Array[TechniqueDef] = [_tech(&"zan", TechniqueDef.SpellType.AOE_BURST, 1, 16.0)]
+	assert_object(SpellSlotResolver.best(kit, 10, SpellSlotResolver.Slot.AREA, {&"zan": 12})).is_null()
+	assert_object(SpellSlotResolver.best(kit, 10, SpellSlotResolver.Slot.AREA, {&"zan": 8})).is_not_null()
+
+
+func test_skills_never_fill_spell_slots() -> void:
+	var skill := _tech(&"crosscut", TechniqueDef.SpellType.PROJECTILE, 1, 80.0)
+	skill.is_skill = true
+	var kit: Array[TechniqueDef] = [skill, _tech(&"foi", TechniqueDef.SpellType.PROJECTILE, 1, 20.0)]
+	assert_str(String(SpellSlotResolver.best(kit, 1, SpellSlotResolver.Slot.SINGLE).technique_id)).is_equal("foi")
+
+
+func test_newly_learned_respects_overrides() -> void:
+	var kit: Array[TechniqueDef] = [_tech(&"gifoi", TechniqueDef.SpellType.PROJECTILE, 30, 45.0)]
+	var fresh := SpellSlotResolver.newly_learned(kit, 13, 14, {&"gifoi": 14})
+	assert_int(fresh.size()).is_equal(1)

@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="HordeUnitDef" format=3]
+
+[ext_resource type="Resource" path="res://resources/battlefield/attacks/grunt_sting.tres" id="1_gwcnp"]
+[ext_resource type="Script" path="res://scripts/battlefield/horde_unit_def.gd" id="2_67u7j"]
+
+[resource]
+script = ExtResource("2_67u7j")
+unit_id = &"xanafalgue"
+display_name = "Xanafalgue"
+max_hp = 8.0
+move_speed = 3.6
+attack = ExtResource("1_gwcnp")
+weakness = &"fire"
+body_style = &"tentacle"
+body_color = Color(0.62, 0.32, 0.28, 1)
+accent_color = Color(0.4, 0.6, 0.95, 1)
+body_scale = 0.85
+radius = 0.45
+drop_table = Array[Dictionary]([{
+"chance": 0.05,
+"item_id": &"monomate"
+}, {
+"chance": 0.01,
+"item_id": &"antidote"
+}])

@@ -58,6 +58,7 @@ func _ready() -> void:
 		_block_hits_remaining = Constants.ENEMY_SHIELD_STAGGER_HITS if enemy_def.can_block else 0
 		# Apply mesh color from definition.
 		_apply_mesh_color(enemy_def.mesh_color)
+		_apply_procedural_body(enemy_def)
 
 	health = HealthComponent.new(hp)
 	juggle = JuggleTracker.new(Constants.MAX_JUGGLE_COUNT)
@@ -374,7 +375,31 @@ func _update_health_bar() -> void:
 	(_health_bar_fill.material_override as StandardMaterial3D).albedo_color = fill_color
 
 
+## Swap the skinned model for a procedural PSIV-family body when the def asks for one.
+func _apply_procedural_body(def: EnemyDef) -> void:
+	if def == null or def.procedural_body == null:
+		return
+	var skinned := model_pivot.get_node_or_null("EnemyModel") as Node3D
+	if skinned:
+		skinned.visible = false
+	enemy_model = null  # flash/restore/animation fall back to the "Mesh" child.
+	var mesh := model_pivot.get_node_or_null("Mesh") as MeshInstance3D
+	if mesh == null:
+		mesh = MeshInstance3D.new()
+		mesh.name = "Mesh"
+		model_pivot.add_child(mesh)
+	mesh.mesh = HordeMeshFactory.get_mesh(def.procedural_body)
+	mesh.scale = Vector3.ONE * def.procedural_body_scale
+	# Model pivot sits at body centre; procedural bodies are built feet-at-origin.
+	mesh.position = Vector3(0.0, -model_pivot.position.y, 0.0)
+	mesh.set_surface_override_material(0, null)
+	_original_material = null
+
+
 func _apply_mesh_color(color: Color) -> void:
+	# Procedural bodies carry their own vertex colours.
+	if enemy_def and enemy_def.procedural_body != null:
+		return
 	# Try the enemy model first, then fall back to a static Mesh child.
 	if enemy_model and enemy_model.has_method("set_base_color"):
 		enemy_model.set_base_color(color)
@@ -410,6 +435,7 @@ func configure(def: EnemyDef, player_target: Node3D, start_dormant: bool = false
 	boss_attack_override = null
 	status_effects.clear_all()
 	_apply_mesh_color(def.mesh_color)
+	_apply_procedural_body(def)
 	collision_layer = Constants.LAYER_ENEMY
 	collision_mask = Constants.LAYER_ENVIRONMENT | Constants.LAYER_PLAYER | Constants.LAYER_ENEMY | Constants.LAYER_PLATFORM
 	state_machine.set_initial_state(&"dormant" if start_dormant else &"idle")

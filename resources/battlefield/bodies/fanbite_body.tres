@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="HordeUnitDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/battlefield/horde_unit_def.gd" id="1_xxgi8"]
+
+[resource]
+script = ExtResource("1_xxgi8")
+unit_id = &"fanbite"
+body_style = &"brute"
+body_color = Color(0.5, 0.35, 0.55, 1)
+accent_color = Color(1, 0.4, 0.2, 1)

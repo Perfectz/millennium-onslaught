@@ -1,20 +1,23 @@
-[gd_resource type="Resource" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="HordeUnitDef" format=3]
 
-[ext_resource type="Script" path="res://scripts/battlefield/horde_unit_def.gd" id="1"]
-[ext_resource type="Resource" path="res://resources/battlefield/attacks/grunt_bite.tres" id="2"]
+[ext_resource type="Resource" path="res://resources/battlefield/attacks/grunt_bite.tres" id="1_qj8ya"]
+[ext_resource type="Script" path="res://scripts/battlefield/horde_unit_def.gd" id="2_ugb1t"]
 
 [resource]
-script = ExtResource("1")
-unit_id = &"crawler"
-display_name = "Bio Crawler"
-max_hp = 26.0
-move_speed = 4.0
-attack = ExtResource("2")
-knockback_resistance = 0.0
+script = ExtResource("2_ugb1t")
+max_hp = 15.0
+move_speed = 3.6
+attack = ExtResource("1_qj8ya")
 weakness = &"fire"
-resistance = &""
-body_style = &"blob"
-body_color = Color(0.46, 0.72, 0.28, 1)
-accent_color = Color(0.95, 0.8, 0.25, 1)
-body_scale = 1.0
-radius = 0.5
+body_style = &"grub"
+body_color = Color(0.78, 0.26, 0.2, 1)
+accent_color = Color(0.95, 0.85, 0.3, 1)
+body_scale = 0.9
+radius = 0.45
+drop_table = Array[Dictionary]([{
+"chance": 0.05,
+"item_id": &"monomate"
+}, {
+"chance": 0.01,
+"item_id": &"antidote"
+}])

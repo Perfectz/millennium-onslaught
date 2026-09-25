@@ -1,65 +1,69 @@
 [gd_resource type="Resource" script_class="BattlefieldDef" format=3]
 
-[ext_resource type="Script" path="res://scripts/battlefield/battlefield_base_def.gd" id="1_r2vvc"]
-[ext_resource type="Script" path="res://scripts/battlefield/horde_unit_def.gd" id="2_6evx0"]
-[ext_resource type="Resource" path="res://resources/battlefield/units/crawler.tres" id="3_r7vl4"]
-[ext_resource type="Resource" path="res://resources/battlefield/units/locust.tres" id="4_lobto"]
-[ext_resource type="Resource" path="res://resources/battlefield/officers/officer_brute.tres" id="5_qksns"]
-[ext_resource type="Resource" path="res://resources/battlefield/officers/officer_guard.tres" id="6_yuokf"]
-[ext_resource type="Resource" path="res://resources/battlefield/units/ogre.tres" id="7_1o0oc"]
-[ext_resource type="Resource" path="res://resources/battlefield/officers/commander_warden.tres" id="8_f7btj"]
-[ext_resource type="Script" path="res://scripts/battlefield/battlefield_def.gd" id="9_gjf6l"]
+[ext_resource type="Script" path="res://scripts/battlefield/battlefield_base_def.gd" id="1_qksns"]
+[ext_resource type="Script" path="res://scripts/battlefield/horde_unit_def.gd" id="2_yuokf"]
+[ext_resource type="Resource" path="res://resources/battlefield/units/locusta.tres" id="3_1o0oc"]
+[ext_resource type="Resource" path="res://resources/battlefield/units/crawler.tres" id="4_f7btj"]
+[ext_resource type="Resource" path="res://resources/battlefield/units/mini_worm.tres" id="5_gjf6l"]
+[ext_resource type="Resource" path="res://resources/battlefield/officers/speard.tres" id="6_meirl"]
+[ext_resource type="Resource" path="res://resources/battlefield/units/sand_newt.tres" id="7_l22to"]
+[ext_resource type="Resource" path="res://resources/battlefield/units/monster_fly.tres" id="8_y4vl2"]
+[ext_resource type="Resource" path="res://resources/battlefield/officers/caterpillar.tres" id="9_1wt3q"]
+[ext_resource type="Resource" path="res://resources/battlefield/units/infant_worm.tres" id="10_8tvef"]
+[ext_resource type="Resource" path="res://resources/battlefield/officers/fanbite.tres" id="11_svqv3"]
+[ext_resource type="Resource" path="res://resources/battlefield/officers/scorpirus.tres" id="12_8blap"]
+[ext_resource type="Script" path="res://scripts/battlefield/battlefield_def.gd" id="13_4d1q2"]
 
-[sub_resource type="Resource" id="Resource_meirl"]
-script = ExtResource("1_r2vvc")
+[sub_resource type="Resource" id="Resource_pwu4q"]
+script = ExtResource("1_qksns")
 base_id = &"hunter_camp"
 display_name = "Hunter Camp"
 position = Vector2(0, 50)
 side = 1
 garrison = 0
 
-[sub_resource type="Resource" id="Resource_l22to"]
-script = ExtResource("1_r2vvc")
-base_id = &"west_hive"
-display_name = "West Hive"
+[sub_resource type="Resource" id="Resource_1kecw"]
+script = ExtResource("1_qksns")
+base_id = &"west_nest"
+display_name = "Western Nest"
 position = Vector2(-36, 12)
 garrison = 22
-garrison_units = Array[ExtResource("2_6evx0")]([ExtResource("3_r7vl4"), ExtResource("3_r7vl4"), ExtResource("4_lobto")])
-officer_def = ExtResource("5_qksns")
-officer_name = "Hive Brute Gorran"
+garrison_units = Array[ExtResource("2_yuokf")]([ExtResource("3_1o0oc"), ExtResource("4_f7btj"), ExtResource("5_gjf6l")])
+officer_def = ExtResource("6_meirl")
+officer_name = "Speard"
 
-[sub_resource type="Resource" id="Resource_y4vl2"]
-script = ExtResource("1_r2vvc")
-base_id = &"east_hive"
-display_name = "East Hive"
+[sub_resource type="Resource" id="Resource_cql1r"]
+script = ExtResource("1_qksns")
+base_id = &"east_nest"
+display_name = "Eastern Nest"
 position = Vector2(36, 6)
 garrison = 22
-garrison_units = Array[ExtResource("2_6evx0")]([ExtResource("4_lobto"), ExtResource("4_lobto"), ExtResource("3_r7vl4")])
-officer_def = ExtResource("6_yuokf")
-officer_name = "Carapace Guard Vessk"
+garrison_units = Array[ExtResource("2_yuokf")]([ExtResource("7_l22to"), ExtResource("8_y4vl2"), ExtResource("3_1o0oc")])
+officer_def = ExtResource("9_1wt3q")
+officer_name = "Caterpillar"
 
-[sub_resource type="Resource" id="Resource_1wt3q"]
-script = ExtResource("1_r2vvc")
-base_id = &"north_outpost"
-display_name = "North Outpost"
+[sub_resource type="Resource" id="Resource_ppu25"]
+script = ExtResource("1_qksns")
+base_id = &"north_nest"
+display_name = "Northern Nest"
 position = Vector2(-8, -24)
 garrison = 28
-garrison_units = Array[ExtResource("2_6evx0")]([ExtResource("3_r7vl4"), ExtResource("4_lobto"), ExtResource("7_1o0oc")])
-officer_def = ExtResource("5_qksns")
-officer_name = "Hive Brute Morth"
+garrison_units = Array[ExtResource("2_yuokf")]([ExtResource("10_8tvef"), ExtResource("3_1o0oc"), ExtResource("7_l22to"), ExtResource("4_f7btj")])
+officer_def = ExtResource("11_svqv3")
+officer_name = "Fanbite"
 
 [resource]
-script = ExtResource("9_gjf6l")
+script = ExtResource("13_4d1q2")
 battlefield_id = &"piata_plains"
-display_name = "Battle of the Piata Plains"
-subtitle = "Bio-monster hives have broken out across the fields south of the Academy."
+display_name = "Battle of the Motavian Plains"
+subtitle = "Bio-monsters are breeding out of control on the road between Piata and Mile. Clear the nests."
 arena_size = Vector2(120, 120)
 player_spawn = Vector2(0, 46)
-bases = Array[ExtResource("1_r2vvc")]([SubResource("Resource_meirl"), SubResource("Resource_l22to"), SubResource("Resource_y4vl2"), SubResource("Resource_1wt3q")])
-commander_def = ExtResource("8_f7btj")
-commander_name = "Hive Warden"
+bases = Array[ExtResource("1_qksns")]([SubResource("Resource_pwu4q"), SubResource("Resource_1kecw"), SubResource("Resource_cql1r"), SubResource("Resource_ppu25")])
+commander_def = ExtResource("12_8blap")
+commander_name = "Scorpirus"
 commander_spawn = Vector2(0, -44)
 commander_escort = 12
-commander_escort_unit = ExtResource("7_1o0oc")
-reinforcement_units = Array[ExtResource("2_6evx0")]([ExtResource("3_r7vl4"), ExtResource("3_r7vl4"), ExtResource("4_lobto")])
-victory_flag = &"piata_plains_cleared"
+commander_escort_unit = ExtResource("3_1o0oc")
+reinforcement_units = Array[ExtResource("2_yuokf")]([ExtResource("3_1o0oc"), ExtResource("4_f7btj"), ExtResource("5_gjf6l"), ExtResource("8_y4vl2"), ExtResource("7_l22to")])
+victory_flag = &"motavian_plains_cleared"

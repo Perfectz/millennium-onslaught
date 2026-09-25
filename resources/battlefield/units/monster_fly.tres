@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="HordeUnitDef" format=3]
+
+[ext_resource type="Resource" path="res://resources/battlefield/attacks/grunt_sting.tres" id="1_0pdwa"]
+[ext_resource type="Script" path="res://scripts/battlefield/horde_unit_def.gd" id="2_nnlft"]
+
+[resource]
+script = ExtResource("2_nnlft")
+unit_id = &"monster_fly"
+display_name = "Monster Fly"
+max_hp = 10.0
+move_speed = 5.6
+attack = ExtResource("1_0pdwa")
+weakness = &"lightning"
+body_style = &"fly"
+body_color = Color(0.45, 0.7, 0.2, 1)
+accent_color = Color(0.9, 0.2, 0.2, 1)
+body_scale = 0.9
+radius = 0.4
+drop_table = Array[Dictionary]([{
+"chance": 0.05,
+"item_id": &"monomate"
+}, {
+"chance": 0.01,
+"item_id": &"antidote"
+}])

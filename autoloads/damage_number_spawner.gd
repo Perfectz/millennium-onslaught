@@ -198,7 +198,7 @@ func _create_damage_number_scene() -> PackedScene:
 	label.name = "DamageNumber"
 	label.text = "0"
 	label.font_size = 48
-	label.pixel_size = 0.01
+	label.pixel_size = Constants.DAMAGE_NUMBER_PIXEL_SIZE
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.no_depth_test = true
 	label.fixed_size = true

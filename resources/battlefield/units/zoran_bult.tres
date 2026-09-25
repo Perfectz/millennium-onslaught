@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="HordeUnitDef" format=3]
+
+[ext_resource type="Resource" path="res://resources/battlefield/attacks/grunt_bite.tres" id="1_kh6rv"]
+[ext_resource type="Script" path="res://scripts/battlefield/horde_unit_def.gd" id="2_laetp"]
+
+[resource]
+script = ExtResource("2_laetp")
+unit_id = &"zoran_bult"
+display_name = "Zoran Bult"
+max_hp = 12.5
+move_speed = 3.4
+attack = ExtResource("1_kh6rv")
+weakness = &"fire"
+body_style = &"brain_twin"
+body_color = Color(0.58, 0.3, 0.3, 1)
+accent_color = Color(0.5, 0.7, 1, 1)
+body_scale = 0.95
+radius = 0.45
+drop_table = Array[Dictionary]([{
+"chance": 0.05,
+"item_id": &"monomate"
+}, {
+"chance": 0.01,
+"item_id": &"antidote"
+}])

@@ -54,6 +54,12 @@ static func get_mesh(def: HordeUnitDef) -> ArrayMesh:
 			_build_bird(st, def)
 		&"soldier":
 			_build_soldier(st, def)
+		&"scorpion":
+			_build_scorpion(st, def)
+		&"eye_worm":
+			_build_eye_worm(st, def)
+		&"brain_twin":
+			_build_brain_twin(st, def)
 		_:
 			_build_blob(st, def)
 	var mesh := st.commit()
@@ -302,6 +308,49 @@ static func _build_soldier(st: SurfaceTool, def: HordeUnitDef) -> void:
 	# Spear held forward.
 	_box(st, Vector3(0.45, 1.0, 0.3) * s, Vector3(1.4, 0.04, 0.04) * s, Color(0.7, 0.7, 0.75), Basis(Vector3.BACK, 0.12))
 	_cone(st, Vector3(1.15, 1.08, 0.3) * s, 0.06 * s, 0.25 * s, def.accent_color.lightened(0.3), 4, Basis(Vector3.BACK, -PI * 0.5))
+
+
+## Scorpirus / Rajago / Biter Fly: a domed scorpion with a raised, segmented stinger tail.
+static func _build_scorpion(st: SurfaceTool, def: HordeUnitDef) -> void:
+	var s := def.body_scale
+	var c := def.body_color
+	_ellipsoid(st, Vector3(0, 0.45, 0) * s, Vector3(0.55, 0.38, 0.6) * s, c, 5, 10)
+	_ellipsoid(st, Vector3(0.42, 0.42, 0) * s, Vector3(0.2, 0.18, 0.25) * s, c.lightened(0.1), 4, 7)
+	for side in [-1.0, 1.0]:
+		_ellipsoid(st, Vector3(0.58, 0.52, 0.1 * side) * s, Vector3(0.05, 0.05, 0.05) * s, def.accent_color, 3, 5)
+		_ellipsoid(st, Vector3(0.75, 0.35, 0.45 * side) * s, Vector3(0.22, 0.12, 0.12) * s, c.darkened(0.15), 3, 6)
+		for i in 4:
+			_box(st, Vector3(0.3 - i * 0.22, 0.22, 0.55 * side) * s, Vector3(0.06, 0.06, 0.45) * s, c.darkened(0.3), Basis(Vector3.RIGHT, 0.6 * side))
+	# Tail arcs up and forward over the back.
+	for i in 5:
+		var t := float(i) / 4.0
+		var pos := Vector3(-0.45 + 0.25 * t, 0.6 + t * 0.85, 0) * s
+		_ellipsoid(st, pos, Vector3(0.11, 0.11, 0.11) * s * (1.0 - t * 0.3), c if i % 2 == 0 else c.darkened(0.2), 3, 6)
+	_cone(st, Vector3(-0.15, 1.45, 0) * s, 0.07 * s, 0.25 * s, def.accent_color, 5, Basis(Vector3.BACK, -2.2))
+
+
+## Mini Worm / Infant Worm / Snow Worm: an upright worm with a glowing eye in its maw.
+static func _build_eye_worm(st: SurfaceTool, def: HordeUnitDef) -> void:
+	var s := def.body_scale
+	var c := def.body_color
+	for i in 4:
+		var t := float(i) / 3.0
+		_ellipsoid(st, Vector3(0.05 * t, 0.18 + t * 0.62, 0) * s, Vector3(0.24, 0.16, 0.24) * s, c if i % 2 == 0 else c.darkened(0.15), 4, 8)
+	_ellipsoid(st, Vector3(0.08, 1.05, 0) * s, Vector3(0.27, 0.22, 0.27) * s, c.lightened(0.1), 4, 8)
+	_ellipsoid(st, Vector3(0.25, 1.05, 0) * s, Vector3(0.12, 0.13, 0.13) * s, EYE_WHITE, 4, 6)
+	_ellipsoid(st, Vector3(0.33, 1.05, 0) * s, Vector3(0.06, 0.08, 0.08) * s, def.accent_color, 3, 5)
+
+
+## Zoran Bult: two bulbous brain-lobes on spindly legs.
+static func _build_brain_twin(st: SurfaceTool, def: HordeUnitDef) -> void:
+	var s := def.body_scale
+	var c := def.body_color
+	for side in [-1.0, 1.0]:
+		_ellipsoid(st, Vector3(0.05, 0.95, 0.22 * side) * s, Vector3(0.26, 0.24, 0.24) * s, c, 5, 8)
+		_box(st, Vector3(0.05, 0.9, 0.22 * side) * s, Vector3(0.5, 0.03, 0.03) * s, c.darkened(0.35), Basis(Vector3.RIGHT, 0.3))
+		_box(st, Vector3(0.0, 0.35, 0.15 * side) * s, Vector3(0.05, 0.7, 0.05) * s, c.darkened(0.3), Basis(Vector3.RIGHT, 0.4 * side))
+		_box(st, Vector3(0.2, 0.55, 0.3 * side) * s, Vector3(0.04, 0.4, 0.04) * s, def.accent_color, Basis(Vector3.BACK, 0.6))
+	_ellipsoid(st, Vector3(0.0, 0.72, 0) * s, Vector3(0.12, 0.1, 0.12) * s, c.darkened(0.2), 3, 6)
 
 
 ## Flat-shaded cone standing on `base` (optionally rotated by `basis` about its base).

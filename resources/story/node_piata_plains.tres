@@ -5,10 +5,10 @@
 [resource]
 script = ExtResource("1")
 node_id = &"piata_plains"
-display_name = "Piata Plains"
+display_name = "Motavian Plains"
 node_type = &"battlefield"
 scene_path = "res://scenes/battlefield/battlefield_run.tscn"
 connections = [&"piata", &"dungeon_1"]
 requires_flag = &""
 map_position = Vector2(0.42, 0.45)
-description = "Open plains south of Piata where Bio-monster hives have erupted. A full-scale battle."
+description = "The plains between Piata and Mile, overrun by breeding Bio-monsters. A full-scale battle."

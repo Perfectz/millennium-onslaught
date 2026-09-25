@@ -160,7 +160,7 @@ func _build_ko_counter(root: Control) -> void:
 	morale_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_child(morale_row)
 	var enemy_tag := Label.new()
-	enemy_tag.text = "HIVES"
+	enemy_tag.text = "BIO-MONSTERS"
 	enemy_tag.add_theme_font_size_override("font_size", 12)
 	enemy_tag.add_theme_color_override("font_color", BattlefieldBaseMarker.ENEMY_COLOR.lightened(0.3))
 	morale_row.add_child(enemy_tag)

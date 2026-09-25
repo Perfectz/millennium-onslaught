@@ -1,29 +1,63 @@
-[gd_resource type="Resource" load_steps=8 format=3]
+[gd_resource type="Resource" script_class="CharacterDef" format=3]
 
 [ext_resource type="Script" path="res://resources/characters/character_def.gd" id="1"]
+[ext_resource type="Script" path="res://resources/attacks/attack_def.gd" id="1_syb6m"]
 [ext_resource type="Resource" path="res://resources/attacks/light_attack_1.tres" id="2"]
 [ext_resource type="Resource" path="res://resources/attacks/light_attack_2.tres" id="3"]
 [ext_resource type="Resource" path="res://resources/attacks/light_attack_3.tres" id="4"]
 [ext_resource type="Resource" path="res://resources/attacks/heavy_attack.tres" id="5"]
 [ext_resource type="Resource" path="res://resources/attacks/launcher_attack.tres" id="6"]
 [ext_resource type="Resource" path="res://resources/techniques/vortex.tres" id="7"]
+[ext_resource type="Script" path="res://resources/techniques/technique_def.gd" id="8_vf2l0"]
+[ext_resource type="Resource" path="res://resources/techniques/foi.tres" id="9_3ouay"]
+[ext_resource type="Resource" path="res://resources/techniques/shift.tres" id="10_deuw2"]
+[ext_resource type="Resource" path="res://resources/techniques/saner.tres" id="11_fu6yy"]
+[ext_resource type="Resource" path="res://resources/techniques/zan.tres" id="13_fm8ej"]
+[ext_resource type="Resource" path="res://resources/techniques/gifoi.tres" id="14_qw25q"]
+[ext_resource type="Resource" path="res://resources/techniques/gizan.tres" id="15_to2x5"]
+[ext_resource type="Resource" path="res://resources/techniques/nafoi.tres" id="16_4ye0e"]
+[ext_resource type="Resource" path="res://resources/techniques/nazan.tres" id="17_o7oem"]
 
 [resource]
 script = ExtResource("1")
 character_id = &"alys"
 display_name = "Alys Landale"
 role = "Hunter"
-base_stats = {"strength": 6, "magic": 4, "defense": 5, "agility": 8}
-combo_chain = [ExtResource("2"), ExtResource("3"), ExtResource("4")]
+base_stats = {
+"agility": 8,
+"defense": 5,
+"magic": 4,
+"strength": 6
+}
+combo_chain = Array[ExtResource("1_syb6m")]([ExtResource("2"), ExtResource("3"), ExtResource("4")])
 heavy_attack = ExtResource("5")
 launcher_attack = ExtResource("6")
-techniques = [ExtResource("7")]
+techniques = Array[ExtResource("8_vf2l0")]([ExtResource("9_3ouay"), ExtResource("10_deuw2"), ExtResource("11_fu6yy"), ExtResource("7"), ExtResource("13_fm8ej"), ExtResource("14_qw25q"), ExtResource("15_to2x5"), ExtResource("16_4ye0e"), ExtResource("17_o7oem")])
+learnset = {
+&"foi": 1,
+&"gifoi": 14,
+&"gizan": 18,
+&"nafoi": 22,
+&"nazan": 27,
+&"saner": 1,
+&"shift": 1,
+&"vortex": 1,
+&"zan": 8
+}
 skill_tree_id = &"alys_tree"
 model_base_path = "res://assets/models/characters/alys/idle.fbx"
 model_skin_path = "res://assets/models/characters/alys/alys_texture_0.png"
-model_scale = Vector3(1, 1, 1)
-model_offset = Vector3(0, 0, 0)
-model_rotation_y = 90.0
-model_animations = {"idle": "res://assets/models/characters/alys/idle.fbx", "run": "res://assets/models/characters/alys/run.fbx", "jump": "res://assets/models/characters/alys/jump.fbx", "attack_light_1": "res://assets/models/characters/alys/attack_light_1.fbx", "attack_light_2": "res://assets/models/characters/alys/attack_light_2.fbx", "attack_light_3": "res://assets/models/characters/alys/attack_light_3.fbx", "attack_heavy": "res://assets/models/characters/alys/attack_heavy.fbx", "attack_launcher": "res://assets/models/characters/alys/attack_light_3.fbx", "hurt": "res://assets/models/characters/alys/hurt.fbx", "dead": "res://assets/models/characters/alys/dead.fbx", "dodge": "res://assets/models/characters/alys/dodge.fbx"}
+model_animations = {
+"attack_heavy": "res://assets/models/characters/alys/attack_heavy.fbx",
+"attack_launcher": "res://assets/models/characters/alys/attack_light_3.fbx",
+"attack_light_1": "res://assets/models/characters/alys/attack_light_1.fbx",
+"attack_light_2": "res://assets/models/characters/alys/attack_light_2.fbx",
+"attack_light_3": "res://assets/models/characters/alys/attack_light_3.fbx",
+"dead": "res://assets/models/characters/alys/dead.fbx",
+"dodge": "res://assets/models/characters/alys/dodge.fbx",
+"hurt": "res://assets/models/characters/alys/hurt.fbx",
+"idle": "res://assets/models/characters/alys/idle.fbx",
+"jump": "res://assets/models/characters/alys/jump.fbx",
+"run": "res://assets/models/characters/alys/run.fbx"
+}
 attack_speed_scale = 1.35
-tint_color = Color(1, 1, 1, 1)

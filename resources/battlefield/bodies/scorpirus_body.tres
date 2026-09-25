@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="HordeUnitDef" format=3]
+
+[ext_resource type="Script" path="res://scripts/battlefield/horde_unit_def.gd" id="1_a2ufq"]
+
+[resource]
+script = ExtResource("1_a2ufq")
+unit_id = &"scorpirus"
+body_style = &"scorpion"
+body_color = Color(0.82, 0.18, 0.15, 1)
+accent_color = Color(1, 0.75, 0.2, 1)

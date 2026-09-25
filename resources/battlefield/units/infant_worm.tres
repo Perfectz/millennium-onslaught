@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="HordeUnitDef" format=3]
+
+[ext_resource type="Resource" path="res://resources/battlefield/attacks/grunt_bite.tres" id="1_tift3"]
+[ext_resource type="Script" path="res://scripts/battlefield/horde_unit_def.gd" id="2_2l3w7"]
+
+[resource]
+script = ExtResource("2_2l3w7")
+unit_id = &"infant_worm"
+display_name = "Infant Worm"
+max_hp = 25.0
+move_speed = 3.6
+attack = ExtResource("1_tift3")
+body_style = &"eye_worm"
+body_color = Color(0.45, 0.45, 0.8, 1)
+accent_color = Color(1, 0.6, 0.15, 1)
+radius = 0.45
+drop_table = Array[Dictionary]([{
+"chance": 0.05,
+"item_id": &"monomate"
+}, {
+"chance": 0.01,
+"item_id": &"antidote"
+}])

@@ -1,29 +1,70 @@
-[gd_resource type="Resource" load_steps=8 format=3]
+[gd_resource type="Resource" script_class="CharacterDef" format=3]
 
 [ext_resource type="Script" path="res://resources/characters/character_def.gd" id="1"]
+[ext_resource type="Script" path="res://resources/attacks/attack_def.gd" id="1_inhed"]
 [ext_resource type="Resource" path="res://resources/attacks/light_attack_1.tres" id="2"]
 [ext_resource type="Resource" path="res://resources/attacks/light_attack_2.tres" id="3"]
 [ext_resource type="Resource" path="res://resources/attacks/light_attack_3.tres" id="4"]
 [ext_resource type="Resource" path="res://resources/attacks/heavy_attack.tres" id="5"]
 [ext_resource type="Resource" path="res://resources/attacks/launcher_attack.tres" id="6"]
 [ext_resource type="Resource" path="res://resources/techniques/rayblade.tres" id="7"]
+[ext_resource type="Script" path="res://resources/techniques/technique_def.gd" id="8_hysa7"]
+[ext_resource type="Resource" path="res://resources/techniques/res.tres" id="9_57xs7"]
+[ext_resource type="Resource" path="res://resources/techniques/tsu.tres" id="10_k2epe"]
+[ext_resource type="Resource" path="res://resources/techniques/crosscut.tres" id="11_s0ann"]
+[ext_resource type="Resource" path="res://resources/techniques/zan.tres" id="12_u60u0"]
+[ext_resource type="Resource" path="res://resources/techniques/air_slash.tres" id="13_mti8x"]
+[ext_resource type="Resource" path="res://resources/techniques/gires.tres" id="14_ssra7"]
+[ext_resource type="Resource" path="res://resources/techniques/githu.tres" id="15_qajnm"]
+[ext_resource type="Resource" path="res://resources/techniques/gizan.tres" id="16_pnbty"]
+[ext_resource type="Resource" path="res://resources/techniques/nathu.tres" id="18_naefx"]
+[ext_resource type="Resource" path="res://resources/techniques/nares.tres" id="19_sgiir"]
+[ext_resource type="Resource" path="res://resources/techniques/nazan.tres" id="20_6cli8"]
 
 [resource]
 script = ExtResource("1")
 character_id = &"chaz"
 display_name = "Chaz Ashley"
 role = "Warrior"
-base_stats = {"strength": 8, "magic": 3, "defense": 6, "agility": 5}
-combo_chain = [ExtResource("2"), ExtResource("3"), ExtResource("4")]
+base_stats = {
+"agility": 5,
+"defense": 6,
+"magic": 3,
+"strength": 8
+}
+combo_chain = Array[ExtResource("1_inhed")]([ExtResource("2"), ExtResource("3"), ExtResource("4")])
 heavy_attack = ExtResource("5")
 launcher_attack = ExtResource("6")
-techniques = [ExtResource("7")]
+techniques = Array[ExtResource("8_hysa7")]([ExtResource("9_57xs7"), ExtResource("10_k2epe"), ExtResource("11_s0ann"), ExtResource("12_u60u0"), ExtResource("13_mti8x"), ExtResource("14_ssra7"), ExtResource("15_qajnm"), ExtResource("16_pnbty"), ExtResource("7"), ExtResource("18_naefx"), ExtResource("19_sgiir"), ExtResource("20_6cli8")])
+learnset = {
+&"air_slash": 13,
+&"crosscut": 6,
+&"gires": 16,
+&"githu": 17,
+&"gizan": 23,
+&"nares": 36,
+&"nathu": 31,
+&"nazan": 37,
+&"rayblade": 27,
+&"res": 1,
+&"tsu": 4,
+&"zan": 12
+}
 skill_tree_id = &"chaz_tree"
 model_base_path = "res://assets/models/characters/chaz/chaz_base.fbx"
 model_skin_path = "res://assets/models/characters/chaz/chaz_texture.png"
-model_scale = Vector3(1, 1, 1)
-model_offset = Vector3(0, 0, 0)
-model_rotation_y = 90.0
+model_animations = {
+"attack_heavy": "res://assets/models/characters/chaz/attack_heavy.fbx",
+"attack_launcher": "res://assets/models/characters/chaz/attack_light_3.fbx",
+"attack_light_1": "res://assets/models/characters/chaz/attack_light_1.fbx",
+"attack_light_2": "res://assets/models/characters/chaz/attack_light_2.fbx",
+"attack_light_3": "res://assets/models/characters/chaz/attack_light_3.fbx",
+"dead": "res://assets/models/characters/chaz/dead.fbx",
+"dodge": "res://assets/models/characters/chaz/dodge.fbx",
+"hurt": "res://assets/models/characters/chaz/hurt.fbx",
+"idle": "res://assets/models/characters/chaz/idle.fbx",
+"jump": "res://assets/models/characters/chaz/jump.fbx",
+"run": "res://assets/models/characters/chaz/run.fbx"
+}
 attack_speed_scale = 2.0
-model_animations = {"idle": "res://assets/models/characters/chaz/idle.fbx", "run": "res://assets/models/characters/chaz/run.fbx", "jump": "res://assets/models/characters/chaz/jump.fbx", "attack_light_1": "res://assets/models/characters/chaz/attack_light_1.fbx", "attack_light_2": "res://assets/models/characters/chaz/attack_light_2.fbx", "attack_light_3": "res://assets/models/characters/chaz/attack_light_3.fbx", "attack_heavy": "res://assets/models/characters/chaz/attack_heavy.fbx", "attack_launcher": "res://assets/models/characters/chaz/attack_light_3.fbx", "hurt": "res://assets/models/characters/chaz/hurt.fbx", "dead": "res://assets/models/characters/chaz/dead.fbx", "dodge": "res://assets/models/characters/chaz/dodge.fbx"}
 tint_color = Color(0.3, 0.5, 1, 1)

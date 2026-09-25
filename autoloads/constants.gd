@@ -512,6 +512,9 @@ const HORDE_LAUNCH_GRAVITY: float = 22.0
 const HORDE_KNOCKBACK_DECAY: float = 7.5
 const HORDE_CORPSE_TIME: float = 0.9
 const HORDE_FLASH_TIME: float = 0.08
+## Damage-number Label3Ds use fixed_size, which renders them as if 1 m from the camera,
+## so pixel_size maps directly to screen share (48 px * 0.001 ~= 5.5% of screen height).
+const DAMAGE_NUMBER_PIXEL_SIZE: float = 0.001
 ## Damage numbers closer than this to the camera plane are skipped (fixed-size labels explode near it).
 const DAMAGE_NUMBER_MIN_CAMERA_DEPTH: float = 2.5
 const HORDE_SPAWN_INTERVAL: float = 0.35

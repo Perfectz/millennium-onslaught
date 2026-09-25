@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="EnemyDef" format=3]
+
+[ext_resource type="Resource" path="res://resources/attacks/enemy_rusher_attack.tres" id="1_8dc6u"]
+[ext_resource type="Resource" path="res://resources/battlefield/bodies/fanbite_body.tres" id="2_811an"]
+[ext_resource type="Script" path="res://resources/enemies/enemy_def.gd" id="3_i6lnq"]
+
+[resource]
+script = ExtResource("3_i6lnq")
+enemy_name = &"Fanbite"
+enemy_type = &"fanbite"
+base_hp = 390.0
+move_speed = 3.5
+attack_range = 1.8
+perception_delay = 0.25
+attack_cooldown = 1.3
+attack = ExtResource("1_8dc6u")
+knockback_resistance = 0.6
+mesh_color = Color(0.45, 0.28, 0.15, 1)
+xp_reward = 78
+gold_reward = 52
+procedural_body = ExtResource("2_811an")
+procedural_body_scale = 1.4

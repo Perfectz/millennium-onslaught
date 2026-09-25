@@ -60,3 +60,9 @@ extends Resource
 
 ## Elemental resistance (takes reduced damage from this element).
 @export var resistance: StringName = &""
+
+## Optional procedural body (PSIV enemy family) used instead of the skinned model.
+## Lets bosses/officers such as Igglanova or Scorpirus look like themselves before bespoke models exist.
+@export var procedural_body: HordeUnitDef = null
+## Uniform scale for the procedural body (bosses are big).
+@export var procedural_body_scale: float = 1.0

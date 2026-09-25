@@ -1,4 +1,4 @@
-[gd_resource type="Resource" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="TechniqueDef" load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://resources/techniques/technique_def.gd" id="1"]
 
@@ -6,12 +6,12 @@
 script = ExtResource("1")
 technique_id = &"res"
 display_name = "Res"
-description = "Channels healing light to restore vitality."
-tp_cost = 15.0
+description = "Restores a little HP."
+tp_cost = 9.0
 base_damage = 0.0
 element_type = &""
-status_effect_chance = 0.0
-status_effect_duration = 0.0
+status_effect_chance = 0
+status_effect_duration = 3.0
 knockback_force = 0.0
 is_projectile = false
 projectile_speed = 0.0
@@ -21,4 +21,8 @@ particle_color = Color(0.4, 1, 0.5, 1)
 unlock_level = 1
 scales_with_magic = true
 spell_type = 1
-heal_amount = 40.0
+heal_amount = 12.0
+buff_stat = &""
+buff_amount = 0.0
+buff_duration = 0.0
+is_skill = false

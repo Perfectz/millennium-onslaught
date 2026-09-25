@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="TechniqueDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/techniques/technique_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+technique_id = &"githu"
+display_name = "Githu"
+description = "A stronger bolt of lightning."
+tp_cost = 33.0
+base_damage = 72.0
+element_type = &"lightning"
+status_effect_chance = 0.3
+status_effect_duration = 3.0
+knockback_force = 6.0
+is_projectile = true
+projectile_speed = 20.0
+aoe_radius = 0.0
+animation_name = &"attack_heavy"
+particle_color = Color(0.85, 0.8, 1, 1)
+unlock_level = 1
+scales_with_magic = true
+spell_type = 0
+heal_amount = 0.0
+buff_stat = &""
+buff_amount = 0.0
+buff_duration = 0.0
+is_skill = false

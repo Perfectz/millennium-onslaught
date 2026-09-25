@@ -70,3 +70,7 @@ enum SpellType { PROJECTILE, HEAL, AOE_BURST, BUFF }
 
 ## Duration of the buff in seconds.
 @export var buff_duration: float = 0.0
+
+## PSIV distinguishes TP techniques (Foi, Zan, Res...) from skills (Crosscut, Vortex, Flaeli...).
+## Skills are cast from the Technique button; techniques fill the heal/single/area spell buttons.
+@export var is_skill: bool = false

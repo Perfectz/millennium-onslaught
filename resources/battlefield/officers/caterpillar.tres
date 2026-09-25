@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="EnemyDef" format=3]
+
+[ext_resource type="Resource" path="res://resources/attacks/enemy_rusher_attack.tres" id="1_74jip"]
+[ext_resource type="Resource" path="res://resources/battlefield/bodies/caterpillar_body.tres" id="2_7hqit"]
+[ext_resource type="Script" path="res://resources/enemies/enemy_def.gd" id="3_52o54"]
+
+[resource]
+script = ExtResource("3_52o54")
+enemy_name = &"Caterpillar"
+enemy_type = &"caterpillar"
+base_hp = 292.5
+move_speed = 3.5
+attack_range = 1.8
+perception_delay = 0.25
+attack_cooldown = 1.3
+attack = ExtResource("1_74jip")
+knockback_resistance = 0.6
+mesh_color = Color(0.45, 0.28, 0.15, 1)
+xp_reward = 58
+gold_reward = 39
+procedural_body = ExtResource("2_7hqit")
+procedural_body_scale = 1.5

@@ -199,12 +199,16 @@ func _process(_delta: float) -> void:
 
 
 func _queue_spell(slot: SpellSlotResolver.Slot) -> void:
-	var tech := SpellSlotResolver.best(_all_techniques(), xp_tracker.get_level(), slot)
+	var tech := SpellSlotResolver.best(_all_techniques(), xp_tracker.get_level(), slot, _learnset())
 	if tech == null:
 		ToastSystem.show_toast("No technique learned for that yet", Color(0.8, 0.8, 0.9))
 		return
 	_pending_spell = tech
 	intent_buffer.record(&"spell")
+
+
+func _learnset() -> Dictionary:
+	return character_def.learnset if character_def else {}
 
 
 func _all_techniques() -> Array[TechniqueDef]:
@@ -213,9 +217,16 @@ func _all_techniques() -> Array[TechniqueDef]:
 	return character_def.techniques
 
 
-## Techniques this character has learned at their current level.
+## Techniques and skills this character has learned at their current level.
 func get_learned_techniques() -> Array[TechniqueDef]:
-	return SpellSlotResolver.learned(_all_techniques(), xp_tracker.get_level())
+	return SpellSlotResolver.learned(_all_techniques(), xp_tracker.get_level(), _learnset())
+
+
+## Learned skills (Technique button). Falls back to every learned technique if the hero has no skills.
+func get_learned_skills() -> Array[TechniqueDef]:
+	var learned := get_learned_techniques()
+	var skills: Array[TechniqueDef] = learned.filter(func(t: TechniqueDef) -> bool: return t.is_skill)
+	return skills if not skills.is_empty() else learned
 
 
 ## Apply gravity with fall multiplier.
@@ -501,7 +512,7 @@ func _bridge_eventbus_signals() -> void:
 		EventBus.rpg_level_up.emit(player_index, new_level)
 		# XPTracker can jump several levels at once; announce every technique crossed.
 		var prior_level := new_level - 1
-		for tech in SpellSlotResolver.newly_learned(_all_techniques(), prior_level, new_level):
+		for tech in SpellSlotResolver.newly_learned(_all_techniques(), prior_level, new_level, _learnset()):
 			EventBus.rpg_technique_learned.emit(player_index, tech.technique_id)
 			ToastSystem.show_toast("Learned %s!" % tech.display_name, tech.particle_color)
 		var char_id := _get_active_character_id()
@@ -560,7 +571,7 @@ func get_derived_stats() -> Dictionary:
 
 ## Get the currently selected technique, or null if none available.
 func get_active_technique() -> TechniqueDef:
-	var learned := get_learned_techniques()
+	var learned := get_learned_skills()
 	if learned.is_empty():
 		return null
 	active_technique_index = clampi(active_technique_index, 0, learned.size() - 1)
@@ -569,7 +580,7 @@ func get_active_technique() -> TechniqueDef:
 
 ## Cycle to the next learned technique.
 func cycle_technique() -> void:
-	var learned := get_learned_techniques()
+	var learned := get_learned_skills()
 	if learned.is_empty():
 		return
 	active_technique_index = (active_technique_index + 1) % learned.size()
