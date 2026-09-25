@@ -47,6 +47,14 @@ Decoded so far (text is ASCII−64, 0xFF-terminated):
   HINAS) → skills (CROSSCUT, RAYBLADE, DBLSLASH, FLAELI, FLARE, VORTEX, ASTRAL, AIRSLASH, DISRUPT,
   HEWN, TANDLE, EFESS, LEGEON, BURSTROC, POSIBOLT, SWEEPING, PHONON, ST. FIRE, …, HOLYWORD…).
 
+## Chapter 1 status (2026-09-25)
+| Canon beat | Fusion content | State |
+|---|---|---|
+| Academy Basement (Igglanova) | `dungeon_1`: Xanafalgue/Zoran Bult swarms, Igglanova + Fission | playable end-to-end (headless walkthrough) |
+| Motavian field encounters | Battle of the Motavian Plains (Locusta, Crawler, Mini/Infant Worm, Monster Fly, Sand Newt; Speard/Caterpillar/Fanbite officers; Scorpirus) | playable |
+| Techniques/skills | 43 canon TechniqueDefs, per-character learnsets | done |
+| Items | Monomate/Dimate/Trimate/Antidote/Dews/pipes, battlefield pickups | done |
+
 ## Next content milestones
 1. Re-theme the Piata Plains slice to canon: grunt types = the region's PSIV enemies; officers and
    commander = the region's PSIV bosses; consumable pickups.

@@ -26,6 +26,10 @@ var anim_phase: float = 0.0
 var is_officer_guard: bool = false
 ## Last computed crowd-separation push (refreshed every other frame by the director).
 var sep_cache: Vector2 = Vector2.ZERO
+## Increments on every activation. Pooled nodes are recycled, so systems that track a grunt
+## (e.g. WaveSystem) must compare serials rather than trust node identity.
+var spawn_serial: int = 0
+static var _next_serial: int = 0
 
 var _body: MeshInstance3D
 var _hurtbox: Hurtbox
@@ -56,6 +60,8 @@ func _init() -> void:
 ## Bring the grunt to life at `pos` with the given definition.
 func activate(unit_def: HordeUnitDef, pos: Vector3, garrison_base: StringName = &"") -> void:
 	def = unit_def
+	_next_serial += 1
+	spawn_serial = _next_serial
 	health = HealthComponent.new(unit_def.max_hp)
 	state = GruntState.IDLE
 	state_timer = 0.0
@@ -76,7 +82,9 @@ func activate(unit_def: HordeUnitDef, pos: Vector3, garrison_base: StringName = 
 	capsule.height = maxf(HURTBOX_HEIGHT * unit_def.body_scale, unit_def.radius * 2.0)
 	_hurt_shape.position = Vector3(0, capsule.height * 0.5, 0)
 	_hurtbox.collision_layer = Constants.LAYER_ENEMY_HURTBOX
-	_hurtbox.monitorable = true
+	# Deferred like deactivate(), so a grunt recycled in the same frame isn't switched back off
+	# by a still-pending deferred "monitorable = false".
+	_hurtbox.set_deferred("monitorable", true)
 	_hurtbox.is_invincible = false
 	visible = true
 	add_to_group(&"enemies")

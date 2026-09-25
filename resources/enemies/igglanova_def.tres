@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="EnemyDef" format=3]
+
+[ext_resource type="Resource" path="res://resources/attacks/boss_attack_1.tres" id="1_rdrnf"]
+[ext_resource type="Resource" path="res://resources/battlefield/bodies/igglanova_body.tres" id="2_7crb4"]
+[ext_resource type="Script" path="res://resources/enemies/enemy_def.gd" id="3_ileyy"]
+[ext_resource type="Resource" path="res://resources/battlefield/units/xanafalgue.tres" id="4_bskyo"]
+
+[resource]
+script = ExtResource("3_ileyy")
+enemy_name = &"Igglanova"
+enemy_type = &"igglanova"
+base_hp = 900.0
+move_speed = 5.0
+attack_range = 2.0
+perception_delay = 0.2
+attack = ExtResource("1_rdrnf")
+behavior = &"boss"
+knockback_resistance = 0.85
+mesh_color = Color(0.5, 0.15, 0.6, 1)
+xp_reward = 171
+gold_reward = 54
+procedural_body = ExtResource("2_7crb4")
+procedural_body_scale = 2.4
+summon_unit = ExtResource("4_bskyo")
+summon_count = 4
+summon_interval = 9.0

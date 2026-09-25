@@ -17,8 +17,8 @@ const HOP_HEIGHT: float = 0.14
 const TOKEN_REQUEST_EXTRA_RANGE: float = 2.5
 
 var player: Node3D = null
-## Camera used to hide grunts that would block the view (optional).
-var view_camera: Camera3D = null
+## Hide grunts that come close enough to the active camera to block the view.
+var hide_near_camera: bool = true
 ## Arena rectangle in XZ (x, z, width, depth).
 var arena: Rect2 = Rect2(-50, -50, 100, 100)
 var aggression: float = 1.0
@@ -103,13 +103,18 @@ func _physics_process(delta: float) -> void:
 	var dt := minf(delta, Constants.DELTA_CAP)
 	_time += dt
 	_frame += 1
+	_purge_freed()
 	_grid.clear()
 	for i in _active.size():
 		var g := _active[i]
 		if g.is_alive():
 			_grid.insert(i, Vector2(g.position.x, g.position.z))
 	var hide_d2 := Constants.BATTLEFIELD_CAMERA_HIDE_DISTANCE * Constants.BATTLEFIELD_CAMERA_HIDE_DISTANCE
-	var cam_pos := view_camera.global_position if view_camera != null and is_instance_valid(view_camera) else Vector3(INF, INF, INF)
+	var cam_pos := Vector3(INF, INF, INF)
+	if hide_near_camera and is_inside_tree():
+		var cam := get_viewport().get_camera_3d()
+		if cam != null and cam.is_inside_tree():
+			cam_pos = cam.global_position
 	var player_pos := Vector2.ZERO
 	var has_player := player != null and is_instance_valid(player)
 	if has_player:
@@ -129,6 +134,16 @@ func _physics_process(delta: float) -> void:
 			_tick_grunt(g, i, dt, player_pos, has_player)
 	for g in _finished:
 		_release(g)
+
+
+## Defensive: drop grunts freed behind the pool's back (reading a freed object through a typed
+## array crashes the engine rather than raising a script error).
+func _purge_freed() -> void:
+	for i in range(_active.size() - 1, -1, -1):
+		var candidate: Variant = _active[i]
+		if not is_instance_valid(candidate):
+			_active.remove_at(i)
+			push_warning("HordeDirector: a pooled grunt was freed externally; pool shrinks by one.")
 
 
 func _tick_grunt(g: HordeGrunt, index: int, dt: float, player_pos: Vector2, has_player: bool) -> void:

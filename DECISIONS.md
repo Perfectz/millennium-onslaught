@@ -578,3 +578,34 @@
 **Alternatives Considered:** MultiMesh-only crowds (cheapest to draw, but per-grunt hit reactions and hurtboxes get much harder); reusing `EnemyController` for everything (too slow past ~20 enemies); Area3D-free hit detection in the director (duplicates the combat path).
 
 **Key Files:** `scripts/battlefield/*`, `scripts/core/player_states/player_state_combination.gd`, `scenes/battlefield/battlefield_run.tscn`, `resources/battlefield/*`.
+
+---
+
+## 2026-09-25 — PSIV-canon Chapter 1, horde swarms in dungeons, pooled-identity rule
+
+**Decision:** Chapter 1 content follows PSIV (see `docs/design/psiv_content_bible.md`), dungeons can spawn
+horde swarms, and code that tracks pooled grunts must compare `spawn_serial`, never node identity.
+
+**What changed:**
+1. Academy Basement: Xanafalgue / Zoran Bult swarms (musou density: 12–28 per encounter), Xanafalgue elites,
+   boss **Igglanova** (PSIV HP 300 x3) casting **Fission** (summons 4 Xanafalgue every 9 s) via the
+   data-driven `EnemyDef.summon_*` + `enemy_summon_requested` event. Floors renamed to B1 Basement Stairwell /
+   B2 Long Corridor / B3 Bio-Capsule Laboratory. The existing chunk order already approximates the original
+   3-floor layout; a geometry-faithful rebuild of each floor (via `tools/build_kaykit_academy_stage.py`) is a follow-up.
+2. `SpawnEntry.horde_unit`, `StageRunner.horde_director`, `DungeonRun` owns a `HordeDirector` + `PickupField`.
+3. Characters learn PSIV techniques at PSIV levels (`CharacterDef.learnset`); `TechniqueDef.is_skill`
+   separates skills (Technique button) from TP techniques (spell buttons, `SpellSlotResolver`).
+4. Level-ups no longer pause dungeons mid-combat (toast + banked stat points, same as battlefields).
+
+**Pooled-identity rule (bugs found by the headless dungeon walkthrough):**
+- `StageRunner.cleanup()` was `queue_free`-ing pooled grunts; the director then read a freed object through a
+  typed array, which **segfaults** the engine. Fix: never free pooled grunts outside `HordeDirector`; the
+  director also purges freed entries defensively.
+- `WaveSystem` tracked grunts by node reference; a grunt killed early and recycled (e.g. by Fission) kept an
+  encounter "alive" forever. Fix: `HordeGrunt.spawn_serial` (bumped on every activation) recorded per
+  encounter; `StageRunner` filters pre-spawned grunts by encounter tag at trigger time.
+- `HordeGrunt.activate()` now defers `monitorable = true` so a same-frame recycle isn't switched off by the
+  pending deferred `false` from `deactivate()`.
+
+**Alternatives considered:** separate "dungeon grunt" type (duplicated combat path); pausing level-up screens
+(breaks musou flow at swarm XP rates).

@@ -46,6 +46,9 @@ var boss_phase: int = 1
 var speed_multiplier: float = 1.0
 var boss_attack_override: AttackDef = null
 
+## Seconds until the next summon (EnemyDef.summon_*).
+var _summon_timer: float = 0.0
+
 
 func _ready() -> void:
 	var hp := Constants.ENEMY_RUSHER_HP
@@ -97,6 +100,7 @@ func _physics_process(delta: float) -> void:
 	var capped := minf(delta, Constants.DELTA_CAP)
 	if attack_cooldown_timer > 0.0:
 		attack_cooldown_timer -= capped
+	_tick_summon(capped)
 	# Tick status effects (burn DOT).
 	var burn_damage := status_effects.tick(capped)
 	if burn_damage > 0.0 and not health.is_dead():
@@ -105,6 +109,19 @@ func _physics_process(delta: float) -> void:
 			state_machine.transition_to(&"dead")
 	_update_health_bar()
 	clamp_to_bounds()
+
+
+func _tick_summon(delta: float) -> void:
+	if enemy_def == null or enemy_def.summon_unit == null or enemy_def.summon_count <= 0 or enemy_def.summon_interval <= 0.0:
+		return
+	var current := state_machine.current_state_name
+	if current == &"dormant" or current == &"dead" or health.is_dead():
+		return
+	_summon_timer -= delta
+	if _summon_timer > 0.0:
+		return
+	_summon_timer = enemy_def.summon_interval
+	EventBus.enemy_summon_requested.emit(self, enemy_def.summon_unit, enemy_def.summon_count, global_position)
 
 
 ## Clamp enemy position to active arena/room bounds (X + Z).
@@ -433,6 +450,7 @@ func configure(def: EnemyDef, player_target: Node3D, start_dormant: bool = false
 	boss_phase = 1
 	speed_multiplier = 1.0
 	boss_attack_override = null
+	_summon_timer = def.summon_interval * 0.5
 	status_effects.clear_all()
 	_apply_mesh_color(def.mesh_color)
 	_apply_procedural_body(def)

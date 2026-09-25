@@ -45,6 +45,10 @@ func _physics_process(_delta: float) -> void:
 
 
 ## Initialize the stage runner with all required references.
+## Optional pool for horde grunt swarms (set by DungeonRun before setup()).
+var horde_director: HordeDirector = null
+
+
 func setup(stage_def: StageDef, player: Node3D, wave_system: WaveSystem,
 		enemy_scene: PackedScene, enemy_container: Node) -> void:
 	_stage_def = stage_def
@@ -213,7 +217,7 @@ func _pre_spawn_all_encounters() -> void:
 
 		var total_enemies: int = 0
 		for spawn_entry in all_entries:
-			if spawn_entry.enemy_def != null:
+			if spawn_entry.enemy_def != null or (spawn_entry.horde_unit != null and horde_director != null):
 				total_enemies += spawn_entry.count
 
 		# Compute placement bounds (pad inward from edges).
@@ -230,6 +234,16 @@ func _pre_spawn_all_encounters() -> void:
 		var enemies: Array = []
 		var spawn_index: int = 0
 		for spawn_entry in all_entries:
+			if spawn_entry.enemy_def == null and spawn_entry.horde_unit != null and horde_director != null:
+				# Musou-density swarm: pooled grunts idle at the encounter until the player nears.
+				for i in spawn_entry.count:
+					var t := float(spawn_index) / maxf(total_enemies - 1, 1)
+					var pos := Vector3(lerpf(min_x, max_x, t), 0.0, lerpf(min_z, max_z, randf()))
+					var grunt := horde_director.spawn(spawn_entry.horde_unit, pos, StringName("encounter_%d" % enc_idx))
+					if grunt != null:
+						enemies.append(grunt)
+					spawn_index += 1
+				continue
 			if spawn_entry.enemy_def == null:
 				continue
 			for i in spawn_entry.count:
@@ -276,7 +290,15 @@ func _on_encounter_triggered(trigger_index: int) -> void:
 	enc.arena_max_z = entry.arena_max_z
 
 	# Start encounter with pre-spawned enemies (no new spawning).
-	var enemies: Array = _pre_spawned_enemies.get(trigger_index, [])
+	var enemies: Array = []
+	var tag := StringName("encounter_%d" % trigger_index)
+	for enemy in _pre_spawned_enemies.get(trigger_index, []):
+		if not is_instance_valid(enemy):
+			continue
+		# Pooled grunts may have died and been recycled elsewhere since pre-spawn.
+		if enemy is HordeGrunt and ((enemy as HordeGrunt).base_id != tag or not (enemy as HordeGrunt).is_alive()):
+			continue
+		enemies.append(enemy)
 	_wave_system.start_encounter_prescreened(enc, enemies)
 
 	# Encounter start juice.
@@ -429,11 +451,12 @@ func cleanup() -> void:
 		if is_instance_valid(chunk):
 			chunk.queue_free()
 	_chunks.clear()
-	# Free any pre-spawned enemies that were never activated.
+	# Free any pre-spawned enemies that were never activated. Horde grunts are pooled by the
+	# HordeDirector (freeing one would corrupt its pool), so they are recycled there instead.
 	for enc_idx in _pre_spawned_enemies:
 		var enemies: Array = _pre_spawned_enemies[enc_idx]
 		for enemy in enemies:
-			if is_instance_valid(enemy) and enemy.is_inside_tree():
+			if is_instance_valid(enemy) and enemy.is_inside_tree() and not enemy is HordeGrunt:
 				enemy.queue_free()
 	_pre_spawned_enemies.clear()
 

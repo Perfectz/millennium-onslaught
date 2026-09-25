@@ -60,6 +60,7 @@ signal battlefield_completed(battlefield_id: StringName, victory: bool)
 signal enemy_spawned(enemy: Node, enemy_type: StringName)
 signal enemy_died(enemy: Node, enemy_type: StringName, position: Vector3)
 signal enemy_wave_cleared()
+signal enemy_summon_requested(summoner: Node, unit: Resource, count: int, origin: Vector3)
 
 # --- Encounter ---
 signal encounter_arena_locked(min_x: float, max_x: float, min_z: float, max_z: float)

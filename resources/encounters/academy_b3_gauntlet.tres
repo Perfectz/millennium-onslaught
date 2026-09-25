@@ -1,57 +1,35 @@
-[gd_resource type="Resource" load_steps=11 format=3]
+[gd_resource type="Resource" script_class="EncounterDef" format=3]
 
 [ext_resource type="Script" path="res://resources/encounters/encounter_def.gd" id="1"]
 [ext_resource type="Script" path="res://resources/encounters/wave_def.gd" id="2"]
 [ext_resource type="Script" path="res://resources/encounters/spawn_entry.gd" id="3"]
-[ext_resource type="Resource" path="res://resources/enemies/brute_def.tres" id="4"]
-[ext_resource type="Resource" path="res://resources/enemies/shield_def.tres" id="5"]
-[ext_resource type="Resource" path="res://resources/enemies/ranged_def.tres" id="6"]
-[ext_resource type="Resource" path="res://resources/enemies/rusher_def.tres" id="7"]
+[ext_resource type="Resource" path="res://resources/battlefield/units/xanafalgue.tres" id="4_qt66u"]
+[ext_resource type="Resource" path="res://resources/battlefield/units/zoran_bult.tres" id="5_0nawb"]
+[ext_resource type="Resource" path="res://resources/enemies/xanafalgue_def.tres" id="6_w73rh"]
 
-[sub_resource type="Resource" id="spawn_w1_brutes"]
+[sub_resource type="Resource" id="Resource_cb3wp"]
 script = ExtResource("3")
-enemy_def = ExtResource("4")
-count = 3
-spawn_side = &"both"
+count = 16
+horde_unit = ExtResource("4_qt66u")
 
-[sub_resource type="Resource" id="wave1"]
-script = ExtResource("2")
-spawn_entries = [SubResource("spawn_w1_brutes")]
-delay_before_spawn = 1.0
-
-[sub_resource type="Resource" id="spawn_w2_shields"]
+[sub_resource type="Resource" id="Resource_3sqwc"]
 script = ExtResource("3")
-enemy_def = ExtResource("5")
+count = 10
+horde_unit = ExtResource("5_0nawb")
+
+[sub_resource type="Resource" id="Resource_4vc0m"]
+script = ExtResource("3")
+enemy_def = ExtResource("6_w73rh")
 count = 2
-spawn_side = &"both"
 
-[sub_resource type="Resource" id="spawn_w2_ranged"]
-script = ExtResource("3")
-enemy_def = ExtResource("6")
-count = 2
-spawn_side = &"both"
-
-[sub_resource type="Resource" id="wave2"]
+[sub_resource type="Resource" id="Resource_0trl4"]
 script = ExtResource("2")
-spawn_entries = [SubResource("spawn_w2_shields"), SubResource("spawn_w2_ranged")]
-delay_before_spawn = 2.0
-
-[sub_resource type="Resource" id="spawn_w3_rushers"]
-script = ExtResource("3")
-enemy_def = ExtResource("7")
-count = 3
-spawn_side = &"both"
-
-[sub_resource type="Resource" id="wave3"]
-script = ExtResource("2")
-spawn_entries = [SubResource("spawn_w3_rushers")]
-delay_before_spawn = 1.5
+spawn_entries = Array[ExtResource("3")]([SubResource("Resource_cb3wp"), SubResource("Resource_3sqwc"), SubResource("Resource_4vc0m")])
 
 [resource]
 script = ExtResource("1")
 encounter_id = &"academy_b3_gauntlet"
-waves = [SubResource("wave1"), SubResource("wave2"), SubResource("wave3")]
-arena_lock = true
+waves = Array[ExtResource("2")]([SubResource("Resource_0trl4")])
 arena_min_x = -6.0
 arena_max_x = 6.0
 arena_min_z = -12.0

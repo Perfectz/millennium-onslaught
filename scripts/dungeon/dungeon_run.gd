@@ -15,7 +15,6 @@ const DUNGEON_REGISTRY: Dictionary = {
 	&"birth_valley": "res://resources/dungeons/birth_valley.tres",
 }
 const PauseMenuScript := preload("res://scripts/ui/pause_menu.gd")
-const LevelUpScreenScript := preload("res://scripts/ui/level_up_screen.gd")
 const SpawnPositionResolverScript := preload("res://scripts/systems/spawn_position_resolver.gd")
 const RuntimeBoundsPolicyScript := preload("res://scripts/components/runtime_bounds_policy.gd")
 const PLAYER_SPAWN_RADIUS := 0.45
@@ -25,6 +24,8 @@ const PLAYER_SPAWN_RADIUS := 0.45
 @onready var fade_rect: ColorRect = $FadeOverlay/FadeRect
 
 var _dungeon_manager: DungeonManager
+var _horde: HordeDirector
+var _pickups: PickupField
 var _wave_system: WaveSystem
 var _stage_runner: StageRunner = null
 var _current_room: Node3D = null
@@ -54,6 +55,7 @@ func _ready() -> void:
 			print("[Input] Controller %d: %s (GUID: %s)" % [joypad_id, Input.get_joy_name(joypad_id), Input.get_joy_guid(joypad_id)])
 
 	_setup_juice_systems()
+	_setup_horde()
 	_setup_hud()
 	_setup_wave_system()
 	_setup_dungeon_manager()
@@ -165,6 +167,38 @@ func _setup_juice_systems() -> void:
 	add_child(vfx)
 
 
+## Pooled horde grunts (musou-density encounters) and item pickups.
+func _setup_horde() -> void:
+	_horde = HordeDirector.new()
+	_horde.name = "HordeDirector"
+	_horde.player = player
+	add_child(_horde)
+	_horde.grunt_defeated.connect(_on_grunt_defeated)
+	_pickups = PickupField.new()
+	_pickups.name = "PickupField"
+	_pickups.player = player
+	add_child(_pickups)
+	EventBus.enemy_summon_requested.connect(_on_summon_requested)
+
+
+func _on_grunt_defeated(grunt: HordeGrunt, _base_id: StringName, _attacker: Node3D) -> void:
+	player.xp_tracker.add_xp(Constants.BATTLE_XP_PER_KO)
+	if grunt.def and not grunt.def.drop_table.is_empty():
+		for item_id in DropRoller.roll_drops(grunt.def.drop_table):
+			_pickups.spawn(item_id, grunt.global_position)
+
+
+func _on_summon_requested(_summoner: Node, unit: Resource, count: int, origin: Vector3) -> void:
+	var horde_unit := unit as HordeUnitDef
+	if horde_unit == null:
+		return
+	for i in count:
+		var a := TAU * float(i) / float(maxi(count, 1))
+		var grunt := _horde.spawn(horde_unit, origin + Vector3(cos(a), 0.0, sin(a)) * 2.0)
+		if grunt:
+			grunt.state = HordeGrunt.GruntState.ADVANCE
+
+
 func _setup_hud() -> void:
 	_hud = HUDScene.instantiate()
 	add_child(_hud)
@@ -199,6 +233,7 @@ func _start_stage_mode(dungeon_def: DungeonDef) -> void:
 	RuntimeState.stage_floor_count = 1
 	_stage_runner = StageRunner.new()
 	_stage_runner.name = "StageRunner"
+	_stage_runner.horde_director = _horde
 	add_child(_stage_runner)
 	_stage_runner.setup(
 		dungeon_def.stage_def, player, _wave_system, EnemyScene, self)
@@ -233,12 +268,14 @@ func _load_stage(index: int) -> void:
 	# Clean up previous stage runner.
 	if _stage_runner:
 		_wave_system.clear_all_enemies()
+		_horde.clear_all()
 		_stage_runner.queue_free()
 		_stage_runner = null
 	_current_stage_index = index
 	RuntimeState.current_stage_index = index
 	_stage_runner = StageRunner.new()
 	_stage_runner.name = "StageRunner"
+	_stage_runner.horde_director = _horde
 	add_child(_stage_runner)
 	_stage_runner.setup(
 		_stage_defs[index], player, _wave_system, EnemyScene, self)
@@ -446,21 +483,10 @@ func _on_enemy_died_xp(enemy: Node, _type: StringName, _pos: Vector3) -> void:
 			DamageNumberSpawner.spawn_xp(_pos, ec.enemy_def.xp_reward)
 
 
-func _on_level_up(player_index: int, new_level: int) -> void:
-	var char_id: StringName = GameState.active_party[player_index] if player_index < GameState.active_party.size() else &""
-	if char_id == &"":
-		return
-	var screen := CanvasLayer.new()
-	screen.set_script(LevelUpScreenScript)
-	screen.setup(char_id, new_level)
-	screen.closed.connect(func() -> void:
-		screen.queue_free()
-		InputManager.set_context(InputManager.InputContext.COMBAT)
-		get_tree().paused = false
-	)
-	add_child(screen)
-	InputManager.set_context(InputManager.InputContext.MENU)
-	get_tree().paused = true
+func _on_level_up(_player_index: int, new_level: int) -> void:
+	# Musou-density fights level you up often; never pause mid-combat. Stat points are banked
+	# for the party screen (same behaviour as battlefields).
+	ToastSystem.show_toast("LEVEL UP!  Lv %d" % new_level, Color(1.0, 0.92, 0.5))
 
 
 func _on_room_cleared(_room_index: int) -> void:
@@ -542,6 +568,7 @@ func _on_dungeon_failed() -> void:
 func _process(delta: float) -> void:
 	if _char_switch_cooldown > 0.0:
 		_char_switch_cooldown -= delta
+	_sync_horde_arena()
 	_handle_runtime_actions()
 	_check_kill_plane()
 	_update_debug_label()
@@ -587,6 +614,14 @@ func _resume_from_pause() -> void:
 		_pause_menu = null
 	InputManager.set_context(InputManager.InputContext.COMBAT)
 	get_tree().paused = false
+
+
+## Keep the horde inside whatever bounds currently constrain the player (stage or arena lock).
+func _sync_horde_arena() -> void:
+	var b := RuntimeState.get_active_bounds()
+	var min_x := float(b.get("min_x", -100.0))
+	var min_z := float(b.get("min_z", -100.0))
+	_horde.arena = Rect2(min_x, min_z, float(b.get("max_x", 100.0)) - min_x, float(b.get("max_z", 100.0)) - min_z)
 
 
 func _check_kill_plane() -> void:

@@ -11,3 +11,6 @@ extends Resource
 
 ## Which side to spawn from: "left", "right", or "both" (split evenly).
 @export var spawn_side: StringName = &"both"
+
+## Spawn lightweight horde grunts instead of a full EnemyController (used when enemy_def is null).
+@export var horde_unit: HordeUnitDef = null

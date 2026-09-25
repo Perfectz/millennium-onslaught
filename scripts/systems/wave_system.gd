@@ -34,6 +34,8 @@ var enemy_container: Node = null
 
 ## Track all spawned enemies for cleanup.
 var _spawned_enemies: Array[Node] = []
+## Spawn serial recorded per tracked horde grunt (pooled nodes get recycled into new grunts).
+var _grunt_serials: Dictionary = {}
 var _health_check_timer: float = 0.0
 
 
@@ -146,6 +148,8 @@ func _on_enemy_died(enemy: Node, _enemy_type: StringName, _position: Vector3) ->
 	# Only decrement for enemies belonging to this encounter (prevents cross-encounter desync).
 	if enemy not in _spawned_enemies:
 		return
+	if enemy is HordeGrunt and not _is_tracked_grunt(enemy as HordeGrunt):
+		return
 	_enemies_alive = maxi(0, _enemies_alive - 1)
 	RuntimeState.encounter_enemies_alive = _enemies_alive
 	if _enemies_alive <= 0:
@@ -180,7 +184,8 @@ func _finish_encounter() -> void:
 ## Clean up all spawned enemies (call on room transition or restart).
 func clear_all_enemies() -> void:
 	for enemy in _spawned_enemies:
-		if is_instance_valid(enemy) and enemy.is_inside_tree():
+		# Horde grunts belong to the HordeDirector's pool; it recycles them.
+		if is_instance_valid(enemy) and enemy.is_inside_tree() and not enemy is HordeGrunt:
 			enemy.queue_free()
 	_spawned_enemies.clear()
 	_enemies_alive = 0
@@ -199,6 +204,7 @@ func start_encounter_prescreened(encounter: EncounterDef, enemies: Array) -> voi
 	_is_active = true
 	_between_wave_breather_timer = 0.0
 	_spawned_enemies.clear()
+	_grunt_serials.clear()
 	_health_check_timer = ENCOUNTER_HEALTH_CHECK_INTERVAL
 	RuntimeState.encounter_active = true
 
@@ -221,6 +227,11 @@ func start_encounter_prescreened(encounter: EncounterDef, enemies: Array) -> voi
 			_spawned_enemies.append(enemy)
 			if enemy is EnemyController:
 				(enemy as EnemyController).activate_for_encounter()
+			elif enemy is HordeGrunt:
+				var grunt := enemy as HordeGrunt
+				_grunt_serials[grunt.get_instance_id()] = grunt.spawn_serial
+				if grunt.state == HordeGrunt.GruntState.IDLE:
+					grunt.state = HordeGrunt.GruntState.ADVANCE
 			_enemies_alive += 1
 
 	_current_wave_index = _encounter.waves.size() - 1
@@ -228,6 +239,10 @@ func start_encounter_prescreened(encounter: EncounterDef, enemies: Array) -> voi
 
 	if _enemies_alive <= 0:
 		_finish_encounter()
+
+
+func _is_tracked_grunt(grunt: HordeGrunt) -> bool:
+	return int(_grunt_serials.get(grunt.get_instance_id(), -1)) == grunt.spawn_serial
 
 
 ## Check if an encounter is currently active.
@@ -274,6 +289,10 @@ func _run_encounter_health_check() -> void:
 	for enemy in _spawned_enemies:
 		if not is_instance_valid(enemy) or not enemy.is_inside_tree():
 			continue
+		if enemy is HordeGrunt:
+			var grunt := enemy as HordeGrunt
+			if not grunt.is_alive() or not _is_tracked_grunt(grunt):
+				continue
 		if enemy is EnemyController:
 			var controller := enemy as EnemyController
 			if controller.health == null or controller.health.is_dead():

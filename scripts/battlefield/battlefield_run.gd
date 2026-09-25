@@ -67,7 +67,6 @@ func _ready() -> void:
 	_director = HordeDirector.new()
 	_director.name = "HordeDirector"
 	_director.player = player
-	_director.view_camera = camera
 	_director.arena = Rect2(-half.x, -half.y, _def.arena_size.x, _def.arena_size.y)
 	add_child(_director)
 	_director.grunt_defeated.connect(_on_grunt_defeated)
@@ -102,6 +101,7 @@ func _ready() -> void:
 
 	EventBus.enemy_died.connect(_on_enemy_died)
 	EventBus.player_died.connect(_on_player_died)
+	EventBus.enemy_summon_requested.connect(_on_summon_requested)
 	EventBus.rpg_level_up.connect(_on_level_up)
 
 	_apply_musou_reach()
@@ -318,6 +318,15 @@ func _reinforcement_origin() -> Vector2:
 			best_d = d
 			best = pos
 	return best
+
+
+func _on_summon_requested(_summoner: Node, unit: Resource, count: int, origin: Vector3) -> void:
+	var horde_unit := unit as HordeUnitDef
+	if horde_unit == null:
+		return
+	for i in count:
+		var a := TAU * float(i) / float(maxi(count, 1))
+		_director.spawn(horde_unit, origin + Vector3(cos(a), 0.0, sin(a)) * 2.0)
 
 
 func _check_captures() -> void:

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="StageDef" format=3]
 
 [ext_resource type="Script" path="res://resources/stages/stage_def.gd" id="1"]
 [ext_resource type="Script" path="res://resources/stages/stage_encounter_entry.gd" id="2"]
@@ -12,7 +12,6 @@ trigger_x = 12.0
 arena_half_width = 7.0
 arena_min_z = -6.0
 arena_max_z = 6.0
-is_boss = false
 
 [sub_resource type="Resource" id="enc_entry_2"]
 script = ExtResource("2")
@@ -21,14 +20,13 @@ trigger_x = 44.0
 arena_half_width = 8.0
 arena_min_z = -8.0
 arena_max_z = 8.0
-is_boss = false
 
 [resource]
 script = ExtResource("1")
 stage_id = &"academy_b2"
-stage_name = "Floor 2 - Monomate Corridor"
+stage_name = "B2 - Long Corridor"
 chunk_scenes = Array[String](["res://scenes/dungeon/rooms/academy_b1_corridors.tscn", "res://scenes/dungeon/rooms/academy_b2_storage.tscn"])
 chunk_width = 30.0
-encounters = [SubResource("enc_entry_1"), SubResource("enc_entry_2")]
+encounters = Array[ExtResource("2")]([SubResource("enc_entry_1"), SubResource("enc_entry_2")])
 music_track = &"stage_1"
 belt_depth = 10.0

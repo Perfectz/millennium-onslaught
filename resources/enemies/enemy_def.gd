@@ -66,3 +66,8 @@ extends Resource
 @export var procedural_body: HordeUnitDef = null
 ## Uniform scale for the procedural body (bosses are big).
 @export var procedural_body_scale: float = 1.0
+
+## Summoning (e.g. Igglanova's Fission calls Xanafalgue): horde unit, count per cast, seconds between casts.
+@export var summon_unit: HordeUnitDef = null
+@export var summon_count: int = 0
+@export var summon_interval: float = 0.0

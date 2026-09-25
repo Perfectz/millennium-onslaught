@@ -1,4 +1,4 @@
-[gd_resource type="Resource" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="StageDef" format=3]
 
 [ext_resource type="Script" path="res://resources/stages/stage_def.gd" id="1"]
 [ext_resource type="Script" path="res://resources/stages/stage_encounter_entry.gd" id="2"]
@@ -13,7 +13,6 @@ trigger_x = 14.0
 arena_half_width = 9.0
 arena_min_z = -8.0
 arena_max_z = 8.0
-is_boss = false
 
 [sub_resource type="Resource" id="enc_entry_2"]
 script = ExtResource("2")
@@ -22,7 +21,6 @@ trigger_x = 50.0
 arena_half_width = 9.0
 arena_min_z = -10.0
 arena_max_z = 10.0
-is_boss = false
 
 [sub_resource type="Resource" id="enc_entry_boss"]
 script = ExtResource("2")
@@ -36,9 +34,9 @@ is_boss = true
 [resource]
 script = ExtResource("1")
 stage_id = &"academy_b3"
-stage_name = "Floor 3 - Antidote Annex"
+stage_name = "B3 - Bio-Capsule Laboratory"
 chunk_scenes = Array[String](["res://scenes/dungeon/rooms/academy_b2_library.tscn", "res://scenes/dungeon/rooms/academy_b3_gauntlet.tscn", "res://scenes/dungeon/rooms/academy_b3_boss.tscn"])
 chunk_width = 36.0
-encounters = [SubResource("enc_entry_1"), SubResource("enc_entry_2"), SubResource("enc_entry_boss")]
+encounters = Array[ExtResource("2")]([SubResource("enc_entry_1"), SubResource("enc_entry_2"), SubResource("enc_entry_boss")])
 music_track = &"stage_1"
 belt_depth = 12.0

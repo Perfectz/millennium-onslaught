@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EnemyDef" format=3]
+
+[ext_resource type="Resource" path="res://resources/attacks/enemy_rusher_attack.tres" id="1_pnxnt"]
+[ext_resource type="Script" path="res://resources/enemies/enemy_def.gd" id="2_syage"]
+
+[resource]
+script = ExtResource("2_syage")
+enemy_name = &"Xanafalgue"
+enemy_type = &"xanafalgue"
+base_hp = 48.0
+attack = ExtResource("1_pnxnt")
+knockback_resistance = 0.05
+mesh_color = Color(0.9, 0.2, 0.15, 1)
+xp_reward = 6
+gold_reward = 4

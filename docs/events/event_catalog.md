@@ -86,6 +86,7 @@
 | `enemy_spawned` | `enemy: Node, enemy_type: StringName` | Wave system | AI, HUD |
 | `enemy_died` | `enemy: Node, enemy_type: StringName, position: Vector3` | Health component | Wave system, Drops, Score |
 | `enemy_wave_cleared` | *none* | Wave system | Camera, Dungeon |
+| `enemy_summon_requested` | `summoner: Node, unit: Resource, count: int, origin: Vector3` | EnemyController (EnemyDef.summon_*) | DungeonRun / BattlefieldRun (spawn via HordeDirector) |
 
 ## Encounter Events
 

@@ -1,26 +1,28 @@
-[gd_resource type="Resource" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="EncounterDef" format=3]
 
 [ext_resource type="Script" path="res://resources/encounters/encounter_def.gd" id="1"]
 [ext_resource type="Script" path="res://resources/encounters/wave_def.gd" id="2"]
 [ext_resource type="Script" path="res://resources/encounters/spawn_entry.gd" id="3"]
-[ext_resource type="Resource" path="res://resources/enemies/boss_def.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/enemies/igglanova_def.tres" id="4_k487k"]
+[ext_resource type="Resource" path="res://resources/battlefield/units/xanafalgue.tres" id="5_fpf6y"]
 
-[sub_resource type="Resource" id="spawn_boss"]
+[sub_resource type="Resource" id="Resource_x0ocn"]
 script = ExtResource("3")
-enemy_def = ExtResource("4")
-count = 1
-spawn_side = &"right"
+enemy_def = ExtResource("4_k487k")
 
-[sub_resource type="Resource" id="wave1"]
+[sub_resource type="Resource" id="Resource_4ie26"]
+script = ExtResource("3")
+count = 6
+horde_unit = ExtResource("5_fpf6y")
+
+[sub_resource type="Resource" id="Resource_yqmri"]
 script = ExtResource("2")
-spawn_entries = [SubResource("spawn_boss")]
-delay_before_spawn = 2.0
+spawn_entries = Array[ExtResource("3")]([SubResource("Resource_x0ocn"), SubResource("Resource_4ie26")])
 
 [resource]
 script = ExtResource("1")
 encounter_id = &"academy_boss"
-waves = [SubResource("wave1")]
-arena_lock = true
+waves = Array[ExtResource("2")]([SubResource("Resource_yqmri")])
 arena_min_x = -11.0
 arena_max_x = 11.0
 arena_min_z = -11.0
