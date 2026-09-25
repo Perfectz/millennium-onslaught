@@ -147,6 +147,7 @@
 | `rpg_status_effect_expired` | `target: Node, effect_type: StringName` | StatusEffectTracker (via PlayerController/EnemyController) | VFX, HUD |
 | `rpg_item_dropped` | `position: Vector3, item_id: StringName` | DungeonManager (via DropRoller) | VFX, Pickup system |
 | `rpg_item_picked_up` | `item_id: StringName` | Pickup system | HUD, ToastSystem |
+| `rpg_item_used` | `player_index: int, item_id: StringName` | PlayerController.use_item | HUD, Audio, Analytics |
 
 ## Stage Events
 

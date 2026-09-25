@@ -538,3 +538,13 @@ const BASE_GARRISON_SIZE: int = 24
 const BATTLEFIELD_PLAYER_REACH_SCALE: float = 1.45
 ## Enemies closer than this to the camera are hidden so they never block the view.
 const BATTLEFIELD_CAMERA_HIDE_DISTANCE: float = 2.2
+## Item pickups (battlefield drops).
+const PICKUP_POOL_SIZE: int = 40
+const PICKUP_COLLECT_RADIUS: float = 1.1
+const PICKUP_MAGNET_RADIUS: float = 3.2
+const PICKUP_MAGNET_SPEED: float = 9.0
+const PICKUP_LIFETIME: float = 30.0
+## Officers always drop this, plus a chance at the rare drop.
+const OFFICER_DROP_ITEM: StringName = &"dimate"
+const OFFICER_RARE_DROP_ITEM: StringName = &"trimate"
+const OFFICER_RARE_DROP_CHANCE: float = 0.35

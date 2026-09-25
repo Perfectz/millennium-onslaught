@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/items/item_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+item_id = &"moon_dew"
+display_name = "Moon Dew"
+description = "Revives a fallen ally."
+cost = 500
+category = &"consumable"
+heal_hp_ratio = 0.5
+heal_tp = 0.0
+cures = Array[StringName]([])
+revive = true
+auto_use_on_pickup = false
+pickup_color = Color(0.8, 0.85, 1, 1)
+field_effect = &""

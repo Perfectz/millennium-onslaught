@@ -32,6 +32,7 @@ enum Phase { BATTLE, COMMANDER, ENDED }
 var _def: BattlefieldDef
 var _env: BattlefieldEnvironment
 var _director: HordeDirector
+var _pickups: PickupField
 var _control := BattlefieldControl.new()
 var _tally := BattleTally.new()
 var _hud: Node = null
@@ -70,6 +71,11 @@ func _ready() -> void:
 	_director.arena = Rect2(-half.x, -half.y, _def.arena_size.x, _def.arena_size.y)
 	add_child(_director)
 	_director.grunt_defeated.connect(_on_grunt_defeated)
+
+	_pickups = PickupField.new()
+	_pickups.name = "PickupField"
+	_pickups.player = player
+	add_child(_pickups)
 
 	var hitstop := HitstopSystem.new()
 	hitstop.name = "HitstopSystem"
@@ -325,7 +331,10 @@ func _check_captures() -> void:
 		_control.try_capture(id)
 
 
-func _on_grunt_defeated(_grunt: HordeGrunt, base_id: StringName, _attacker: Node3D) -> void:
+func _on_grunt_defeated(grunt: HordeGrunt, base_id: StringName, _attacker: Node3D) -> void:
+	if grunt.def and not grunt.def.drop_table.is_empty():
+		for item_id in DropRoller.roll_drops(grunt.def.drop_table):
+			_pickups.spawn(item_id, grunt.global_position)
 	if base_id != &"":
 		_control.register_garrison_ko(base_id)
 	_register_ko(false, Constants.BATTLE_XP_PER_KO)
@@ -347,10 +356,17 @@ func _on_enemy_died(enemy: Node, _type: StringName, _pos: Vector3) -> void:
 	_officers.erase(key)
 	var ec := enemy as EnemyController
 	_register_ko(true, ec.enemy_def.xp_reward if ec and ec.enemy_def else Constants.BATTLE_XP_PER_OFFICER)
+	_drop_officer_loot(ec.global_position if ec else player.global_position)
 	_control.register_officer_ko()
 	if entry["base_id"] != &"":
 		_control.register_garrison_ko(entry["base_id"])
 	EventBus.battlefield_officer_defeated.emit(enemy, entry["name"])
+
+
+func _drop_officer_loot(pos: Vector3) -> void:
+	_pickups.spawn(Constants.OFFICER_DROP_ITEM, pos)
+	if randf() < Constants.OFFICER_RARE_DROP_CHANCE:
+		_pickups.spawn(Constants.OFFICER_RARE_DROP_ITEM, pos + Vector3(0.8, 0.0, 0.0))
 
 
 func _register_ko(is_officer: bool, xp: int) -> void:

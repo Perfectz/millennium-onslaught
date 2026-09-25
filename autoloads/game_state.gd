@@ -752,9 +752,22 @@ func _hydrate_inventory_entry(entry: Dictionary) -> Dictionary:
 
 func _get_item_defaults(item_id: StringName) -> Dictionary:
 	var def := _load_equipment_def(item_id)
-	if def == null:
+	if def != null:
+		return InventoryManager.from_equipment_def(def)
+	var item := load_item_def(item_id)
+	if item == null:
 		return {}
-	return InventoryManager.from_equipment_def(def)
+	return {"display_name": item.display_name, "description": item.description, "cost": item.cost, "slot": &""}
+
+
+## Load a consumable/key ItemDef by id (res://resources/items/<id>.tres), or null.
+func load_item_def(item_id: StringName) -> ItemDef:
+	if item_id == &"":
+		return null
+	var path := "res://resources/items/%s.tres" % str(item_id)
+	if not ResourceLoader.exists(path):
+		return null
+	return load(path) as ItemDef
 
 
 func _load_equipment_def(item_id: StringName) -> EquipmentDef:

@@ -4,9 +4,6 @@ class_name PlayerController
 extends CharacterBody3D
 
 
-const _SPELL_FIREBALL := preload("res://resources/techniques/spell_fireball.tres")
-const _SPELL_HEAL := preload("res://resources/techniques/spell_heal.tres")
-const _SPELL_BURST := preload("res://resources/techniques/spell_radiant_burst.tres")
 const PlayerHitPolicyScript := preload("res://scripts/components/player_hit_policy.gd")
 const PlayerLockOnPolicyScript := preload("res://scripts/components/player_lock_on_policy.gd")
 const PlayerProfilePolicyScript := preload("res://scripts/components/player_profile_policy.gd")
@@ -192,16 +189,33 @@ func _process(_delta: float) -> void:
 	if InputManager.is_action_just_pressed_for_player(player_index, &"lock_on"):
 		try_lock_on()
 
-	# Button-based spell casting (LB=heal, RT=projectile, LT=AoE).
+	# Spell buttons cast this character's best *learned* technique per slot (LB=heal, RT=single, LT=area).
 	if InputManager.is_action_just_pressed_for_player(player_index, &"heal_spell"):
-		_pending_spell = _SPELL_HEAL
-		intent_buffer.record(&"spell")
+		_queue_spell(SpellSlotResolver.Slot.HEAL)
 	if InputManager.is_action_just_pressed_for_player(player_index, &"projectile_attack"):
-		_pending_spell = _SPELL_FIREBALL
-		intent_buffer.record(&"spell")
+		_queue_spell(SpellSlotResolver.Slot.SINGLE)
 	if InputManager.is_action_just_pressed_for_player(player_index, &"aoe_spell"):
-		_pending_spell = _SPELL_BURST
-		intent_buffer.record(&"spell")
+		_queue_spell(SpellSlotResolver.Slot.AREA)
+
+
+func _queue_spell(slot: SpellSlotResolver.Slot) -> void:
+	var tech := SpellSlotResolver.best(_all_techniques(), xp_tracker.get_level(), slot)
+	if tech == null:
+		ToastSystem.show_toast("No technique learned for that yet", Color(0.8, 0.8, 0.9))
+		return
+	_pending_spell = tech
+	intent_buffer.record(&"spell")
+
+
+func _all_techniques() -> Array[TechniqueDef]:
+	if character_def == null:
+		return []
+	return character_def.techniques
+
+
+## Techniques this character has learned at their current level.
+func get_learned_techniques() -> Array[TechniqueDef]:
+	return SpellSlotResolver.learned(_all_techniques(), xp_tracker.get_level())
 
 
 ## Apply gravity with fall multiplier.
@@ -485,6 +499,11 @@ func _bridge_eventbus_signals() -> void:
 	)
 	xp_tracker.level_up.connect(func(new_level: int, stat_points: int) -> void:
 		EventBus.rpg_level_up.emit(player_index, new_level)
+		# XPTracker can jump several levels at once; announce every technique crossed.
+		var prior_level := new_level - 1
+		for tech in SpellSlotResolver.newly_learned(_all_techniques(), prior_level, new_level):
+			EventBus.rpg_technique_learned.emit(player_index, tech.technique_id)
+			ToastSystem.show_toast("Learned %s!" % tech.display_name, tech.particle_color)
 		var char_id := _get_active_character_id()
 		var data := GameState.ensure_character_record(char_id)
 		if data.is_empty():
@@ -541,19 +560,19 @@ func get_derived_stats() -> Dictionary:
 
 ## Get the currently selected technique, or null if none available.
 func get_active_technique() -> TechniqueDef:
-	if not character_def:
+	var learned := get_learned_techniques()
+	if learned.is_empty():
 		return null
-	if character_def.techniques.is_empty():
-		return null
-	active_technique_index = clampi(active_technique_index, 0, character_def.techniques.size() - 1)
-	return character_def.techniques[active_technique_index]
+	active_technique_index = clampi(active_technique_index, 0, learned.size() - 1)
+	return learned[active_technique_index]
 
 
-## Cycle to the next available technique.
+## Cycle to the next learned technique.
 func cycle_technique() -> void:
-	if not character_def or character_def.techniques.is_empty():
+	var learned := get_learned_techniques()
+	if learned.is_empty():
 		return
-	active_technique_index = (active_technique_index + 1) % character_def.techniques.size()
+	active_technique_index = (active_technique_index + 1) % learned.size()
 
 
 ## Load CharacterDef and restore RPG state from GameState on ready.
@@ -588,6 +607,29 @@ func _load_character_from_game_state() -> void:
 
 
 ## Emit initial HP/TP values so the HUD picks them up after connecting signals.
+## Apply a consumable to this character. Returns false if it would have no effect.
+func use_item(item: ItemDef) -> bool:
+	if item == null:
+		return false
+	var active: Array[StringName] = []
+	for status in item.cures:
+		if status_effects.has_effect(status):
+			active.append(status)
+	var result := ItemEffectResolver.resolve(
+		item, health.get_current_hp(), health.get_max_hp(),
+		tp_tracker.get_current_tp(), tp_tracker.get_max_tp(), active)
+	if not result["useful"]:
+		return false
+	if float(result["hp_restored"]) > 0.0:
+		health.heal(float(result["hp_restored"]))
+	if float(result["tp_restored"]) > 0.0:
+		tp_tracker.add_tp(float(result["tp_restored"]))
+	for status: StringName in result["cured"]:
+		status_effects.remove_effect(status)
+	EventBus.rpg_item_used.emit(player_index, item.item_id)
+	return true
+
+
 ## Enter the Combination state when requested and the gauge is full.
 func _try_start_combination() -> void:
 	if not intent_buffer.consume(&"combination"):

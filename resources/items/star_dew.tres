@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/items/item_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+item_id = &"star_dew"
+display_name = "Star Dew"
+description = "Restores the HP of the whole party."
+cost = 300
+category = &"consumable"
+heal_hp_ratio = 1.0
+heal_tp = 0.0
+cures = Array[StringName]([])
+revive = false
+auto_use_on_pickup = false
+pickup_color = Color(1, 1, 0.8, 1)
+field_effect = &""

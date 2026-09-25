@@ -109,6 +109,7 @@ signal rpg_status_effect_applied(target: Node, effect_type: StringName, duration
 signal rpg_status_effect_expired(target: Node, effect_type: StringName)
 signal rpg_item_dropped(position: Vector3, item_id: StringName)
 signal rpg_item_picked_up(item_id: StringName)
+signal rpg_item_used(player_index: int, item_id: StringName)
 
 # --- Save/Load ---
 signal save_completed(slot: int)
