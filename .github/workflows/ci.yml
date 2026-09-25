@@ -7,7 +7,7 @@ on:
     branches: [main, develop]
 
 env:
-  GODOT_VERSION: "4.6.1"
+  GODOT_VERSION: "4.7.2"
 
 jobs:
   smoke-test:

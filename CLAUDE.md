@@ -6,7 +6,7 @@
 
 ## Project Identity
 
-- **Engine:** Godot 4.6.1 (GDScript)
+- **Engine:** Godot 4.7.2 (GDScript)
 - **Genre:** 2.5D belt-scroller beat-'em-up with JRPG progression and roguelike dungeon tension
 - **Platforms:** PC (60fps) and Android (30fps)
 - **Rendering:** Full 3D (not 2D with manual sorting) — depth sorting is automatic via Z-buffer
