@@ -38,6 +38,8 @@ func _on_entry_activated(entry: Dictionary) -> void:
 			GameManager.go_to_town(target_id)
 		"go_dungeon":
 			GameManager.go_to_character_select(target_id)
+		"go_battlefield":
+			GameManager.go_to_battlefield_select(target_id)
 		_:
 			if node_def.node_type == &"town":
 				GameManager.go_to_town(node_id)

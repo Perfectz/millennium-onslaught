@@ -67,6 +67,9 @@ var status_effects: StatusEffectTracker
 ## Currently selected technique index.
 var active_technique_index: int = 0
 
+## Musou-style Combination meter (fills from hits/KOs/damage taken; spent by the combination state).
+var combination_gauge: CombinationGauge
+
 ## The spell queued by a button press for the spell state to consume.
 var _pending_spell: TechniqueDef = null
 
@@ -84,6 +87,7 @@ func _ready() -> void:
 	xp_tracker = XPTracker.new()
 	equipment_manager = EquipmentManager.new()
 	status_effects = StatusEffectTracker.new()
+	combination_gauge = CombinationGauge.new()
 
 	# Sample inputs even when Engine.time_scale == 0 (hitstop).
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -104,6 +108,7 @@ func _ready() -> void:
 	var SpellScript := load("res://scripts/core/player_states/player_state_spell.gd")
 	state_machine.add_state(&"spell", SpellScript.new())
 	state_machine.add_state(&"dodge", PlayerStateDodge.new())
+	state_machine.add_state(&"combination", PlayerStateCombination.new())
 	state_machine.add_state(&"hurt", PlayerStateHurt.new())
 	state_machine.add_state(&"dead", PlayerStateDead.new())
 	state_machine.set_initial_state(&"idle")
@@ -149,6 +154,8 @@ func _physics_process(delta: float) -> void:
 			state_machine.transition_to(&"dead")
 
 
+	_try_start_combination()
+
 	# Early fall recovery — catch falls before the kill plane at Y < -10.
 	var recovery := PlayerRuntimePolicyScript.resolve_fall_recovery(position, velocity, -2.0, 0.1)
 	position = recovery.get("position", position) as Vector3
@@ -168,6 +175,8 @@ func _process(_delta: float) -> void:
 		intent_buffer.record(&"dodge")
 	if InputManager.is_action_just_pressed_for_player(player_index, &"technique"):
 		intent_buffer.record(&"technique")
+	if InputManager.is_action_just_pressed_for_player(player_index, &"combination"):
+		intent_buffer.record(&"combination")
 	var guard_state := PlayerRuntimePolicyScript.resolve_guard_state(
 		InputManager.is_action_just_pressed_for_player(player_index, &"block"),
 		InputManager.is_action_pressed_for_player(player_index, &"block"),
@@ -431,7 +440,7 @@ func _on_hit_received(attack_data: AttackDef, attacker: Node3D) -> void:
 		EventBus.combat_block.emit(self)
 	var resolved_attack := resolution.get("resolved_attack", attack_data) as AttackDef
 
-	CombatSystem.process_hit(
+	var damage_taken := CombatSystem.process_hit(
 		health, resolved_attack, attacker, self,
 		float(damage_context.get("defense", 0.0)),
 		0,
@@ -439,6 +448,8 @@ func _on_hit_received(attack_data: AttackDef, attacker: Node3D) -> void:
 		1.0,
 		float(damage_context.get("damage_taken_multiplier", 1.0))
 	)
+
+	combination_gauge.register_damage_taken(damage_taken)
 
 	# Apply elemental status effects from the incoming attack.
 	CombatSystem.apply_status_if_applicable(resolved_attack, self, status_effects)
@@ -502,6 +513,11 @@ func _bridge_eventbus_signals() -> void:
 		EventBus.rpg_status_effect_expired.emit(self, effect_type)
 	)
 	EventBus.enemy_died.connect(_on_enemy_kill_heal)
+	combination_gauge.changed.connect(func(value: float, max_value: float) -> void:
+		EventBus.player_combination_changed.emit(player_index, value, max_value)
+	)
+	EventBus.combat_hit_event.connect(_on_combat_hit_for_gauge)
+	EventBus.combat_kill_event.connect(_on_combat_kill_for_gauge)
 
 
 ## Configure the player with a CharacterDef resource.
@@ -572,7 +588,30 @@ func _load_character_from_game_state() -> void:
 
 
 ## Emit initial HP/TP values so the HUD picks them up after connecting signals.
+## Enter the Combination state when requested and the gauge is full.
+func _try_start_combination() -> void:
+	if not intent_buffer.consume(&"combination"):
+		return
+	var current := state_machine.current_state_name
+	if current == &"dead" or current == &"combination":
+		return
+	if not combination_gauge.try_consume():
+		return
+	state_machine.transition_to(&"combination")
+
+
+func _on_combat_hit_for_gauge(event: CombatHitEvent) -> void:
+	if event.attacker == self and event.target != self:
+		combination_gauge.register_hit()
+
+
+func _on_combat_kill_for_gauge(event: CombatKillEvent) -> void:
+	if event.attacker == self:
+		combination_gauge.register_ko()
+
+
 func _emit_initial_state() -> void:
+	EventBus.player_combination_changed.emit(player_index, combination_gauge.get_value(), Constants.COMBINATION_GAUGE_MAX)
 	EventBus.player_health_changed.emit(player_index, health.get_current_hp(), health.get_max_hp())
 	EventBus.player_tp_changed.emit(player_index, tp_tracker.get_current_tp(), tp_tracker.get_max_tp())
 

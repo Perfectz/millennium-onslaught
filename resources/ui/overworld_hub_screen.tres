@@ -48,6 +48,24 @@ entries = [{
 "story_video": "res://assets/textures/locations/piata_academy_story.ogv",
 "title": "Piata Academy"
 }, {
+"action": "go_battlefield",
+"action_target": "piata_plains",
+"accent": Color(1, 0.72, 0.3, 1),
+"context_subtitle": "OPEN FIELD BATTLE",
+"context_title": "MOTAVIA MAP: PIATA PLAINS",
+"description": "Bio-monster hives have erupted across the plains south of the Academy. Hundreds of creatures pour from three nests. Break their garrisons, take the hives, and draw out the Hive Warden.",
+"dialogue": "There must be hundreds of them out there. Stay close, rookie\u2014and when the Combination gauge is full, let it rip.",
+"id": "piata_plains",
+"level": "Battle \u2022 Lv 1 - 6",
+"menu_label": "Piata Plains  [BATTLE]",
+"node_id": "piata_plains",
+"portrait_code": "ALYS / HUNTER",
+"portrait_image": "res://assets/textures/portraits/alys_portrait.png",
+"speaker": "Alys Brangwin",
+"story_subtitle": "HIVE OUTBREAK / MUSOU BATTLE",
+"story_title": "STORY CUE",
+"title": "Piata Plains"
+}, {
 "action": "go_dungeon",
 "action_target": "dungeon_1",
 "accent": Color(0.26, 0.95, 1, 1),

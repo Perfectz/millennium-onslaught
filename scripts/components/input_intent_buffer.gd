@@ -2,7 +2,7 @@
 ## then executes on the first legal frame. Prevents "eaten inputs" across states,
 ## hitstop, and recovery windows. Pure logic — no scene tree dependency.
 ##
-## Categories: attack_light, attack_heavy, dodge, technique
+## Categories: attack_light, attack_heavy, dodge, technique, spell, combination
 ## Policy: last-intent-wins within category, expired intents are ignored,
 ## clear_all on knockdown/hard-stun/death/menu.
 class_name InputIntentBuffer
@@ -32,6 +32,7 @@ func _init(clock: Callable = Callable()) -> void:
 		&"dodge": Constants.DODGE_BUFFER_WINDOW,
 		&"technique": Constants.TECHNIQUE_BUFFER_WINDOW,
 		&"spell": Constants.SPELL_BUFFER_WINDOW,
+		&"combination": Constants.TECHNIQUE_BUFFER_WINDOW,
 	}
 	clear_all()
 

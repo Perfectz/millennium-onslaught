@@ -38,6 +38,24 @@ signal player_tp_changed(player_index: int, new_tp: float, max_tp: float)
 signal player_died(player_index: int)
 signal player_revived(player_index: int)
 
+# --- Combination (musou) ---
+signal combat_combination_started(player: Node, element: StringName)
+signal combat_combination_pulse(player: Node, origin: Vector3, radius: float)
+signal combat_combination_finished(player: Node)
+signal player_combination_changed(player_index: int, value: float, max_value: float)
+
+# --- Battlefield ---
+signal battlefield_started(battlefield_id: StringName)
+signal battlefield_ko_count_changed(ko_count: int)
+signal battlefield_ko_milestone(ko_count: int)
+signal battlefield_base_captured(base_id: StringName, display_name: String)
+signal battlefield_base_lost(base_id: StringName, display_name: String)
+signal battlefield_officer_spawned(officer: Node, display_name: String)
+signal battlefield_officer_defeated(officer: Node, display_name: String)
+signal battlefield_morale_changed(morale: float)
+signal battlefield_objective_changed(text: String)
+signal battlefield_completed(battlefield_id: StringName, victory: bool)
+
 # --- Enemy ---
 signal enemy_spawned(enemy: Node, enemy_type: StringName)
 signal enemy_died(enemy: Node, enemy_type: StringName, position: Vector3)

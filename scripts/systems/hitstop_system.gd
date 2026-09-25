@@ -43,5 +43,8 @@ func _on_hit_event(event: CombatHitEvent) -> void:
 		start_hitstop(Constants.HITSTOP_LIGHT_DURATION)
 
 
-func _on_kill_event(_event: CombatKillEvent) -> void:
+func _on_kill_event(event: CombatKillEvent) -> void:
+	# Horde grunts die by the dozen; freezing on each would stall the battlefield.
+	if is_instance_valid(event.target) and event.target.is_in_group(&"horde"):
+		return
 	start_hitstop(Constants.HITSTOP_KILL_DURATION)

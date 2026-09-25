@@ -94,7 +94,10 @@ func _on_hit_event(event: CombatHitEvent) -> void:
 		screen_flash(Color(1, 1, 1, 0.15), 0.06)
 
 
-func _on_kill_event(_event: CombatKillEvent) -> void:
+func _on_kill_event(event: CombatKillEvent) -> void:
+	# Horde grunt KOs get no kill slow-mo/flash — only officers and bosses earn that beat.
+	if is_instance_valid(event.target) and event.target.is_in_group(&"horde"):
+		return
 	directional_shake(Constants.CAMERA_SHAKE_KILL, Constants.CAMERA_SHAKE_DURATION * 1.3, Vector3.UP)
 	screen_flash(Color(1, 0.95, 0.8, 0.25), 0.08)
 	slow_motion(0.15, Constants.HITSTOP_KILL_DURATION)

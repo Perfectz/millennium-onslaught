@@ -7,12 +7,12 @@
 ## Project Identity
 
 - **Engine:** Godot 4.7.2 (GDScript)
-- **Genre:** 2.5D belt-scroller beat-'em-up with JRPG progression and roguelike dungeon tension
+- **Genre:** Dynasty-Warriors-style musou × Phantasy Star IV JRPG (open battlefields with 100+ enemies, plus dungeons), following PSIV's plot, bosses, enemies, techniques and items
 - **Platforms:** PC (60fps) and Android (30fps)
 - **Rendering:** Full 3D (not 2D with manual sorting) — depth sorting is automatic via Z-buffer
 - **Resolution:** 1920x1080 base, stretch mode `canvas_items`, aspect `expand`
 - **Test Framework:** GdUnit4
-- **Current MVP:** MVP 0 (Project scaffold and tooling setup)
+- **Current focus:** PSIV fusion — battlefield (musou) mode vertical slice landed; next is re-theming content to the PSIV roster/plot (see `docs/design/fusion_direction.md`)
 
 ## Onboarding Protocol
 

@@ -547,3 +547,34 @@
 - Keep anonymous dictionaries for payloads: Flexible short term, but weakens validation and makes AI-driven edits harder to reason about.
 
 **Key Files:** `autoloads/event_bus.gd`, `scripts/contracts/combat_hit_event.gd`, `scripts/contracts/combat_kill_event.gd`, `scripts/systems/combat_system.gd`, `docs/events/event_catalog.md`, `docs/events/combat_event_contracts.md`, `tools/validate_event_catalog.py`, `tools/smoke_test.sh`, `tools/sanity_check.ps1`, `.github/workflows/ci.yml`
+
+---
+
+## 2026-09-25 — Upgrade to Godot 4.7.2 and bring the repo back online
+
+**Decision:** Move the project from Godot 4.6.1 to 4.7.2 (latest stable), and make a clean clone buildable by vendoring content that previously lived only in the gitignored `humandropbox/` staging folder.
+
+**Why:** The academy dungeon rooms, 16 Alys animation scenes and the title music referenced `res://humandropbox/...`, so every fresh clone (and CI) loaded a broken dungeon. 4.7.2 imported with no script changes; the only diffs are new importer defaults in `.import` files.
+
+**What Changed:** 24 CC0 KayKit Dungeon Remastered models vendored into `assets/environment/kaykit_dungeon/`; scene/import paths repointed; ObjectPool now adopts returned instances (level teardown can no longer free pooled nodes) and skips freed instances; CI pinned to 4.7.2.
+
+**Alternatives Considered:** Stay on 4.6.x (no benefit, user asked for latest); commit `humandropbox/` wholesale (hundreds of MB of unused staging assets).
+
+---
+
+## 2026-09-25 — Battlefield (musou) mode: data-oriented horde + Combination gauge
+
+**Decision:** Add a Dynasty-Warriors-style battlefield mode alongside dungeons. Mass enemies are lightweight pooled `HordeGrunt` nodes driven by a single `HordeDirector` loop; officers/commanders reuse the full `EnemyController`. A PSIV-themed Combination gauge replaces the classic musou meter.
+
+**Why:** The fusion direction (Dynasty Warriors × Phantasy Star IV) needs 100+ enemies on screen. `EnemyController` (CharacterBody3D + state machine + skinned model per enemy) costs far too much at that count. Grunts keep a `Hurtbox`, so every existing attack path (combo hitbox, projectiles, spells, Combination) hits them with no special cases.
+
+**Key choices:**
+1. **Batched AI** — one `_physics_process` for all grunts; `SpatialHashGrid` for separation (time-sliced, half the crowd per frame); `AttackTokenPool` caps simultaneous attackers (morale scales the cap); telegraphed windups.
+2. **Pure rules, TDD** — `CombinationGauge`, `AttackTokenPool`, `SpatialHashGrid`, `BattleTally`, `BattlefieldControl`, `HordeSteering` are RefCounted with 50 unit tests.
+3. **Juice budget** — grunt KOs skip kill hitstop/slow-mo (officers and bosses keep it), otherwise sweeping a crowd would stall the game.
+4. **Procedural placeholder art** — `HordeMeshFactory` builds low-poly vertex-coloured biomonsters, one shared mesh per type.
+5. **Measured cost** — `HordeDirector` ≈ 1.3 ms/frame for 140 grunts on a 2.8 GHz cloud vCPU (GDScript). Next lever if Android needs it: move the inner loop to C#/GDExtension.
+
+**Alternatives Considered:** MultiMesh-only crowds (cheapest to draw, but per-grunt hit reactions and hurtboxes get much harder); reusing `EnemyController` for everything (too slow past ~20 enemies); Area3D-free hit detection in the director (duplicates the combat path).
+
+**Key Files:** `scripts/battlefield/*`, `scripts/core/player_states/player_state_combination.gd`, `scenes/battlefield/battlefield_run.tscn`, `resources/battlefield/*`.

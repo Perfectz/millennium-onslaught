@@ -278,6 +278,7 @@ const SCENE_MAIN_MENU: String = "res://scenes/ui/main_menu.tscn"
 const SCENE_OVERWORLD: String = "res://scenes/overworld/overworld.tscn"
 const SCENE_TOWN: String = "res://scenes/town/town.tscn"
 const SCENE_DUNGEON: String = "res://scenes/dungeon/dungeon_run.tscn"
+const SCENE_BATTLEFIELD: String = "res://scenes/battlefield/battlefield_run.tscn"
 const SCENE_SPLASH: String = "res://scenes/ui/splash_screen.tscn"
 const SCENE_TITLE: String = "res://scenes/ui/title_screen.tscn"
 const SCENE_CUTSCENE: String = "res://scenes/ui/cutscene_player.tscn"
@@ -298,6 +299,7 @@ const SPLASH_HOLD_TIME: float = 2.0
 # --- Overworld Node Data ---
 const OVERWORLD_NODES: Array[String] = [
 	"res://resources/story/node_piata.tres",
+	"res://resources/story/node_piata_plains.tres",
 	"res://resources/story/node_dungeon_1.tres",
 	"res://resources/story/node_birth_valley.tres",
 	"res://resources/story/node_zema.tres",
@@ -481,3 +483,56 @@ const OBJECT_POOL_ENEMY_COUNT: int = 20
 const OBJECT_POOL_PROJECTILE_COUNT: int = 30
 const OBJECT_POOL_VFX_COUNT: int = 40
 const OBJECT_POOL_DAMAGE_NUMBER_COUNT: int = 20
+
+# --- Battlefield (Musou horde mode) ---
+## Combination gauge (Dynasty-Warriors "musou" meter, themed on PSIV Combinations).
+const COMBINATION_GAUGE_MAX: float = 100.0
+const COMBINATION_GAIN_PER_HIT: float = 1.5
+const COMBINATION_GAIN_PER_KO: float = 2.0
+const COMBINATION_GAIN_ON_DAMAGE_TAKEN_RATIO: float = 0.35
+const COMBINATION_ATTACK_RADIUS: float = 6.5
+const COMBINATION_ATTACK_DURATION: float = 1.6
+const COMBINATION_ATTACK_PULSES: int = 4
+const COMBINATION_ATTACK_BASE_DAMAGE: float = 38.0
+const COMBINATION_ATTACK_KNOCKBACK: float = 9.0
+## Horde grunts.
+const HORDE_MAX_GRUNTS: int = 140
+const HORDE_SPATIAL_CELL_SIZE: float = 2.5
+const HORDE_SEPARATION_RADIUS: float = 1.05
+const HORDE_SEPARATION_FORCE: float = 6.0
+const HORDE_ATTACK_TOKENS: int = 4
+const HORDE_ENGAGE_RADIUS: float = 14.0
+const HORDE_RING_RADIUS: float = 3.2
+const HORDE_ATTACK_RANGE: float = 1.6
+const HORDE_ATTACK_WINDUP: float = 0.55
+const HORDE_ATTACK_RECOVERY: float = 0.7
+const HORDE_ATTACK_COOLDOWN: float = 1.4
+const HORDE_STAGGER_TIME: float = 0.35
+const HORDE_LAUNCH_GRAVITY: float = 22.0
+const HORDE_KNOCKBACK_DECAY: float = 7.5
+const HORDE_CORPSE_TIME: float = 0.9
+const HORDE_FLASH_TIME: float = 0.08
+const HORDE_SPAWN_INTERVAL: float = 0.35
+## Tally / rewards.
+const BATTLE_XP_PER_KO: int = 2
+const BATTLE_XP_PER_OFFICER: int = 40
+const BATTLE_GOLD_PER_KO: int = 1
+const BATTLE_GOLD_PER_OFFICER: int = 30
+const BATTLE_KO_MILESTONE: int = 100
+## Rank thresholds by KO count (S >= first entry).
+const BATTLE_RANK_KO_THRESHOLDS: Array[int] = [300, 200, 100, 50]
+const BATTLE_RANK_LETTERS: Array[String] = ["S", "A", "B", "C", "D"]
+## Morale: -100 (enemy dominant) .. 100 (allied dominant).
+const MORALE_MIN: float = -100.0
+const MORALE_MAX: float = 100.0
+const MORALE_PER_BASE_CAPTURE: float = 20.0
+const MORALE_PER_OFFICER_KO: float = 12.0
+const MORALE_PER_BASE_LOST: float = -25.0
+const MORALE_AGGRESSION_SCALE: float = 0.5
+## Bases.
+const BASE_CAPTURE_RADIUS: float = 6.0
+const BASE_GARRISON_SIZE: int = 24
+## Musou reach: the player's attack hitbox is enlarged by this factor on battlefields.
+const BATTLEFIELD_PLAYER_REACH_SCALE: float = 1.45
+## Enemies closer than this to the camera are hidden so they never block the view.
+const BATTLEFIELD_CAMERA_HIDE_DISTANCE: float = 2.2

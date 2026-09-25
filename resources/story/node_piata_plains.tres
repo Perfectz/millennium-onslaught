@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/story/overworld_node_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+node_id = &"piata_plains"
+display_name = "Piata Plains"
+node_type = &"battlefield"
+scene_path = "res://scenes/battlefield/battlefield_run.tscn"
+connections = [&"piata", &"dungeon_1"]
+requires_flag = &""
+map_position = Vector2(0.42, 0.45)
+description = "Open plains south of Piata where Bio-monster hives have erupted. A full-scale battle."

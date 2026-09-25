@@ -522,41 +522,8 @@ func _on_dungeon_completed(_dungeon_id: StringName) -> void:
 
 
 ## Process XP through level-up checks for all active party members.
-## Active character already received real-time XP - just sync state.
-## Non-active characters get bulk XP + base stat growth + stat points.
 func _apply_party_xp(xp_earned: int) -> void:
-	if xp_earned <= 0:
-		return
-	var active_char := GameState.active_party[0] if GameState.active_party.size() > 0 else &""
-	for char_id in GameState.active_party:
-		if char_id not in GameState.character_data:
-			continue
-		var data: Dictionary = GameState.character_data[char_id]
-		if char_id == active_char:
-			# Active character already leveled in real-time - sync tracker state.
-			data["xp"] = player.xp_tracker.get_xp()
-			data["level"] = player.xp_tracker.get_level()
-		else:
-			# Non-active: DungeonManager already added raw XP to data["xp"].
-			# Process pending level-ups from the accumulated total.
-			var tracker := XPTracker.new()
-			tracker.set_state(data.get("xp", 0), data.get("level", 1))
-			var old_level: int = tracker.get_level()
-			var points := tracker.check_level_ups()
-			var new_level: int = tracker.get_level()
-			var levels_gained: int = new_level - old_level
-			data["xp"] = tracker.get_xp()
-			data["level"] = new_level
-			data["stat_points_available"] = data.get("stat_points_available", 0) + points
-			# Apply base stat growth for each level gained.
-			if levels_gained > 0:
-				var growth: Dictionary = Constants.CHARACTER_STAT_GROWTH.get(char_id, Constants.DEFAULT_STAT_GROWTH)
-				var stats: Dictionary = data.get("stats", {})
-				for stat_key: StringName in growth:
-					stats[stat_key] = stats.get(stat_key, 0) + growth[stat_key] * levels_gained
-				data["stats"] = stats
-				# Restore HP on level-up for non-active members.
-				data["hp"] = data.get("max_hp", Constants.PLAYER_MAX_HP)
+	PartyXPDistributor.apply(player, xp_earned)
 
 
 func _on_dungeon_failed() -> void:
@@ -598,33 +565,8 @@ func _handle_runtime_actions() -> void:
 func _switch_character(direction: int) -> void:
 	if _char_switch_cooldown > 0.0:
 		return
-	if GameState.active_party.size() <= 1:
-		return
-	# Find current index.
-	var current_id := GameState.active_party[0]
-	var idx := GameState.active_party.find(current_id)
-	var new_idx := (idx + direction) % GameState.active_party.size()
-	if new_idx < 0:
-		new_idx += GameState.active_party.size()
-	var new_id: StringName = GameState.active_party[new_idx]
-	if new_id == current_id:
-		return
-	GameState.sync_character_runtime_state(
-		current_id,
-		player.health.get_current_hp(),
-		player.health.get_max_hp(),
-		player.tp_tracker.get_current_tp(),
-		player.xp_tracker.get_xp(),
-		player.xp_tracker.get_level()
-	)
-	# Rotate active_party so new character is at index 0.
-	var old_id := current_id
-	GameState.active_party.erase(new_id)
-	GameState.active_party.push_front(new_id)
-	# Reload player with new character data.
-	player._load_character_from_game_state()
-	_char_switch_cooldown = Constants.CHARACTER_SWITCH_COOLDOWN
-	EventBus.rpg_character_switched.emit(old_id, new_id)
+	if PartySwitcher.switch_active(player, direction):
+		_char_switch_cooldown = Constants.CHARACTER_SWITCH_COOLDOWN
 
 
 func _toggle_pause_menu() -> void:

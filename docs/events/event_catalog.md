@@ -55,6 +55,30 @@
 | `player_died` | `player_index: int` | PlayerController (bridged from HealthComponent) | GameManager, Co-op |
 | `player_revived` | `player_index: int` | Revive system | HUD, VFX |
 
+## Combination Events
+
+| Signal | Payload | Emitter | Listeners |
+|--------|---------|---------|-----------|
+| `combat_combination_started` | `player: Node, element: StringName` | PlayerStateCombination | Battlefield VFX, Audio, Camera |
+| `combat_combination_pulse` | `player: Node, origin: Vector3, radius: float` | PlayerStateCombination | Battlefield VFX (shockwave) |
+| `combat_combination_finished` | `player: Node` | PlayerStateCombination | Battlefield VFX |
+| `player_combination_changed` | `player_index: int, value: float, max_value: float` | PlayerController (CombinationGauge) | HUD / Battlefield HUD |
+
+## Battlefield Events
+
+| Signal | Payload | Emitter | Listeners |
+|--------|---------|---------|-----------|
+| `battlefield_started` | `battlefield_id: StringName` | BattlefieldRun | Audio, Analytics |
+| `battlefield_ko_count_changed` | `ko_count: int` | BattlefieldRun | Battlefield HUD |
+| `battlefield_ko_milestone` | `ko_count: int` | BattlefieldRun (BattleTally) | Toasts, Audio |
+| `battlefield_base_captured` | `base_id: StringName, display_name: String` | BattlefieldRun (BattlefieldControl) | Battlefield HUD, Toasts |
+| `battlefield_base_lost` | `base_id: StringName, display_name: String` | BattlefieldRun (BattlefieldControl) | Battlefield HUD, Toasts |
+| `battlefield_officer_spawned` | `officer: Node, display_name: String` | BattlefieldRun | Battlefield HUD, Toasts |
+| `battlefield_officer_defeated` | `officer: Node, display_name: String` | BattlefieldRun | Battlefield HUD, Toasts |
+| `battlefield_morale_changed` | `morale: float` | BattlefieldRun (BattlefieldControl) | Battlefield HUD, HordeDirector |
+| `battlefield_objective_changed` | `text: String` | BattlefieldRun | Battlefield HUD |
+| `battlefield_completed` | `battlefield_id: StringName, victory: bool` | BattlefieldRun | Results screen, Save |
+
 ## Enemy Events
 
 | Signal | Payload | Emitter | Listeners |

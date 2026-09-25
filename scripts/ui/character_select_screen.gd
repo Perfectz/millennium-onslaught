@@ -16,9 +16,12 @@ func _on_entry_activated(entry: Dictionary) -> void:
 	if char_id in GameState.active_party:
 		GameState.active_party.erase(char_id)
 	GameState.active_party.push_front(char_id)
-	# Proceed to dungeon.
+	# Proceed to the pending battlefield or dungeon.
+	var battlefield_id := GameState.pending_battlefield_id
 	var dungeon_id := GameState.pending_dungeon_id
-	if dungeon_id != &"":
+	if battlefield_id != &"":
+		GameManager.go_to_battlefield(battlefield_id)
+	elif dungeon_id != &"":
 		GameManager.go_to_dungeon(dungeon_id)
 	else:
 		GameManager.go_to_overworld()
@@ -26,6 +29,7 @@ func _on_entry_activated(entry: Dictionary) -> void:
 
 func _on_cancel_requested() -> void:
 	GameState.pending_dungeon_id = &""
+	GameState.pending_battlefield_id = &""
 	GameManager.go_to_overworld()
 
 

@@ -140,8 +140,23 @@ func go_to_character_select(dungeon_id: StringName) -> void:
 ## Navigate to a dungeon by dungeon_id.
 func go_to_dungeon(dungeon_id: StringName) -> void:
 	GameState.pending_dungeon_id = dungeon_id
+	GameState.pending_battlefield_id = &""
 	change_phase(Phase.DUNGEON)
 	transition_to_scene(Constants.SCENE_DUNGEON)
+
+
+## Navigate to character select before a battlefield (musou battle).
+func go_to_battlefield_select(battlefield_id: StringName) -> void:
+	GameState.pending_battlefield_id = battlefield_id
+	GameState.pending_dungeon_id = &""
+	transition_to_scene(Constants.SCENE_CHARACTER_SELECT)
+
+
+## Navigate straight into a battlefield by battlefield_id.
+func go_to_battlefield(battlefield_id: StringName) -> void:
+	GameState.pending_battlefield_id = battlefield_id
+	change_phase(Phase.DUNGEON)
+	transition_to_scene(Constants.SCENE_BATTLEFIELD)
 
 
 ## Navigate to a cutscene with scene data, next destination, and optional music track.

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/battlefield/horde_unit_def.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/battlefield/attacks/grunt_bite.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+unit_id = &"crawler"
+display_name = "Bio Crawler"
+max_hp = 26.0
+move_speed = 4.0
+attack = ExtResource("2")
+knockback_resistance = 0.0
+weakness = &"fire"
+resistance = &""
+body_style = &"blob"
+body_color = Color(0.46, 0.72, 0.28, 1)
+accent_color = Color(0.95, 0.8, 0.25, 1)
+body_scale = 1.0
+radius = 0.5

@@ -45,6 +45,7 @@ const REMAPPABLE_ACTIONS: Array[StringName] = [
 	&"jump", &"attack_light", &"attack_heavy", &"dodge",
 	&"block", &"technique", &"heal_spell", &"camera_reset",
 	&"lock_on", &"pause", &"character_prev", &"character_next", &"technique_cycle",
+	&"combination",
 ]
 
 ## Human-readable labels for remappable actions.
@@ -62,6 +63,7 @@ const ACTION_DISPLAY_NAMES: Dictionary = {
 	&"character_prev": "Prev Character",
 	&"character_next": "Next Character",
 	&"technique_cycle": "Cycle Technique",
+	&"combination": "Combination Attack",
 }
 
 ## Default joypad button index for each remappable action (SDL standard).
@@ -79,6 +81,7 @@ const DEFAULT_JOYPAD_BUTTONS: Dictionary = {
 	&"character_prev": JOY_BUTTON_DPAD_LEFT,
 	&"character_next": JOY_BUTTON_DPAD_RIGHT,
 	&"technique_cycle": JOY_BUTTON_DPAD_DOWN,
+	&"combination": JOY_BUTTON_BACK,
 }
 
 ## Default keyboard key for each remappable action.
@@ -96,6 +99,7 @@ const DEFAULT_KEYBOARD_KEYS: Dictionary = {
 	&"character_prev": KEY_Q,
 	&"character_next": KEY_E,
 	&"technique_cycle": KEY_O,
+	&"combination": KEY_F,
 }
 
 ## Default keyboard keys for non-remappable debug/photo actions.

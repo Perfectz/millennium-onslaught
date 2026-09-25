@@ -46,6 +46,9 @@ var pending_town_id: StringName = &""
 ## Pending dungeon to load on scene transition.
 var pending_dungeon_id: StringName = &""
 
+## Pending battlefield (musou battle) to load on scene transition.
+var pending_battlefield_id: StringName = &""
+
 ## Which save slot auto-save writes to (set on load, reset on new game).
 var active_save_slot: int = 0
 

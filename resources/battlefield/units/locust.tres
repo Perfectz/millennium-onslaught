@@ -1,0 +1,20 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/battlefield/horde_unit_def.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/battlefield/attacks/grunt_sting.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+unit_id = &"locust"
+display_name = "Sand Locust"
+max_hp = 18.0
+move_speed = 5.6
+attack = ExtResource("2")
+knockback_resistance = 0.0
+weakness = &"lightning"
+resistance = &""
+body_style = &"insect"
+body_color = Color(0.78, 0.6, 0.3, 1)
+accent_color = Color(0.55, 0.85, 0.95, 1)
+body_scale = 1.0
+radius = 0.45

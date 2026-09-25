@@ -29,6 +29,20 @@ Dev Test Scene: `res://scenes/dungeon/rooms/test_arena.tscn`
 
 ---
 
+## Battlefield Mode (Musou)
+
+Dynasty-Warriors-style open battles. Entry: overworld **Piata Plains [BATTLE]** → character select → `scenes/battlefield/battlefield_run.tscn`.
+Full file map in `scripts/battlefield/README.md`; design in `docs/design/fusion_direction.md`.
+
+| System | File | Notes |
+|---|---|---|
+| BattlefieldRun | `scripts/battlefield/battlefield_run.gd` | Orchestrator: garrisons, officers, reinforcements, capture → commander → victory/defeat, XP/meseta/save |
+| HordeDirector | `scripts/battlefield/horde_director.gd` | Batched AI for up to `HORDE_MAX_GRUNTS` pooled grunts |
+| HordeGrunt | `scripts/battlefield/horde_grunt.gd` | Lightweight enemy with `Hurtbox` (all player attacks work) |
+| Combination state | `scripts/core/player_states/player_state_combination.gd` | Musou attack; `F` / controller Back; gauge on `PlayerController.combination_gauge` |
+| Pure rules (tested) | `combination_gauge.gd`, `attack_token_pool.gd`, `spatial_hash_grid.gd`, `battle_tally.gd`, `battlefield_control.gd`, `horde_steering.gd` | `tests/unit/battlefield/` (50 tests) |
+| Shared helpers | `scripts/systems/party_xp_distributor.gd`, `scripts/systems/party_switcher.gd` | Extracted from `dungeon_run.gd`, used by both modes |
+
 ## Autoloads (Singletons)
 
 | System | File | Purpose |
@@ -348,6 +362,7 @@ Total test functions: 449
 | E | Switch character (next) |
 | O / D-Pad Left | Cycle technique |
 | Tab / L3 | Lock-on |
+| F / Back (Select) | Combination attack (when the gauge is full) |
 
 ### Debug / Demo
 | Input | Action |

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/battlefield/horde_unit_def.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/battlefield/attacks/grunt_slam.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+unit_id = &"ogre"
+display_name = "Motavian Ogre"
+max_hp = 90.0
+move_speed = 3.0
+attack = ExtResource("2")
+knockback_resistance = 0.55
+weakness = &""
+resistance = &"fire"
+body_style = &"brute"
+body_color = Color(0.55, 0.38, 0.5, 1)
+accent_color = Color(1.0, 0.35, 0.2, 1)
+body_scale = 1.15
+radius = 0.7
