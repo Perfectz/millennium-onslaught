@@ -1,6 +1,6 @@
 [gd_scene format=4]
 
-[ext_resource type="Texture2D" path="res://humandropbox/alys models/alys Rigged with texture_alpha_0.png" id="1_pgieg"]
+[ext_resource type="Texture2D" path="res://assets/models/characters/alys_cc/base/alys Rigged with texture_alpha_0.png" id="1_pgieg"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wp658"]
 resource_name = "Material_004"

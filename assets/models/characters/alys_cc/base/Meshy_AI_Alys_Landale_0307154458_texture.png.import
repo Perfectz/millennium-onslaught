@@ -3,8 +3,8 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://y0htgqt8pod1"
-path.s3tc="res://.godot/imported/Meshy_AI_Alys_Landale_0307154458_texture.png-9942839003191a7ac13cf37658e2cbf5.s3tc.ctex"
-path.etc2="res://.godot/imported/Meshy_AI_Alys_Landale_0307154458_texture.png-9942839003191a7ac13cf37658e2cbf5.etc2.ctex"
+path.s3tc="res://.godot/imported/Meshy_AI_Alys_Landale_0307154458_texture.png-93651932031b3bc4f1bcc600f70b350d.s3tc.ctex"
+path.etc2="res://.godot/imported/Meshy_AI_Alys_Landale_0307154458_texture.png-93651932031b3bc4f1bcc600f70b350d.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://humandropbox/alys models/Meshy_AI_Alys_Landale_0307154458_texture.png"
-dest_files=["res://.godot/imported/Meshy_AI_Alys_Landale_0307154458_texture.png-9942839003191a7ac13cf37658e2cbf5.s3tc.ctex", "res://.godot/imported/Meshy_AI_Alys_Landale_0307154458_texture.png-9942839003191a7ac13cf37658e2cbf5.etc2.ctex"]
+source_file="res://assets/models/characters/alys_cc/base/Meshy_AI_Alys_Landale_0307154458_texture.png"
+dest_files=["res://.godot/imported/Meshy_AI_Alys_Landale_0307154458_texture.png-93651932031b3bc4f1bcc600f70b350d.s3tc.ctex", "res://.godot/imported/Meshy_AI_Alys_Landale_0307154458_texture.png-93651932031b3bc4f1bcc600f70b350d.etc2.ctex"]
 
 [params]
 

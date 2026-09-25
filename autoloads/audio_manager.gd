@@ -16,7 +16,7 @@ const PITCH_VARIATION_MIN: float = 0.92
 const PITCH_VARIATION_MAX: float = 1.08
 
 const TRACK_PATHS: Dictionary = {
-	&"title": "res://humandropbox/Beginning of the new millineium.mp3",
+	&"title": "res://assets/audio/music/title.mp3",
 	&"stage_1": "res://assets/audio/music/stage_1.mp3",
 	&"stage_2": "res://assets/audio/music/stage_2.mp3",
 	&"stage_3": "res://assets/audio/music/stage_3.mp3",
@@ -40,7 +40,7 @@ const PLAYLIST_ORDER: Array[StringName] = [
 ]
 
 const TRACK_DISPLAY_NAMES: Dictionary = {
-	&"title": "Beginning of the New Millineium",
+	&"title": "Title Theme",
 }
 
 var _sfx_players: Array[AudioStreamPlayer] = []

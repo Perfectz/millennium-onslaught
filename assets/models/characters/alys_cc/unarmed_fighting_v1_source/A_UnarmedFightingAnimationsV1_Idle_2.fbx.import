@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://hvd0o2rhi3vv"
-path="res://.godot/imported/A_UnarmedFightingAnimationsV1_Idle_2.fbx-b359ae8c8da05870969f8fbd8371e245.scn"
+path="res://.godot/imported/A_UnarmedFightingAnimationsV1_Idle_2.fbx-a5f1709a7f9684f21227527e091f2156.scn"
 
 [deps]
 
-source_file="res://humandropbox/AAB_FBX (4)/AAB_FBX/Unarmed Fighting Animations V1 FBX/A_UnarmedFightingAnimationsV1_Idle_2.fbx"
-dest_files=["res://.godot/imported/A_UnarmedFightingAnimationsV1_Idle_2.fbx-b359ae8c8da05870969f8fbd8371e245.scn"]
+source_file="res://assets/models/characters/alys_cc/unarmed_fighting_v1_source/A_UnarmedFightingAnimationsV1_Idle_2.fbx"
+dest_files=["res://.godot/imported/A_UnarmedFightingAnimationsV1_Idle_2.fbx-a5f1709a7f9684f21227527e091f2156.scn"]
 
 [params]
 

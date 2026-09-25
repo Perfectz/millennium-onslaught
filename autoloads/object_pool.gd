@@ -28,13 +28,20 @@ func warm_pool(scene: PackedScene, count: int, pool_name: StringName = &"") -> v
 
 
 ## Get an instance from the pool. Returns null if pool is empty.
+## Instances freed behind the pool's back (e.g. with their level) are discarded.
 func get_instance(pool_name: StringName) -> Node:
-	if pool_name not in _pools or _pools[pool_name].is_empty():
+	if pool_name not in _pools:
 		return null
-	var instance: Node = _pools[pool_name].pop_back()
-	_activate(instance)
-	_active_counts[pool_name] += 1
-	return instance
+	var pool: Array = _pools[pool_name]
+	while not pool.is_empty():
+		var candidate: Variant = pool.pop_back()
+		if not is_instance_valid(candidate) or (candidate as Node).is_queued_for_deletion():
+			continue
+		var instance := candidate as Node
+		_activate(instance)
+		_active_counts[pool_name] += 1
+		return instance
+	return null
 
 
 ## Return an instance to its pool.
@@ -52,6 +59,7 @@ func return_instance(instance: Node) -> void:
 		instance.queue_free()
 		return
 	_deactivate(instance)
+	_adopt(instance)
 	_pools[key].append(instance)
 	_active_counts[key] = maxi(0, _active_counts.get(key, 1) - 1)
 
@@ -79,3 +87,14 @@ func _deactivate(instance: Node) -> void:
 	instance.set_meta(&"pool_active", false)
 	if instance is Node3D:
 		instance.position = Constants.POOL_DEACTIVATE_POSITION
+
+
+## Pooled instances live under the pool while inactive so level teardown can't free them.
+func _adopt(instance: Node) -> void:
+	var parent := instance.get_parent()
+	if parent == self:
+		return
+	if parent == null:
+		add_child(instance)
+	else:
+		instance.reparent(self, false)

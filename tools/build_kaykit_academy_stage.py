@@ -4,36 +4,34 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACK_ROOT = (
-    "res://humandropbox/KayKit_DungeonRemastered_1.1_FREE/"
-    "KayKit_DungeonRemastered_1.1_FREE/Assets/gltf"
-)
+# CC0 KayKit Dungeon Remastered models, vendored (only the pieces we use).
+PACK_ROOT = "res://assets/environment/kaykit_dungeon"
 
 ASSETS = {
-    "floor_tile_large": f"{PACK_ROOT}/floor_tile_large.gltf",
-    "floor_tile_large_rocks": f"{PACK_ROOT}/floor_tile_large_rocks.gltf",
-    "floor_tile_big_grate": f"{PACK_ROOT}/floor_tile_big_grate.gltf",
-    "wall": f"{PACK_ROOT}/wall.gltf",
-    "wall_window": f"{PACK_ROOT}/wall_window_open.gltf",
-    "wall_door": f"{PACK_ROOT}/wall_doorway.gltf",
-    "wall_door_open": f"{PACK_ROOT}/wall_doorway_sides.gltf",
-    "wall_half": f"{PACK_ROOT}/wall_half.gltf",
-    "wall_broken": f"{PACK_ROOT}/wall_broken.gltf",
-    "wall_shelves": f"{PACK_ROOT}/wall_shelves.gltf",
-    "pillar": f"{PACK_ROOT}/pillar.gltf",
-    "torch": f"{PACK_ROOT}/torch_mounted.gltf",
-    "banner_blue": f"{PACK_ROOT}/banner_patternA_blue.gltf",
-    "banner_red": f"{PACK_ROOT}/banner_patternA_red.gltf",
-    "barrel": f"{PACK_ROOT}/barrel_large.gltf",
-    "chest": f"{PACK_ROOT}/chest.gltf",
-    "table_long": f"{PACK_ROOT}/table_long.gltf",
-    "table_medium": f"{PACK_ROOT}/table_medium_decorated_A.gltf",
-    "chair": f"{PACK_ROOT}/chair.gltf",
-    "rubble": f"{PACK_ROOT}/rubble_large.gltf",
-    "shelf_large": f"{PACK_ROOT}/shelf_large.gltf",
-    "box_large": f"{PACK_ROOT}/box_large.gltf",
-    "box_stacked": f"{PACK_ROOT}/box_stacked.gltf",
-    "stairs_narrow": f"{PACK_ROOT}/stairs_narrow.gltf",
+    "floor_tile_large": f"{PACK_ROOT}/floor_tile_large.glb",
+    "floor_tile_large_rocks": f"{PACK_ROOT}/floor_tile_large_rocks.glb",
+    "floor_tile_big_grate": f"{PACK_ROOT}/floor_tile_big_grate.glb",
+    "wall": f"{PACK_ROOT}/wall.glb",
+    "wall_window": f"{PACK_ROOT}/wall_window_open.glb",
+    "wall_door": f"{PACK_ROOT}/wall_doorway.glb",
+    "wall_door_open": f"{PACK_ROOT}/wall_doorway_sides.glb",
+    "wall_half": f"{PACK_ROOT}/wall_half.glb",
+    "wall_broken": f"{PACK_ROOT}/wall_broken.glb",
+    "wall_shelves": f"{PACK_ROOT}/wall_shelves.glb",
+    "pillar": f"{PACK_ROOT}/pillar.glb",
+    "torch": f"{PACK_ROOT}/torch_mounted.glb",
+    "banner_blue": f"{PACK_ROOT}/banner_patternA_blue.glb",
+    "banner_red": f"{PACK_ROOT}/banner_patternA_red.glb",
+    "barrel": f"{PACK_ROOT}/barrel_large.glb",
+    "chest": f"{PACK_ROOT}/chest.glb",
+    "table_long": f"{PACK_ROOT}/table_long.glb",
+    "table_medium": f"{PACK_ROOT}/table_medium_decorated_A.glb",
+    "chair": f"{PACK_ROOT}/chair.glb",
+    "rubble": f"{PACK_ROOT}/rubble_large.glb",
+    "shelf_large": f"{PACK_ROOT}/shelf_large.glb",
+    "box_large": f"{PACK_ROOT}/box_large.glb",
+    "box_stacked": f"{PACK_ROOT}/box_stacked.glb",
+    "stairs_narrow": f"{PACK_ROOT}/stairs_narrow.glb",
 }
 
 BOUNDARY_HEIGHT = 4.0

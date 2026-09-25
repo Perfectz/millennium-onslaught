@@ -169,8 +169,6 @@ func _release_label(label: Label3D) -> void:
 	label.visible = false
 	label.modulate.a = 1.0
 	label.scale = Vector3.ONE
-	if label.get_parent() != ObjectPool:
-		label.reparent(ObjectPool)
 	ObjectPool.return_instance(label)
 
 

@@ -673,7 +673,10 @@ func _mount_world_effect(effect: Node3D) -> bool:
 		anchor = Node3D.new()
 		anchor.name = String(WORLD_EFFECTS_ANCHOR_NAME)
 		scene_root.add_child(anchor)
-	if effect.get_parent() != anchor:
+	var parent := effect.get_parent()
+	if parent == null:
+		anchor.add_child(effect)
+	elif parent != anchor:
 		effect.reparent(anchor)
 	return true
 
@@ -689,8 +692,6 @@ func _release_dust_burst(burst: GPUParticles3D, pooled: bool) -> void:
 		return
 	burst.emitting = false
 	if pooled:
-		if burst.get_parent() != ObjectPool:
-			burst.reparent(ObjectPool)
 		ObjectPool.return_instance(burst)
 	else:
 		burst.queue_free()

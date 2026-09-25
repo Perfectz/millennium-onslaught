@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b2kbwybv60qq7"
-path="res://.godot/imported/alys Rigged with texture_0.png-1c980ce3eae43b182ffe203fe6d8481a.ctex"
+path="res://.godot/imported/alys Rigged with texture_0.png-600aafcf18e9c80d44506419d18457a6.ctex"
 metadata={
 "vram_texture": false
 }
@@ -13,8 +13,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://humandropbox/alys models/alys Rigged with texture_0.png"
-dest_files=["res://.godot/imported/alys Rigged with texture_0.png-1c980ce3eae43b182ffe203fe6d8481a.ctex"]
+source_file="res://assets/models/characters/alys_cc/base/alys Rigged with texture_0.png"
+dest_files=["res://.godot/imported/alys Rigged with texture_0.png-600aafcf18e9c80d44506419d18457a6.ctex"]
 
 [params]
 
